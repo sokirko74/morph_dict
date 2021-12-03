@@ -54,25 +54,10 @@ int main(int argc, const char* argv[])
         return 1;
     };
 
-    std::string  Error;
-    if (!IsRmlRegistered(Error)) {
-        std::cerr << Error << "\n";
-        return 1;
-    };
-
     MorphLanguageEnum wizardLangua;
     try {
 
-        //  adding "/" to the end of  OutputPath
-        std::string OutputPath = args.Retrieve("output");
-        if (!OutputPath.empty())
-        {
-            char c = OutputPath[OutputPath.length() - 1];
-            if ((c != '/')
-                && (c != '\\')
-                )
-                OutputPath += '/';
-        };
+        std::string output_folder = args.Retrieve("output-folder");
 
         MorphoWizard Wizard;
         std::string WizardFilename = argv[1];
@@ -90,33 +75,33 @@ int main(int argc, const char* argv[])
             if (!Wizard.prepare_for_RML2())
                 return 1;
         };
-
+        
         {
             CMorphDictBuilder R(Wizard.m_Language);
             R.GenerateLemmas(Wizard);
             R.GenerateUnitedFlexModels(Wizard);
             R.CreateAutomat(Wizard);
             std::cerr << "Saving...\n";
-            std::string outFileName = std::string(OutputPath + MORPH_MAIN_FILES);
-            if (!R.Save(outFileName))
+            auto outFileName = std::filesystem::path(output_folder) / MORPH_MAIN_FILES;
+            if (!R.Save(outFileName.string()))
             {
                 std::cerr << "Cannot save the main automat to " << outFileName << std::endl;
                 return 1;
             };
             std::cerr << "Successful written indices of the main automat to " << outFileName << std::endl;
 
-            if (!R.GenPredictIdx(Wizard, PostfixLength, MinFreq, OutputPath))
+            if (!R.GenPredictIdx(Wizard, PostfixLength, MinFreq, output_folder))
             {
                 std::cerr << "Cannot create prediction base\n";
                 return 1;
             };
         }
 
-
+        
         { // generating options file
-            std::string OptFileName = OutputPath + OPTIONS_FILE;
+            auto OptFileName = std::filesystem::path(output_folder) / OPTIONS_FILE;
             std::cerr << "writing options file " << OptFileName << std::endl;
-            FILE* opt_fp = fopen(OptFileName.c_str(), "w");
+            FILE* opt_fp = fopen(OptFileName.string().c_str(), "w");
             if (!opt_fp)
             {
                 std::cerr << "Cannot write to file " << OptFileName << std::endl;
@@ -127,7 +112,7 @@ int main(int argc, const char* argv[])
             fclose(opt_fp);
             std::cerr << "Options file was created\n";
         }
-
+        
     }
     catch (CExpc e)
     {

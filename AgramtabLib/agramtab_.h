@@ -21,7 +21,7 @@ typedef bool(*GrammemCompare)(const CAgramtabLine* l1, const CAgramtabLine* l2);
 class CAgramtab {
 
 public:
-    const std::string GramtabFileName = "gramtab.tab";
+    const static inline char* GramtabFileName = "gramtab.tab";
     bool	m_bInited;
     MorphLanguageEnum  m_Language;
     bool m_bUseNationalConstants;

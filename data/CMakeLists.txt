@@ -14,12 +14,12 @@ macro (RunMorphGen langua)
 
     add_custom_target(
         "MorphGen_on_${langua}"
-         SOURCES ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom ${output_folder}/gramtab.txt
+         SOURCES ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom ${output_folder}/gramtab.tab
     )
 
     add_custom_command(
-            OUTPUT ${output_folder}/gramtab.txt PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${input_folder}/gramtab.txt ${output_folder}/gramtab.txt
+            OUTPUT ${output_folder}/gramtab.tab PRE_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${input_folder}/gramtab.tab ${output_folder}/gramtab.tab
             VERBATIM
     )
     add_custom_command(
@@ -39,9 +39,9 @@ macro (StatDatBinRun langua Topic)
     add_custom_command(
         OUTPUT ${Trg}
         COMMAND StatDatBin --input ${Src} --language ${langua} --output ${Trg}
-        DEPENDS StatDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases"
+        DEPENDS StatDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases" ${output_morph_folder}/${langua}/gramtab.tab
         #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        COMMENT "Convert ${Src} to the binary format"
+        COMMENT "StatDatBin"
         VERBATIM
     )
 endmacro()
@@ -52,9 +52,9 @@ macro (WordDatBinRun langua Topic)
     add_custom_command(
         OUTPUT ${Trg}
         COMMAND WordDatBin --input ${Src} --language ${langua} --output ${Trg}
-        DEPENDS WordDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases"
+        DEPENDS WordDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases" ${output_morph_folder}/${langua}/gramtab.tab
         #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        COMMENT "Convert ${Source} to the binary format"
+        COMMENT "WordDatBin"
         VERBATIM
     )
 endmacro()
@@ -83,5 +83,6 @@ CreateAllMorphBinFiles(English)
 add_custom_target(
     MorphDicts
     DEPENDS  Russian_Morph German_Morph English_Morph
+    #DEPENDS  English_Morph
 )
 

@@ -301,7 +301,8 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 	};
 
 	R.ConvertBuildRelationsToRelations();
-	R.Save(path + PREDICT_BIN_PATH);
+	auto out_path = std::filesystem::path(path) / PREDICT_BIN_PATH;
+	R.Save(out_path.string());
 	
 
 	svMapRaw.clear();

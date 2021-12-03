@@ -7,7 +7,7 @@
 #include "FormInfo.h"
 #include "DumpParadigm.h"
 #include "OperationMeter.h"
-
+#include <filesystem>
 
 const uint16_t UnknownSessionNo = 0xffff - 1;
 const uint16_t UnknownPrefixSetNo = 0xffff - 1;
@@ -110,7 +110,7 @@ class MorphoWizard : public CMorphWizardBase
 	friend	class MorphWizardMeter;
 	MorphWizardMeter* m_pMeter;	// Nick 30.11.2003
 
-	void load_gramtab();
+	void load_gramtab(std::string path);
 	void ReadSessions(std::ifstream& mrdFile);
 	void ReadLemmas(std::ifstream& mrdFile);
 public:
@@ -130,8 +130,8 @@ public:
 	LemmaMap				m_LemmaToParadigm;
 
 
-	// the keys from .mwz file (project file)
-	std::map<std::string, std::string>		m_ProjectFileKeys;
+	// project folder
+	std::filesystem::path m_MwzFolder;
 
 	std::string											m_CurrentNewLemma;
 	std::vector< predict_container_t::const_iterator>				m_CurrentPredictedParadigms;
@@ -153,17 +153,14 @@ public:
 	~MorphoWizard();
 
 	//=================  general: loading, saving, logging ======================
-	void	load_wizard(const char* path, const char* user_name, bool bCreatePrediction = true);
+	void	load_wizard(std::string path, std::string user_name, bool bCreatePrediction = true);
 	void	load_mrd(bool guest, bool bCreatePrediction);
-	bool	load_static(MorphLanguageEnum langua);
-	std::string& get_value(const std::string& key);
 	void	log(const std::string& messg);
 	void	log(const std::string& lemm, const CFlexiaModel& p, bool is_added);
 	bool	is_changed() { return m_bWasChanged; }
 	void	save_mrd();
 	std::string	get_lock_file_name()   const;
 	std::string	get_log_file_name()   const;
-	std::string	get_predict_src_file_path(int mode) const;
 	void	MakeReadOnly();
 	void	CreatePredictIndex();
 	void	pack();
