@@ -40,7 +40,6 @@ macro (StatDatBinRun langua Topic)
         OUTPUT ${Trg}
         COMMAND StatDatBin --input ${Src} --language ${langua} --output ${Trg}
         DEPENDS StatDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases" ${output_morph_folder}/${langua}/gramtab.tab
-        #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
         COMMENT "StatDatBin"
         VERBATIM
     )
@@ -53,7 +52,6 @@ macro (WordDatBinRun langua Topic)
         OUTPUT ${Trg}
         COMMAND WordDatBin --input ${Src} --language ${langua} --output ${Trg}
         DEPENDS WordDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases" ${output_morph_folder}/${langua}/gramtab.tab
-        #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
         COMMENT "WordDatBin"
         VERBATIM
     )

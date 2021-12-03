@@ -60,7 +60,6 @@ int main(int argc, const char* argv[])
         std::string output_folder = args.Retrieve("output-folder");
 
         MorphoWizard Wizard;
-        std::string WizardFilename = argv[1];
         Wizard.load_wizard(args.Retrieve("input").c_str(), "guest", false);
         wizardLangua = Wizard.m_Language;
         if (!bAllowRussianJo)
@@ -112,11 +111,16 @@ int main(int argc, const char* argv[])
             fclose(opt_fp);
             std::cerr << "Options file was created\n";
         }
+        std::filesystem::copy_file(Wizard.m_GramtabPath, output_folder / Wizard.m_GramtabPath.filename(), std::filesystem::copy_options::overwrite_existing);
         
     }
     catch (CExpc e)
     {
         std::cerr << "exception=" << e.m_strCause << std::endl;
+        return 1;
+    }
+    catch (const std::exception& ex) {
+        std::cerr << "exception=" << ex.what()<< std::endl;
         return 1;
     }
     catch (...)

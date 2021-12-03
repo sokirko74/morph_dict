@@ -17,14 +17,12 @@ macro (TestMorphGen lang path)
     message (${folder})
     add_test(
             NAME MorphGen_${lang}_${base_name}_0
-            COMMAND MorphGen --input ${base_name} --output-folder . --postfix-len 5 --min-freq 3
-            WORKING_DIRECTORY  ${folder}
+            COMMAND MorphGen --input ${path} --output-folder ${CMAKE_CURRENT_BINARY_DIR} --postfix-len 5 --min-freq 3
     )
 
     add_test(
             NAME MorphGen_${lang}_${base_name}_1
-            COMMAND MorphGenTest ${folder} "дума"
-            WORKING_DIRECTORY  ${folder}
+            COMMAND MorphGenTest ${CMAKE_CURRENT_BINARY_DIR} "дума" "${folder}/test_word.morph.canon" 
     )
 endmacro(TestMorphGen)
 

@@ -2,7 +2,7 @@
 #include <fstream>
 #include <streambuf>
 
-int Lemmatize(MorphLanguageEnum langua, std::string folder, std::string word) {
+int Lemmatize(MorphLanguageEnum langua, std::string folder, std::string word, std::string canon_file) {
     CMorphanHolder Holder;
     Holder.LoadLemmatizer(langua, folder);
     word = convert_from_utf8(word.c_str(), Holder.m_CurrentLanguage);
@@ -11,7 +11,7 @@ int Lemmatize(MorphLanguageEnum langua, std::string folder, std::string word) {
     outp << test.c_str();
     outp.close();
 
-    std::ifstream canon_fp(MakePath(folder, "test_word.morph.canon"));
+    std::ifstream canon_fp(canon_file);
     std::string canon((std::istreambuf_iterator<char>(canon_fp)),
         std::istreambuf_iterator<char>());
     return canon == test;
@@ -19,14 +19,15 @@ int Lemmatize(MorphLanguageEnum langua, std::string folder, std::string word) {
 
 int main(int argc, const char* argv[])
 {
-    if (argc != 3) {
-        std::cerr << "usage: TestMorphGen <folder> <word>";
+    if (argc != 4) {
+        std::cerr << "usage: TestMorphGen <folder> <word> <canon_file>";
         return 1;
     }
     try {
         std::string folder = argv[1];
         std::string word = argv[2];
-        auto res = Lemmatize(morphRussian, folder, word) ? 0 : 1;
+        std::string canon_file = argv[3];
+        auto res = Lemmatize(morphRussian, folder, word, canon_file) ? 0 : 1;
         std::cerr << "res=" << res << "\n";
         return res;
     }

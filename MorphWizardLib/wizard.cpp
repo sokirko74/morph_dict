@@ -217,8 +217,8 @@ void MorphoWizard::load_gramtab(std::string path) {
         throw CExpc("Unknown language: " + GetStringByLanguage(m_Language));
     };
 
-    auto full_path = m_MwzFolder / path;
-    pGramTab->Read(full_path.string().c_str());
+    m_GramtabPath = m_MwzFolder / path;
+    pGramTab->Read(m_GramtabPath.string().c_str());
 
     m_pGramTab = pGramTab;
 
