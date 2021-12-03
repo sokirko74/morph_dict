@@ -7,10 +7,10 @@
 #include <fstream>
 #include <sstream>
 #include <regex>
-//----------------------------------------------------------------------------
+#include <filesystem>
+
 const char* AnyCommonAncode = " ";
 
-//----------------------------------------------------------------------------
 std::string GetCurrentDate() {
 	time_t ltime;
 	time(&ltime);
@@ -89,10 +89,6 @@ bool CFlexiaModel::has_ancode(const std::string& search_ancode) const {
 	}
 	return false;
 };
-
-//==============================================================================
-
-//==============================================================================
 
 bool CAccentModel::ReadFromString(const std::string& s) {
 	StringTokenizer Tok(s.c_str(), "; \r\n");
@@ -227,13 +223,6 @@ std::string MorphoWizard::get_log_file_name() const {
 	return Path;
 };
 
-void MorphoWizard::load_string_vector(const std::string& name, StringVector& res) {
-	std::string dicts_str = get_value(name);
-	StringTokenizer tok(dicts_str.c_str(), ",");
-	while (tok()) {
-		res.push_back(tok.val());
-	}
-}
 
 //MRD_FILE 	L:\MORPH.windows\SOURCE\RUS_SRC\morphs.mrd
 //LANG	        RUSSIAN
@@ -241,33 +230,6 @@ void MorphoWizard::load_string_vector(const std::string& name, StringVector& res
 
 
 const size_t MaxMrdLineLength = 10240;
-
-std::string GetFullPathByName(std::string FileName) {
-	std::string Path;
-#ifdef WIN32
-	char absolute_path[255];
-	_fullpath(absolute_path, FileName.c_str(), 255);
-	Path = GetPathByFile(std::string(absolute_path));
-#else
-	char current_dir[255];
-	getcwd(current_dir, 255);
-	std::string add_path = GetPathByFile(FileName);
-	if (!add_path.empty())
-		if (add_path[0] != '/')
-			Path = std::string(current_dir) + std::string("/") + add_path;
-		else
-			Path = add_path;
-	else
-		Path = current_dir;
-#endif
-
-	if (!Path.empty())
-		if ((Path[Path.length() - 1] == '\\')
-			|| (Path[Path.length() - 1] == '/')
-			)
-			Path.erase(Path.length() - 1);
-	return Path;
-};
 
 void MorphoWizard::load_gramtab() {
 	CAgramtab* pGramTab;
@@ -363,29 +325,27 @@ bool MorphoWizard::load_static(MorphLanguageEnum langua) {
 
 
 void MorphoWizard::load_wizard(const char* path, const char* user_name, bool bCreatePrediction) {
-	m_ProjectFileKeys["ProjectsDir"] = GetFullPathByName(path);
+	m_ProjectFileKeys["ProjectsDir"] = std::filesystem::absolute(path);
 
 	std::ifstream mwzFile(path);
 	if (!mwzFile.is_open())
 		throw CExpc("Cannot open file " + std::string(path));
+    if (m_pGramTab) delete m_pGramTab;
+    nlohmann::json jf = nlohmann::json::parse(mwzFile);
+    for (auto& el : jf.items()) {
+        if (el.key() == "MRD_FILE") {
+            m_MrdPath = el.value();
+        }
+        else if (el.key() == "LANG") {
+            auto lang = el.value();
+            if (!GetLanguageByString(lang, m_Language))
+                throw CExpc("Unknown language: " + lang);
 
-	std::string buffer;
-	while (read_utf8_line(mwzFile, buffer)) {
-		std::string key, val;
-		StringTokenizer tok(buffer.c_str(), " \t\r\n");
-		if (!tok()) continue;
-		key = tok.val();
-		if (key[0] == '#') continue;
-		if (!tok()) throw CExpc("wrong mwz file");
-		val = tok.val();
-		if (tok()) throw CExpc("wrong mwz file");
-		m_ProjectFileKeys[key] = val;
-
-	}
-
+        }
+        m_ProjectFileKeys[el.key()] = el.value();
+    }
 
 	std::string& lang = get_value("LANG");
-	if (m_pGramTab) delete m_pGramTab;
 	if (!GetLanguageByString(lang, m_Language))
 		throw CExpc("Unknown language: " + lang);
 
@@ -395,14 +355,12 @@ void MorphoWizard::load_wizard(const char* path, const char* user_name, bool bCr
 	m_MrdPath = get_value("MRD_FILE");
 	m_LanguageStr = get_value("LANG");
 
-	// init users
-	load_string_vector("USERS", m_Users);
 
 	bool guest = strcmp(user_name, "guest") == 0;
 	bool login = false;
 	if (!guest) {
-		for (int i = 0; i < m_Users.size(); i++) {
-			if (m_Users[i] == user_name) {
+		for (auto el: m_ProjectFileKeys['USERS']) {
+			if (el == user_name) {
 				login = true;
 				break;
 			}

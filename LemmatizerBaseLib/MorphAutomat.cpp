@@ -266,8 +266,8 @@ bool CMorphAutomat::Save(std::string AutomatFileName) const
 
 		fclose(fp);
 
-		printf ("%i children\n",m_RelationsCount);
-		printf ("%i nodes\n",m_NodesCount);
+		printf ("%li children\n",m_RelationsCount);
+		printf ("%li nodes\n",m_NodesCount);
 
 
 		return true;

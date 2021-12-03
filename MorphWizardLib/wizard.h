@@ -156,7 +156,6 @@ public:
 	void	load_wizard(const char* path, const char* user_name, bool bCreatePrediction = true);
 	void	load_mrd(bool guest, bool bCreatePrediction);
 	bool	load_static(MorphLanguageEnum langua);
-	void	load_string_vector(const std::string& name, StringVector& res);
 	std::string& get_value(const std::string& key);
 	void	log(const std::string& messg);
 	void	log(const std::string& lemm, const CFlexiaModel& p, bool is_added);

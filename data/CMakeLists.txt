@@ -1,0 +1,87 @@
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+declare_cmake_min_version()
+
+project(MorphAllLanguages)
+
+set( output_morph_folder  ${PROJECT_SOURCE_DIR}/../../../Dicts/Morph )
+
+message("dicts_folder=${output_morph_folder}")
+
+macro (RunMorphGen langua)
+    set( input_folder  ${PROJECT_SOURCE_DIR}/${langua} )
+    set( output_folder  ${output_morph_folder}/${langua} )
+    make_directory(${output_folder})
+
+    add_custom_target(
+        "MorphGen_on_${langua}"
+         SOURCES ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom ${output_folder}/gramtab.txt
+    )
+
+    add_custom_command(
+            OUTPUT ${output_folder}/gramtab.txt PRE_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${input_folder}/gramtab.txt ${output_folder}/gramtab.txt
+            VERBATIM
+    )
+    add_custom_command(
+        OUTPUT ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom
+        COMMAND MorphGen --input project.mwz --output-folder ${output_folder} --postfix-len 5 --min-freq 3
+        DEPENDS MorphGen ${input_folder}/morphs.mrd ${input_folder}/project.mwz ${input_folder}/gramtab.tab
+        COMMENT "Convert Morphology ${langua}"                 
+        WORKING_DIRECTORY ${input_folder}
+        VERBATIM
+    )
+endmacro()
+
+
+macro (StatDatBinRun langua Topic)
+    set (Src ${PROJECT_SOURCE_DIR}/${langua}/StatData.txt)
+    set (Trg ${output_morph_folder}/${langua}/${Topic}homoweight.bin)
+    add_custom_command(
+        OUTPUT ${Trg}
+        COMMAND StatDatBin --input ${Src} --language ${langua} --output ${Trg}
+        DEPENDS StatDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases"
+        #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Convert ${Src} to the binary format"
+        VERBATIM
+    )
+endmacro()
+
+macro (WordDatBinRun langua Topic)
+    set (Src ${PROJECT_SOURCE_DIR}/${langua}/WordData.txt)
+    set (Trg ${output_morph_folder}/${langua}/${Topic}wordweight.bin)
+    add_custom_command(
+        OUTPUT ${Trg}
+        COMMAND WordDatBin --input ${Src} --language ${langua} --output ${Trg}
+        DEPENDS WordDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases"
+        #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Convert ${Source} to the binary format"
+        VERBATIM
+    )
+endmacro()
+
+
+macro (CreateAllMorphBinFiles langua)
+    RunMorphGen (${langua})
+    
+    foreach (Topic l c f)
+        StatDatBinRun ( ${langua} ${Topic} ) 
+        WordDatBinRun ( ${langua} ${Topic} )
+    endforeach ()
+
+    set( folder  ${output_morph_folder}/${langua} )
+    add_custom_target(
+        "${langua}_Morph"
+        SOURCES ${folder}/morph.bases ${folder}/chomoweight.bin ${folder}/lhomoweight.bin ${folder}/fhomoweight.bin ${folder}/cwordweight.bin ${folder}/lwordweight.bin ${folder}/fwordweight.bin
+        WORKING_DIRECTORY ${folder}
+    )
+endmacro()
+
+CreateAllMorphBinFiles(Russian)
+CreateAllMorphBinFiles(German)
+CreateAllMorphBinFiles(English)
+
+add_custom_target(
+    MorphDicts
+    DEPENDS  Russian_Morph German_Morph English_Morph
+)
+
