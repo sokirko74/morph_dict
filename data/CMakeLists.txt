@@ -3,7 +3,8 @@ declare_cmake_min_version()
 
 project(MorphAllLanguages)
 
-set( output_morph_folder  ${PROJECT_SOURCE_DIR}/../../../Dicts/Morph )
+
+set( output_morph_folder  ${DICTS_FOLDER}/Morph )
 
 message("dicts_folder=${output_morph_folder}")
 
@@ -81,6 +82,5 @@ CreateAllMorphBinFiles(English)
 add_custom_target(
     MorphDicts
     DEPENDS  Russian_Morph German_Morph English_Morph
-    #DEPENDS  English_Morph
 )
 
