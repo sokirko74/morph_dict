@@ -3,8 +3,11 @@ declare_cmake_min_version()
 
 project(MorphAllLanguages)
 
-
-set( output_morph_folder  ${DICTS_FOLDER}/Morph )
+if  ( DEFINED DICTS_FOLDER)
+   set( output_morph_folder  ${DICTS_FOLDER}/Morph )
+else()
+    set( output_morph_folder  ${PROJECT_SOURCE_DIR}/../../Dicts/Morph )
+endif()
 
 message("dicts_folder=${output_morph_folder}")
 
