@@ -19,7 +19,7 @@ public:
 
 	part_of_speech_t GetPartOfSpeechesCount() const;
 	const char* GetPartOfSpeechStr(part_of_speech_t i) const;
-	size_t GetGrammemsCount()  const;
+	grammem_t GetGrammemsCount()  const;
 	const char* GetGrammemStr(size_t i) const;
 	size_t GetMaxGrmCount() const;
 	CAgramtabLine*& GetLine(size_t LineNo) { return Lines[LineNo]; }

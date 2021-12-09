@@ -150,7 +150,7 @@ uint32_t  CFormInfo::GetCount () const
 {
 	assert (IsValid());
 	if (!IsValid()) return 0;
-	return GetFlexiaModel().m_Flexia.size();
+	return (uint32_t)GetFlexiaModel().m_Flexia.size();
 }
 
 

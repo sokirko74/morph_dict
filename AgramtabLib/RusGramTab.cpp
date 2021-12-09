@@ -155,7 +155,7 @@ const char* CRusGramTab::GetPartOfSpeechStr(part_of_speech_t i) const
 	}
 };
 
-size_t	CRusGramTab::GetGrammemsCount()  const
+grammem_t	CRusGramTab::GetGrammemsCount()  const
 {
 	return RussianGrammemsCount;
 };

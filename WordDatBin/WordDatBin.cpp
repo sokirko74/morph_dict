@@ -1,6 +1,3 @@
-// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ <DataFile> (пїЅпїЅ. StatTxtDat)
-// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ <pid,weight> пїЅ пїЅпїЅпїЅпїЅ "r*wordweight.bin"
-
 #include "../common/util_classes.h"
 #include "morph_dict/common/bserialize.h"
 #include "morph_dict/common/argparse.h"
@@ -186,6 +183,8 @@ void initArgParser(int argc, const char **argv, ArgumentParser& parser) {
 }
 
 int main(int argc, const char **argv) {
+    std::cout << "start\n";
+
     ArgumentParser args;
     initArgParser(argc, argv, args);
 
@@ -198,7 +197,7 @@ int main(int argc, const char **argv) {
 
     }
     catch (CExpc e) {
-        fprintf(stderr, "exception occurred: %s!\n", e.m_strCause.c_str());
+        std::cerr << "exception occurred:"  << e.m_strCause << "\n";
     }
     catch (...) {
         std::cout << std::endl << "An error in try{} has occurred!" << std::endl;

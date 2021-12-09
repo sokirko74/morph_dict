@@ -122,7 +122,7 @@ bool CLemmatizer::LemmatizeWord(std::string& InputWordStr, const bool cap, const
 		if (predict)
 		{
 			PredictByDataBase(InputWordStr, results,cap);
-			for (int i =results.size()-1; i>=0; i--)
+			for (int i=(int)results.size()-1; i>=0; i--)
 			{
 					const CAutomAnnotationInner& A = results[i];
 					const CLemmaInfo& I = m_LemmaInfos[A.m_LemmaInfoNo].m_LemmaInfo;
@@ -179,8 +179,8 @@ bool CLemmatizer::GetAllAncodesAndLemmasQuick(std::string& InputWordStr, bool ca
 				||	!strncmp(InputWordStr.c_str(), F.m_PrefixStr.c_str(), PrefixLen)
 			)
 			BaseStart = PrefixLen;
-		int BaseLen  = InputWordStr.length() - F.m_FlexiaStr.length() - BaseStart;
-		if (BaseLen < 0) BaseLen = InputWordStr.length();
+		int BaseLen  = (int)InputWordStr.length() - (int)F.m_FlexiaStr.length() - (int)BaseStart;
+		if (BaseLen < 0) BaseLen = (int)InputWordStr.length();
 		size_t GramCodeLen = M.m_Flexia[A.m_ItemNo].m_Gramcode.length();
 		size_t FlexiaLength = M.m_Flexia[0].m_FlexiaStr.length();
 		if (BaseLen+FlexiaLength+3+GramCodeLen > MaxBufferSize-OutLen) return false; 
@@ -265,8 +265,6 @@ void CreateDecartProduction (const std::vector<CFormInfo>& results1, const std::
 
 };
 
-
-
 bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& InputWordStr, bool capital, bool bUsePrediction, std::vector<CFormInfo>& Result) const
 {
     Result.clear();
@@ -295,31 +293,10 @@ bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& InputWordStr
 		// then we should try to predict each parts of the hyphened word separately
         std::vector<CFormInfo> results1, results2;
 
-		int hyph = InputWordStr.find("-");
-		bool gennum = false;
-		int pos = -1;
-		if( GetLanguage() == morphRussian && InputWordStr.length() > 12 && hyph == std::string::npos)
-		for(int n = 0; n < NumeralToNumberCount; n++)
-		{
-			if( !NumeralToNumber[n].m_bNoun ) continue;
-			int len = NumeralToNumber[n].m_Ordinal.length();
-			if(NumeralToNumber[n].m_Ordinal[0]!=0 && InputWordStr.length()>len+1
-				&& (pos = InputWordStr.substr(InputWordStr.length() - len - 1).rfind(std::string(NumeralToNumber[n].m_Ordinal).substr(0, len - 2))) != std::string::npos)
-			{
-				std::string s = InputWordStr.substr(InputWordStr.length() - len - 1 + pos);
-				CreateParadigmCollection(false, s, capital, false, results1 );
-				if ( results1.size()>0 )
-				{
-					Result = results1;
-					Result[0].m_InputWordBase = InputWordStr.substr(0, InputWordStr.length() - len - 1 + pos) 
-						+ Result[0].m_InputWordBase;
-					Result[0].SetUserUnknown();
-				}
-				break;
-			}
-		}
+		size_t hyph = InputWordStr.find("-");
 		if (hyph != std::string::npos)
 		{
+			bool gennum = false;
 			// try to lemmatize each parts without predictions
 			std::string first_part = InputWordStr.substr(0, hyph);
 			std::string second_part = InputWordStr.substr(gennum ? hyph : hyph+1);
@@ -455,7 +432,7 @@ void CLemmatizer::PredictByDataBase(std::string InputWordStr,  std::vector<CAuto
 			continue;
 		};
 
-		has_nps[PartOfSpeechNo] = FindResults.size();
+		has_nps[PartOfSpeechNo] = (BYTE)FindResults.size();
 
 		FindResults.push_back(ConvertPredictTupleToAnnot(res[j]));
 	}

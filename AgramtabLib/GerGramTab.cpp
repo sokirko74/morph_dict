@@ -121,7 +121,7 @@ const char* CGerGramTab::GetPartOfSpeechStr(part_of_speech_t i) const {
 		return GermanPartOfSpeech[i].c_str();
 };
 
-size_t CGerGramTab::GetGrammemsCount()  const { 
+grammem_t CGerGramTab::GetGrammemsCount()  const {
 		return GermanGrammemsCount;
 };
 

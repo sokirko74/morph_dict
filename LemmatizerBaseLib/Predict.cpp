@@ -20,11 +20,11 @@ void CPredictBase::FindRecursive(int NodeNo, std::string& curr_path, std::vector
 	const CMorphAutomNode& N = m_SuffixAutomat.GetNode(NodeNo);
 	if (N.IsFinal())
 	{
-		int i = curr_path.find(m_SuffixAutomat.m_AnnotChar);
+		size_t i = curr_path.find(m_SuffixAutomat.m_AnnotChar);
 		assert (i != std::string::npos);
-		int j = curr_path.find(m_SuffixAutomat.m_AnnotChar, i+1);
+		size_t j = curr_path.find(m_SuffixAutomat.m_AnnotChar, i+1);
 		assert (j != std::string::npos);
-		int k = curr_path.find(m_SuffixAutomat.m_AnnotChar, j+1);
+		size_t k = curr_path.find(m_SuffixAutomat.m_AnnotChar, j+1);
 		assert (k != std::string::npos);
 		CPredictTuple A;
 		A.m_PartOfSpeechNo = m_SuffixAutomat.DecodeFromAlphabet(curr_path.substr(i+1,j-i-1));

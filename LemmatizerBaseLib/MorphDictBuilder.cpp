@@ -166,7 +166,7 @@ void  CMorphDictBuilder::CreateAutomat(const MorphoWizard& Wizard)
 	{
 
 		if (!(LemmaNo % 100))
-			fprintf (stderr,"Lemma %li/%li  RegisterSize = %li \r", LemmaNo, Wizard.m_LemmaToParadigm.size(), RegisterSize);
+			std::cerr << "Lemma " << LemmaNo << "/" << Wizard.m_LemmaToParadigm.size() << " RegisterSize =" << RegisterSize << "    \r";
 			
 		size_t ModelNo = it->second.m_FlexiaModelNo;
 		if (ModelNo  > Wizard.m_FlexiaModels.size())
@@ -223,7 +223,7 @@ void  CMorphDictBuilder::CreateAutomat(const MorphoWizard& Wizard)
 		LemmaNo++;
 	};
 
-	fprintf (stderr,"Lemma %lu/%lu  RegisterSize=%li   \n", LemmaNo, Wizard.m_LemmaToParadigm.size(), RegisterSize);
+	std::cerr <<  "Lemma " << LemmaNo << "/" << Wizard.m_LemmaToParadigm.size() << " RegisterSize =" << RegisterSize << "\n";
 
 	if (LemmaNo >  0xffffff)
 	{

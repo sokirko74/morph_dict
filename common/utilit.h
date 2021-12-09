@@ -100,17 +100,13 @@ extern std::string	GetPathByFile (std::string FileName);
 extern bool		IsEmptyLine ( const char *t);
 extern bool		IsHtmlFile (const std::string& FileName);
 extern void		AddFile(const char* MainFile, const char* ToAdd);
-extern bool     RmlMoveFile(const char *oldpath, const char *newpath);
-extern bool     RmlCopyFile(const char *oldpath, const char *newpath);
 extern std::string	CreateTempFileName();
 extern bool		MakeDir(const std::string& txt);
-extern bool     RemoveWithPrint (const std::string& FileName);
 
 // working with registry 
 extern std::string	GetRegistryString (std::string RegistryPath);
 extern std::string	GetRegistryStringFromLocalIniFile (std::string RegistryPath);
 extern bool		CanGetRegistryString (std::string RegistryPath);
-extern void		SetRegistryString (std::string RegistryPath, std::string Value);
 extern bool		IsRmlRegistered(std::string& Error);
 extern struct tm  RmlGetCurrentTime ();
 extern std::string	GetIniFilePath();

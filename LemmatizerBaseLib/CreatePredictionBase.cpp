@@ -228,7 +228,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 
 		if (base+paradigm.get_first_flex() == PlugLemma)
 		{
-			PlugLemmaInfoNo = lin;
+			PlugLemmaInfoNo = (int)lin;
 			continue;
 		};
 		
@@ -237,7 +237,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 				continue;
 
 		std::string pos = wizard.get_pos_string(paradigm.get_first_code());
-		uint16_t nps =  GetPredictionPartOfSpeech(pos, wizard.m_Language);
+		part_of_speech_t nps =  GetPredictionPartOfSpeech(pos, wizard.m_Language);
 		if (nps == UnknownPartOfSpeech)
 			continue;
 
@@ -250,7 +250,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 			std::string wordform = base + flexia;
 			if (wordform.length() < PostfixLength) continue;
 			std::string Postfix = wordform.substr(wordform.length() - PostfixLength);
-			AddElem(svMapRaw, Postfix, lin, nps, (uint16_t)i, Postfix2Freq, m_LemmaInfos);
+			AddElem(svMapRaw, Postfix, (int)lin, nps, (uint16_t)i, Postfix2Freq, m_LemmaInfos);
 		}
 		
 	}

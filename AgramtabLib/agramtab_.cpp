@@ -197,7 +197,7 @@ int CAgramtab::AreEqualPartOfSpeech(const char* grm1, const char* grm2)
 char* CAgramtab::grammems_to_str(grammems_mask_t grammems, char* out_buf) const
 {
     out_buf[0] = 0;
-    size_t GrammemsCount = GetGrammemsCount();
+    auto GrammemsCount = GetGrammemsCount();
     for (int i = GrammemsCount - 1; i >= 0; i--)
         if (_QM(i) & grammems)
         {

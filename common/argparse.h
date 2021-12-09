@@ -114,10 +114,11 @@ private:
             }
             if (a.Name == "input") {
                 if (Retrieve("input") != "-") {
-                    std::cerr << "read " << Retrieve("input") << "\n";
-                    InputStreamFile.open(Retrieve("input"));
+                    auto path = Retrieve("input");
+                    std::cerr << "read " << path << "\n";
+                    InputStreamFile.open(path);
                     if (!InputStreamFile.is_open()) {
-                        ArgumentError("cannot open file " + Retrieve("input"));
+                        ArgumentError("cannot open file " + path);
                     }
                     InputStream = &InputStreamFile;
                 } else {

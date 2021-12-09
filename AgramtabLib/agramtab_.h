@@ -35,7 +35,7 @@ public:
     virtual size_t GetMaxGrmCount()  const = 0;
     virtual part_of_speech_t GetPartOfSpeechesCount()  const = 0;
     virtual const char* GetPartOfSpeechStr(part_of_speech_t i) const = 0;
-    virtual size_t GetGrammemsCount()  const = 0;
+    virtual grammem_t GetGrammemsCount()  const = 0;
     virtual const char* GetGrammemStr(size_t i) const = 0;
     virtual size_t GramcodeToLineIndex(const char* s) const = 0;
     virtual std::string LineIndexToGramcode(uint16_t i) const = 0;

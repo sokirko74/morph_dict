@@ -62,7 +62,7 @@ const char* CEngGramTab::GetPartOfSpeechStr(part_of_speech_t i) const {
 	return EnglishPartOfSpeech[i].c_str();
 };
 
-size_t CEngGramTab::GetGrammemsCount()  const { 
+grammem_t CEngGramTab::GetGrammemsCount()  const {
 	return EnglishGrammemsCount;
 };
 

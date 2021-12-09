@@ -212,7 +212,7 @@ void CMorphAutomat::Load(std::string AutomatFileName)
 	char buffer [256];
 	if (!fgets(buffer, 256, fp)) throw CExpc("cannt read nodes count");
 	m_NodesCount = atoi(buffer);
-	if (!m_NodesCount) throw CExpc("nodes count cannot be 0");
+	if (!m_NodesCount) throw CExpc(Format("nodes count cannot be 0 in %s", AutomatFileName.c_str()));
 
 	assert (m_pNodes == 0);
 	

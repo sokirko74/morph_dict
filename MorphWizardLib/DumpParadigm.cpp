@@ -70,14 +70,14 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
         std::string s = convert_from_utf8(buf, m_pWizard->m_Language);
         {
             const char* auth_patt = "//edited by ";
-            int qq = s.find(auth_patt);
+            size_t qq = s.find(auth_patt);
             if (qq != std::string::npos) {
                 m_AuthorStr = s.substr(qq + strlen(auth_patt));
                 Trim(m_AuthorStr);
             };
         };
         {
-            int qq = s.find("//");
+            size_t qq = s.find("//");
             if (qq != std::string::npos)
 
                 s.erase(qq);
@@ -93,7 +93,7 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
         };
 
         if (s.substr(0, strlen(PrefixesField)) == PrefixesField) {
-            int ind = s.find("=");
+            size_t ind = s.find("=");
             if (ind == std::string::npos) {
                 Errors += Format("cannot parse %s field at line", PrefixesField, line_no);
                 bError = true;
@@ -107,7 +107,7 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
 
         if (s.substr(0, strlen(TypeGrmField)) == TypeGrmField) {
 
-            int ind = s.find("=");
+            size_t ind = s.find("=");
             if (ind == std::string::npos) {
                 Errors += Format("cannot parse %s field at line %i", TypeGrmField, line_no);
                 bError = true;
@@ -121,7 +121,7 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
 
         if (s.substr(0, strlen(SessionField)) == SessionField) {
 
-            int ind = s.find("=");
+            size_t ind = s.find("=");
             if (ind == std::string::npos) {
                 Errors += Format("cannot parse %s field at line %i", SessionField, line_no);
                 bError = true;

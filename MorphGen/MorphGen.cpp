@@ -82,11 +82,7 @@ int main(int argc, const char* argv[])
             R.CreateAutomat(Wizard);
             std::cerr << "Saving...\n";
             auto outFileName = std::filesystem::path(output_folder) / MORPH_MAIN_FILES;
-            if (!R.Save(outFileName.string()))
-            {
-                std::cerr << "Cannot save the main automat to " << outFileName << std::endl;
-                return 1;
-            };
+            R.Save(outFileName.string());
             std::cerr << "Successful written indices of the main automat to " << outFileName << std::endl;
 
             if (!R.GenPredictIdx(Wizard, PostfixLength, MinFreq, output_folder))
