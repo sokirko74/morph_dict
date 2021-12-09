@@ -810,55 +810,6 @@ bool CanGetRegistryString (std::string RegistryPath)
 }
 
 
-void SetRegistryString (std::string RegistryPath, std::string Value)
-{  
-	if (RegistryPath.find(' ') != -1) 
-		throw CExpc ("A registry path cannot contain spaces");
-
-	std::string FileName = GetIniFilePath() + "/" + RML_REGISTRY_FILENAME;
-
-	FILE* fp = fopen (FileName.c_str(), "r");
-	if (fp == 0)
-		throw CExpc ("Cannot open "+FileName);
-	std::string TempFileName = CreateTempFileName();
-	FILE* outfp = fopen (TempFileName.c_str(), "w");
-	if (!outfp) 
-		throw CExpc ("Cannot open temporary file for setting variables in Registry");
-
-	char buffer[2048];
-
-	while (fgets(buffer,2048,fp))
-	{
-		std::string s = buffer;
-		Trim(s);
-		if (s.empty()) continue;
-		size_t end_field_name = strcspn(s.c_str(), " \t");
-		if (end_field_name == s.length()) 
-		{
-			fclose(fp);
-			remove (TempFileName.c_str());
-			throw CExpc ("Cannot parse line "+s);
-		};
-
-		if (RegistryPath != s.substr(0,end_field_name))
-			fprintf (outfp, "%s\n", s.c_str());
-	};
-
-	fprintf (outfp, "%s %s\n", RegistryPath.c_str(), Value.c_str());
-
-	
-	fclose(fp);
-	fclose(outfp);
-
-	remove (FileName.c_str());
-
-    if (!RmlMoveFile(TempFileName.c_str(), FileName.c_str()))
-		throw CExpc ("Cannot move temporary file for setting variables to main file");
-
-
-};
-
-
 bool	IsRmlRegistered(std::string& Error)
 {
 	try 
@@ -2179,21 +2130,6 @@ bool  MakeDir(const std::string& txt)
 };
 
 
-
-
-
-
-bool RemoveWithPrint (const std::string& FileName)
-{
-    if (FileExists(FileName.c_str()))
-		if (remove(FileName.c_str()))
-		{
-			fprintf(stderr, "Cannot remove %s errno=%i\n", FileName.c_str(), errno);
-			return false;
-		}
-    return true;
-}
-
 size_t HashValue(const char *pc) 
 {
     static const uint32_t mask[sizeof(uint32_t)] = {
@@ -2212,48 +2148,6 @@ size_t HashValue(const char *pc)
         h ^= (*c & mask[i]); 
 
     return h;
-}
-
-
-
-
-bool RmlCopyFile(const char *oldpath, const char *newpath)
-{
-    char buf[512];
-   
-    FILE* fi = fopen(oldpath, "rb");
-    if (!fi)
-        return false;
-    FILE* fo = fopen(newpath, "wb");
-    if (!fo)
-        return false;
-    int x = 0;
-    do 
-    {
-        x = fread(buf, 1, 512, fi);
-        if (x > 0) 
-            if (fwrite(buf, 1, x, fo) < x) 
-            {	/* Couldn't write */
-                fclose(fo);
-                fclose(fi);
-                unlink(newpath);
-                return false;
-            }
-    }
-    while ( x  > 0);
-    fclose(fo);
-    fclose(fi);
-    return true;
-}
-
-bool RmlMoveFile(const char *oldpath, const char *newpath)
-{
-  if (!rename(oldpath, newpath))
-    return true;
-  
-  if (!RmlCopyFile(oldpath, newpath)) return false;
-  unlink(oldpath);
-  return true;
 }
 
 std::string BuildRMLPath (const char* s)

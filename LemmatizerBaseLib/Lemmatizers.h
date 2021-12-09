@@ -46,7 +46,6 @@ protected:
     CAutomAnnotationInner ConvertPredictTupleToAnnot(const CPredictTuple &input) const;
     void PredictByDataBase(std::string InputWordStr, std::vector<CAutomAnnotationInner> &results, bool is_cap) const;
     bool IsPrefix(const std::string &Prefix) const;
-    void CheckRussianOrdinalNumber(const std::string& inputWordStr, bool capital, std::vector<CFormInfo>& Result) const;
 
 
 public:
