@@ -301,7 +301,7 @@ void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool
             m_MrdPath = el.value();
         }
         else if (el.key() == "LANG") {
-            auto lang = el.value();
+            std::string lang = el.value();
             if (!GetLanguageByString(lang, m_Language))
                 throw CExpc("Unknown language: " + lang);
         }
