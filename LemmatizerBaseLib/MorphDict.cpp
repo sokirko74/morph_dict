@@ -192,54 +192,37 @@ void CMorphDict::Load(std::string GrammarFileName)
 	CreateModelsIndex();
 };
 
-bool CMorphDict::Save(std::string GrammarFileName) const
+void CMorphDict::Save(std::string GrammarFileName) const
 {
-	try {
-		if (!m_pFormAutomat->Save(MakeFName(GrammarFileName, "forms_autom")))
-		{
-			ErrorMessage(Format("Cannot write to %s", MakeFName(GrammarFileName, "forms_autom").c_str()));
-			return false;
-		}
+	m_pFormAutomat->Save(MakeFName(GrammarFileName, "forms_autom"));
 
 
-		std::string PrecompiledFile = MakeFName(GrammarFileName, "annot");
-		std::ofstream outp(PrecompiledFile, std::ios::binary);
-		if (!outp.is_open())
-		{
-			ErrorMessage(Format("Cannot write to %s", PrecompiledFile.c_str()));
-			return false;
-		};
-		WriteFlexiaModels(outp);
-		WriteAccentModels(outp);
-		assert(!m_Prefixes.empty() && m_Prefixes[0].empty());
-
-		// do not write the first empty prefix, instead add it manually each time during loading
-		outp << m_Prefixes.size() - 1 << "\n";
-		for (size_t i = 1; i < m_Prefixes.size(); i++) {
-			outp << m_Prefixes[i] << "\n";
-		}
-
-		outp << m_LemmaInfos.size() << "\n";
-		if (!WriteVectorStream(outp, m_LemmaInfos)) return false;
-
-		assert(m_NPSs.size() == m_FlexiaModels.size());
-		outp << m_NPSs.size() << "\n";
-		if (!WriteVectorStream(outp, m_NPSs)) return false;
-		outp.close();
-
-		if (!m_Bases.WriteShortStringHolder(MakeFName(GrammarFileName, "bases")))
-		{
-			fprintf(stderr, "Cannot save bases\n");
-			return false;
-		};
-
-		return true;
-	}
-	catch (...)
+	std::string PrecompiledFile = MakeFName(GrammarFileName, "annot");
+	std::ofstream outp(PrecompiledFile, std::ios::binary);
+	if (!outp.is_open())
 	{
-		fprintf(stderr, "Cannot save CMorphDict");
-		return false;
+		throw CExpc(Format("Cannot write to %s", PrecompiledFile.c_str()));
 	};
+	WriteFlexiaModels(outp);
+	WriteAccentModels(outp);
+	assert(!m_Prefixes.empty() && m_Prefixes[0].empty());
+
+	// do not write the first empty prefix, instead add it manually each time during loading
+	outp << m_Prefixes.size() - 1 << "\n";
+	for (size_t i = 1; i < m_Prefixes.size(); i++) {
+		outp << m_Prefixes[i] << "\n";
+	}
+
+	outp << m_LemmaInfos.size() << "\n";
+	WriteVectorStream(outp, m_LemmaInfos);
+
+	assert(m_NPSs.size() == m_FlexiaModels.size());
+	outp << m_NPSs.size() << "\n";
+	WriteVectorStream(outp, m_NPSs);
+	outp.close();
+
+	m_Bases.WriteShortStringHolder(MakeFName(GrammarFileName, "bases"));
+	
 };
 
 

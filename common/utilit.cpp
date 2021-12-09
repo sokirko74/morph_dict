@@ -1714,42 +1714,39 @@ bool  IsLessShortString::operator ()(const CShortString& Item1,	const CShortStri
 void CShortStringHolder::ReadShortStringHolder(std::string filename)
 {
 	clear();
-	uint32_t Count;
-	size_t BufferSize = (size_t)FileSize(filename.c_str()) - sizeof(Count);
-
-	FILE* fp = fopen(filename.c_str(), "rb");
-	if (!fp) return;
-	
-	fread ((void *)&Count, 1, sizeof(Count), fp);
-	try {
-		m_Buffer.clear();
-		ReadVectorInner(fp, m_Buffer, BufferSize);
-		fclose(fp);
-		fp = 0;
+	uint32_t count;
+	size_t BufferSize = (size_t)FileSize(filename.c_str()) - sizeof(count);
+	std::ifstream inp(filename, std::ios::binary);
+	if (!inp.is_open()) {
+		throw CExpc(Format("cannot read %s", filename.c_str()));
 	}
-	catch (...)
-	{
-		if (fp) fclose(fp);
-		throw;
+	inp.read((char*)&count, sizeof(count));
+	if (!inp) {
+		inp.close();
+		throw CExpc(Format("cannot read count from %s", filename.c_str()));
 	}
+	m_Buffer.resize(BufferSize);
+	inp.read(&m_Buffer[0], BufferSize);
+	if (!inp) {
+		inp.close();
+		throw CExpc(Format("cannot read bytes from %s", filename.c_str()));
+	}
+	inp.close();
 
-	reserve(Count);
+
+	reserve(count);
 	int Offset = 0;
-	for (uint32_t i=0; i < Count; i++)
+	for (uint32_t i=0; i < count; i++)
 	{
 		CShortString R(m_Buffer.begin()+Offset);
 		push_back(R);
 		Offset +=   R.GetLength() + 2; // 1 byte for length and 1 byte for 0 in the end
 	};
-	
-
-
 };
 
 template<class T>
 bool CShortStringHolder::CreateFromSequence(T begin, T end)
 {
-	
 	m_Buffer.clear();
 	uint32_t Count = 0;
 	for (; begin != end; begin++)
@@ -1793,31 +1790,17 @@ bool CShortStringHolder::CreateFromSet(const StringSet& in)
 	return CreateFromSequence<StringSet::const_iterator>(in.begin(), in.end());
 }
 
-bool CShortStringHolder::WriteShortStringHolder(const std::string& FileName) const
+void CShortStringHolder::WriteShortStringHolder(const std::string& FileName) const
 {
-	FILE* fp = fopen (FileName.c_str(), "wb");
-	if (!fp)	return false;
-	try
-	{
-        assert (size() < std::numeric_limits<uint32_t>::max());
-        uint32_t nLength = size();
-		if (fwrite((void*)&nLength, sizeof(nLength), 1,  fp) != 1)
-		{
-				fclose(fp);
-				return false;
-		}
-		if (!WriteVectorInner(fp, m_Buffer))
-		{
-				fclose(fp);
-				return false;
-		}
-		if (fclose(fp)) return false;
-	}
-	catch(...)
-	{
-		return false;
-	}
-	return true;
+	std::ofstream outp(FileName.c_str(), std::ios::binary);
+	if (!outp.is_open()) {
+		throw CExpc(Format("cannot write to %s", FileName.c_str()));
+	};
+    assert (size() < std::numeric_limits<uint32_t>::max());
+    uint32_t nLength = size();
+	outp.write((char*)&nLength, sizeof(nLength));
+	outp.write((char*)&m_Buffer[0], m_Buffer.size());
+	outp.close();
 }
 
 

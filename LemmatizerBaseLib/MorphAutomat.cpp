@@ -2,8 +2,10 @@
 // ==========  Dialing Lemmatizer (www.aot.ru), 
 // ==========  Copyright by Alexey Sokirko (2004)
 
+// This source code is higly optimized (no std::vectors or std::fstream) 
+// The load time of morphology dictionaries is important.
+
 #include "MorphAutomat.h"
-#include "morph_dict/common/bserialize.h"
 
 static int  InitAlphabet(MorphLanguageEnum Language, int* pCode2Alphabet, int *pAlphabet2Code, size_t AnnotChar)
 {
@@ -17,7 +19,7 @@ static int  InitAlphabet(MorphLanguageEnum Language, int* pCode2Alphabet, int *p
 				||	(i == '-') 
 				||	(i == AnnotChar)
 				||	(		(Language == morphEnglish) 
-						&&	(AdditionalEnglishChars.find(i) != std::string::npos)
+						&&	(AdditionalEnglishChars.find((BYTE)i) != std::string::npos)
 					)
 				||	(		(Language == morphGerman) 
 						&&	(AdditionalGermanChars.find((BYTE)i) != std::string::npos)
@@ -27,7 +29,7 @@ static int  InitAlphabet(MorphLanguageEnum Language, int* pCode2Alphabet, int *p
 					 )
 			)
 		{
-			pCode2Alphabet[AlphabetSize] = i;
+			pCode2Alphabet[AlphabetSize] = (int)i;
 			pAlphabet2Code[i] = AlphabetSize;
 			AlphabetSize++;
 		}
@@ -135,48 +137,6 @@ void CMorphAutomat::Clear()
 };
 
 
-inline size_t get_size_in_bytes (const CMorphAutomNode& t)
-{
-	return		
-			get_size_in_bytes(t.m_Data)
-			;
-};
-
-inline size_t save_to_bytes(const CMorphAutomNode& t, BYTE* buf)
-{
-	buf += save_to_bytes(t.m_Data, buf);
-	return get_size_in_bytes(t);
-};
-
-inline size_t restore_from_bytes(CMorphAutomNode& t, const BYTE* buf)
-{
-	buf += restore_from_bytes(t.m_Data, buf);
-	return get_size_in_bytes(t);
-};
-
-
-
-inline size_t get_size_in_bytes (const CMorphAutomRelation& t)
-{
-	return		get_size_in_bytes(t.m_Data);
-};
-
-inline size_t save_to_bytes(const CMorphAutomRelation& t, BYTE* buf)
-{
-	buf += save_to_bytes(t.m_Data, buf);
-	return get_size_in_bytes(t);
-};
-
-inline size_t restore_from_bytes(CMorphAutomRelation& t, const BYTE* buf)
-{
-	buf += restore_from_bytes(t.m_Data, buf);
-	return get_size_in_bytes(t);
-};
-
-
-
-
-
 void CMorphAutomat::BuildChildrenCache()
 {
 	size_t Count = ChildrenCacheSize;
@@ -244,43 +204,28 @@ void CMorphAutomat::Load(std::string AutomatFileName)
 	BuildChildrenCache();
 };
 
-bool CMorphAutomat::Save(std::string AutomatFileName) const
+void CMorphAutomat::Save(std::string AutomatFileName) const
 {
-	try {
-		FILE * fp = fopen(AutomatFileName.c_str(), "wb");
-		if (!fp)
-		{
-			ErrorMessage (Format("CMorphAutomat::Save, cannot write to %s", AutomatFileName.c_str()));
-			return false;
-		};
-		fprintf(fp, "%li\n", m_NodesCount);
-		if (fwrite(m_pNodes, sizeof(CMorphAutomNode),m_NodesCount, fp) != m_NodesCount)
-			return  false;
-
-		fprintf(fp, "%li\n", m_RelationsCount);
-		if (fwrite(m_pRelations, sizeof(CMorphAutomRelation),m_RelationsCount, fp) != m_RelationsCount)
-			return  false;
-		
-
-		fwrite(m_Alphabet2Code,sizeof(int),256,fp);
-
+	FILE * fp = fopen(AutomatFileName.c_str(), "wb");
+	if (!fp)
+		throw CExpc(Format("cannot open file %s", AutomatFileName.c_str()));
+	fprintf(fp, "%i\n", (int)m_NodesCount);
+	if (fwrite(m_pNodes, sizeof(CMorphAutomNode), m_NodesCount, fp) != m_NodesCount) {
 		fclose(fp);
-
-		printf ("%li children\n",m_RelationsCount);
-		printf ("%li nodes\n",m_NodesCount);
-
-
-		return true;
+		throw CExpc(Format("cannot write nodes to %s", AutomatFileName.c_str()));
 	}
-	catch (...)
-	{
-		fprintf (stderr, "Cannot save CMorphAutomat");
-		return false;
-	};
+
+	fprintf(fp, "%i\n", (int)m_RelationsCount);
+	if (fwrite(m_pRelations, sizeof(CMorphAutomRelation), m_RelationsCount, fp) != m_RelationsCount) {
+		fclose(fp);
+		throw CExpc(Format("cannot write relations to %s", AutomatFileName.c_str()));
+	}
+		
+	fwrite(m_Alphabet2Code,sizeof(int),256,fp);
+	fclose(fp);
+	std::cout << m_RelationsCount << " children\n";
+	std::cout << m_NodesCount << " nodes\n";
 };
-
-
-
 
 
 size_t  CMorphAutomat::GetChildrenCount(size_t NodeNo)  const

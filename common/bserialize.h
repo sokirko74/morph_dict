@@ -327,7 +327,7 @@ bool WriteVectorInner(FILE *fp, const std::vector<T> &V) {
 };
 
 template<class T>
-bool WriteVectorStream(std::ofstream& outp, const std::vector<T>& vec) {
+void WriteVectorStream(std::ofstream& outp, const std::vector<T>& vec) {
     T dummy;
     size_t size_of_t = get_size_in_bytes(dummy);
 
@@ -338,7 +338,6 @@ bool WriteVectorStream(std::ofstream& outp, const std::vector<T>& vec) {
         save_to_bytes(item, buffer);
         outp.write((char*)buffer, size_of_t);
     };
-    return true;
 };
 
 

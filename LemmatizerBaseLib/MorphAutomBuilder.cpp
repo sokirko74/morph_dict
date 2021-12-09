@@ -502,7 +502,7 @@ void CMorphAutomatBuilder::AddStringDaciuk(const std::string& WordForm)
 	}
 
 	// CurrentIndex is a pointer to prefix node, which was not yet registered
-	int  CurrentIndex = m_Prefix.size() - 1;
+	int  CurrentIndex = (int)m_Prefix.size() - 1;
 		
 	if (FirstConfluenceState != -1)
 	{	

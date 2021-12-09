@@ -83,7 +83,7 @@ public:
 
 	//  loading & saving
 	void	Load(std::string GrammarFileName);
-	bool	Save(std::string GrammarFileName) const;
+	void	Save(std::string GrammarFileName) const;
 	
 	
 	void	PredictBySuffix (const std::string& Text, size_t& TextOffset, size_t MinimalPredictSuffixlen, std::vector<CAutomAnnotationInner>& Infos) const;

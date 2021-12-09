@@ -142,7 +142,7 @@ public:
 	CMorphAutomat(MorphLanguageEnum Language, BYTE AnnotChar);
 	~CMorphAutomat();
 	void	Load(std::string GrammarFileName);
-	bool	Save(std::string GrammarFileName) const;
+	void	Save(std::string GrammarFileName) const;
 	bool	DumpAllStrings(std::string FileName) const;
 	void	GetInnerMorphInfos (const std::string& Text, size_t TextPos, std::vector<CAutomAnnotationInner>& Infos) const;
 	const CMorphAutomRelation*  GetChildren(size_t NodeNo) const;

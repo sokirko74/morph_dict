@@ -130,7 +130,7 @@ class CShortStringHolder : public std::vector<CShortString>
 		bool CreateFromSequence(T begin, T end);
 public:	
 	void	ReadShortStringHolder(std::string filename);
-	bool	WriteShortStringHolder(const std::string& FileName) const;
+	void	WriteShortStringHolder(const std::string& FileName) const;
 	bool	CreateFromVector(const StringVector& in);
 	bool	CreateFromSet(const StringSet& in);
 };
