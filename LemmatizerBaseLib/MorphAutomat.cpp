@@ -193,7 +193,9 @@ void CMorphAutomat::Load(std::string AutomatFileName)
 
 	{
 		int Alphabet2Code[256];
-		fread(Alphabet2Code,sizeof(int),256,fp);
+		if (fread(Alphabet2Code,sizeof(int),256,fp) != 256)  {
+            throw CExpc(Format("Cannot read Alphabet2Code from %s", AutomatFileName.c_str()));;
+        }
 		if (memcmp(Alphabet2Code,m_Alphabet2Code, 256*sizeof(int)) )
 		{
 			std::string err = Format("%s alphabet has changed; cannot load morph automat", GetStringByLanguage(m_Language).c_str());
