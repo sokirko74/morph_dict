@@ -99,7 +99,6 @@ extern bool     MakePathAndCheck(const std::string path, const std::string fileN
 extern std::string	GetPathByFile (std::string FileName);
 extern bool		IsEmptyLine ( const char *t);
 extern bool		IsHtmlFile (const std::string& FileName);
-extern void		AddFile(const char* MainFile, const char* ToAdd);
 extern std::string	CreateTempFileName();
 extern bool		MakeDir(const std::string& txt);
 

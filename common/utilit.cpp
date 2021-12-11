@@ -676,18 +676,6 @@ bool IsHtmlFile (const std::string& FileName)
 }
 
 
-void AddFile(const char* MainFile, const char* ToAdd)
-{
-	char s[_MAX_PATH*2];
-	#ifdef WIN32
-		sprintf (s, "type %s  >> %s ", ToAdd, MainFile);
-	#else
-		sprintf (s, "cat %s  >> %s ", ToAdd, MainFile);
-	#endif
-	system (s);
-
-};
-
 std::string GetRmlVariable()
 {
 	const char* rml = getenv("RML");
@@ -2241,6 +2229,7 @@ std::string convert_to_utf8(const std::string& str, const MorphLanguageEnum lang
 
 	std::wstring utf8_to_utf16(const std::string& str) {
 		assert (false);
+        return std::wstring();
 		//std::wstring_convert<std::codecvt_utf8_utf16<char16_t> > converter;
 		//return converter.from_bytes(str);
 	}
@@ -2248,6 +2237,7 @@ std::string convert_to_utf8(const std::string& str, const MorphLanguageEnum lang
 
 	std::string utf16_to_utf8(const std::wstring& wstr) {
 		assert (false);
+        return std::string();
 		//std::u16string u16str(wstr.begin(), wstr.end());
 		//std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t > converter;
 		//std::string s =  converter.to_bytes(u16str.c_str());
