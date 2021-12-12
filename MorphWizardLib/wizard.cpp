@@ -769,32 +769,6 @@ void MorphoWizard::find_wordforms(std::string wordform, std::vector<lemma_iterat
     }
 }
 
-/*
-//----------------------------------------------------------------------------
-void MorphoWizard::find_wordforms(const std::string &wordform, std::vector<lemma_iterator_t> &res)
-{
-    if( !!m_pMeter )
-    {
-        m_pMeter->SetMaxPos(m_LemmaToParadigm.size());
-        m_pMeter->SetInfo("Finding wordforms...");
-    }
-
-    std::vector<std::string> wordforms;
-    for (lemma_iterator_t it = m_LemmaToParadigm.begin(); it != m_LemmaToParadigm.end();it++)
-    {
-        get_wordforms(it, wordforms);
-        for (int i = 0; i < wordforms.size(); i++)
-        {
-            if (simple_match (wordform, wordforms[i] ) )
-            {
-                res.push_back(it);
-                break;
-            }
-        }
-        if( !!m_pMeter ) m_pMeter->AddPos();
-    }
-}
-*/
 
 //----------------------------------------------------------------------------
 // search an ancode std::string in all paradigms (an ancode std::string can contain more than one ancode)

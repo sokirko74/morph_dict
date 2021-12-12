@@ -38,24 +38,26 @@ endmacro()
 
 
 macro (StatDatBinRun langua Topic)
-    set (Src ${PROJECT_SOURCE_DIR}/${langua}/StatData.txt)
-    set (Trg ${output_morph_folder}/${langua}/${Topic}homoweight.bin)
+    set (src ${PROJECT_SOURCE_DIR}/${langua}/StatData.txt)
+    set (morph_folder ${output_morph_folder}/${langua})
+    set (trg ${morph_folder}/${Topic}homoweight.bin)
     add_custom_command(
-        OUTPUT ${Trg}
-        COMMAND StatDatBin --input ${Src} --language ${langua} --output ${Trg}
-        DEPENDS StatDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases" ${output_morph_folder}/${langua}/gramtab.tab
+        OUTPUT ${trg}
+        COMMAND StatDatBin --morph-folder ${morph_folder} --input ${src} --language ${langua} --output ${trg}
+        DEPENDS StatDatBin ${src} "${morph_folder}/morph.bases" "${morph_folder}/gramtab.tab"
         COMMENT "StatDatBin"
         VERBATIM
     )
 endmacro()
 
 macro (WordDatBinRun langua Topic)
-    set (Src ${PROJECT_SOURCE_DIR}/${langua}/WordData.txt)
-    set (Trg ${output_morph_folder}/${langua}/${Topic}wordweight.bin)
+    set (src ${PROJECT_SOURCE_DIR}/${langua}/WordData.txt)
+    set (morph_folder ${output_morph_folder}/${langua})
+    set (trg ${morph_folder}/${Topic}wordweight.bin)
     add_custom_command(
-        OUTPUT ${Trg}
-        COMMAND WordDatBin --input ${Src} --language ${langua} --output ${Trg}
-        DEPENDS WordDatBin ${Src} "${output_morph_folder}/${langua}/morph.bases" ${output_morph_folder}/${langua}/gramtab.tab
+        OUTPUT ${trg}
+        COMMAND WordDatBin --morph-folder ${morph_folder} --input ${src} --language ${langua} --output ${trg}
+        DEPENDS WordDatBin ${src} "${morph_folder}/morph.bases" "${morph_folder}/gramtab.tab"
         COMMENT "WordDatBin"
         VERBATIM
     )
