@@ -768,32 +768,6 @@ void MorphoWizard::find_wordforms(std::string wordform, std::vector<lemma_iterat
     }
 }
 
-/*
-//----------------------------------------------------------------------------
-void MorphoWizard::find_wordforms(const std::string &wordform, std::vector<lemma_iterator_t> &res)
-{
-    if( !!m_pMeter )
-    {
-        m_pMeter->SetMaxPos(m_LemmaToParadigm.size());
-        m_pMeter->SetInfo("Finding wordforms...");
-    }
-
-    std::vector<std::string> wordforms;
-    for (lemma_iterator_t it = m_LemmaToParadigm.begin(); it != m_LemmaToParadigm.end();it++)
-    {
-        get_wordforms(it, wordforms);
-        for (int i = 0; i < wordforms.size(); i++)
-        {
-            if (simple_match (wordform, wordforms[i] ) )
-            {
-                res.push_back(it);
-                break;
-            }
-        }
-        if( !!m_pMeter ) m_pMeter->AddPos();
-    }
-}
-*/
 
 //----------------------------------------------------------------------------
 // search an ancode std::string in all paradigms (an ancode std::string can contain more than one ancode)
@@ -1658,26 +1632,6 @@ std::string MorphoWizard::create_slf_from_predicted(int PredictParadigmNo, std::
     if (NewLemma.find("|"))
         NewLemma.erase(0, NewLemma.find("|") + 1);
     return mrd_to_slf(NewLemma, P, UnknownAccentModelNo, UnknownAccent, line_size);
-
-    /*
-        // It was commented by Sokirko, because this code does not correctly process prefixes
-    std::string slf = "\n" + mrd_to_slf(S.m_SourceLemma, P, UnknownAccentModelNo, UnknownAccent, line_size);
-    std::string flex = P.get_first_flex();
-
-    std::string Base = "\n"+S.m_SourceLemma.substr(0, S.m_SourceLemma.length() - flex.size());
-    RmlMakeLower(Base, m_Language);
-
-    std::string NewBase = "\n"+m_CurrentNewLemma.substr(0, m_CurrentNewLemma.length() - flex.size());
-    RmlMakeLower(NewBase, m_Language);
-
-    for (int i =0; i <slf.size(); i++)
-        if (slf.substr(i, Base.length()) == Base)
-        {
-            slf.replace(i, Base.length(), NewBase);
-            i+= NewBase.size() - 1;
-        };
-    slf.erase(0, 1);
-    return slf;*/
 
 }
 
