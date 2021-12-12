@@ -168,8 +168,9 @@ bool CParadigmInfo::IsAnyEqual(const CParadigmInfo& X) const {
 
 
 
-MorphoWizard::MorphoWizard()
-    : m_bLoaded(false),
+MorphoWizard::MorphoWizard(): 
+    m_bLoaded(false), 
+    m_Predictor(this),
     m_bWasChanged(false) {
     m_ReadOnly = true;
     m_bFullTrace = true;
@@ -527,7 +528,7 @@ void MorphoWizard::load_mrd(bool guest, bool bCreatePrediction) {
     this->ReadLemmas(mrdFile);
     fprintf(stderr, ".");
     if (bCreatePrediction)
-        CreatePredictIndex();
+        m_Predictor.CreateIndex();
     fprintf(stderr, ".\n");
 }
 
@@ -1021,8 +1022,12 @@ std::string MorphoWizard::get_prefix_set_str(uint16_t PrefixSetNo) const {
     return Result;
 };
 
+std::string MorphoWizard::get_prefix_set(CParadigmInfo i) const {
+    return (i.m_PrefixSetNo == UnknownPrefixSetNo) ? "" : get_prefix_set_str(i.m_PrefixSetNo);
+}
+
 std::string MorphoWizard::get_prefix_set(const_lemma_iterator_t it) const {
-    return (it->second.m_PrefixSetNo == UnknownPrefixSetNo) ? "" : get_prefix_set_str(it->second.m_PrefixSetNo);
+    return get_prefix_set(it->second);
 }
 
 
@@ -1533,154 +1538,6 @@ AGAIN:
 }
 
 
-inline std::string GetSuffix(const std::string& Lemma, int PrefferedLength) {
-    int SuffLen = (int)Lemma.length() - PrefferedLength;
-    if (SuffLen < 0) SuffLen = 0;
-    std::string Suffix = Lemma.substr(SuffLen);
-    return Suffix;
-
-};
-
-bool IsLessByLemmaLength(const CPredictSuffix& _X1, const CPredictSuffix& _X2) {
-    return _X1.m_SourceLemma.length() < _X2.m_SourceLemma.length();
-};
-
-void MorphoWizard::CreatePredictIndex() {
-    for (size_t i = 0; i < MaxPredictSuffixLength - MinPredictSuffixLength + 1; i++)
-        m_PredictIndex[i].clear();
-
-
-    if (!!m_pMeter) {
-        m_pMeter->SetMaxPos((uint32_t)m_LemmaToParadigm.size());
-        m_pMeter->SetInfo("Creating Predict Index...");
-    }
-
-    // go through all words
-    std::vector<CPredictSuffix> AllLemmas;
-    for (lemma_iterator_t lemm_it = m_LemmaToParadigm.begin(); lemm_it != m_LemmaToParadigm.end(); lemm_it++) {
-        const CFlexiaModel& p = m_FlexiaModels[lemm_it->second.m_FlexiaModelNo];
-
-        const char* lemma = lemm_it->first.c_str();
-
-        // create predict suffix
-        CPredictSuffix S;
-        S.m_FlexiaModelNo = lemm_it->second.m_FlexiaModelNo;
-        S.m_SourceLemmaAncode = p.get_first_code();
-        S.m_SourceCommonAncode = lemm_it->second.GetCommonAncodeIfCan();
-        S.m_SourceLemma = lemma;
-        S.m_PrefixSetStr = get_prefix_set(lemm_it);
-        S.m_Frequence = 1;
-        if (S.m_SourceLemma.length() < 3) continue;
-        AllLemmas.push_back(S);
-    };
-
-    sort(AllLemmas.begin(), AllLemmas.end(), IsLessByLemmaLength);
-
-    // going through all prefix suffixes
-    for (size_t i = 0; i < AllLemmas.size(); i++) {
-        CPredictSuffix& S = AllLemmas[i];
-        for (size_t suff_len = MinPredictSuffixLength; suff_len <= MaxPredictSuffixLength; suff_len++) {
-            predict_container_t& PredictIndex = m_PredictIndex[suff_len - MinPredictSuffixLength];
-
-            S.m_Suffix = GetSuffix(S.m_SourceLemma, (int)suff_len);
-
-            std::pair<predict_container_t::iterator, bool> bRes = PredictIndex.insert(S);
-            if (!bRes.second) {
-                bRes.first->m_Frequence++;
-            }
-
-        };
-
-        if (!!m_pMeter)
-            m_pMeter->AddPos();
-    }
-
-
-};
-
-
-void MorphoWizard::predict_lemm(const std::string& lemm, const int preffer_suf_len, const int minimal_frequence,
-    bool bOnlyMainPartOfSpeeches) {
-
-    m_CurrentPredictedParadigms.clear();
-    m_CurrentNewLemma = lemm;
-    if (preffer_suf_len < MinPredictSuffixLength) return;
-    if (preffer_suf_len > MaxPredictSuffixLength) return;
-
-    try {
-
-        const predict_container_t& PredictIndex = m_PredictIndex[preffer_suf_len - MinPredictSuffixLength];
-
-        std::string Suffix = GetSuffix(lemm, preffer_suf_len);
-
-        for (predict_container_t::const_iterator it = PredictIndex.begin(); it != PredictIndex.end(); it++) {
-            const CPredictSuffix& S = *it;
-
-            if (S.m_Suffix != Suffix) continue;
-            if (S.m_Frequence < minimal_frequence)
-                continue;
-
-            if (lemm.find("|") != std::string::npos)
-                if (S.m_PrefixSetStr.empty())
-                    continue;
-
-            const CFlexiaModel& P = m_FlexiaModels[S.m_FlexiaModelNo];
-            std::string flex = P.get_first_flex();
-            if (flex.size() > Suffix.size()) {
-                if (flex.size() >= lemm.size()) continue;
-                if (flex != lemm.substr(lemm.length() - flex.size())) continue;
-            };
-
-            std::string pos = get_pos_string(S.m_SourceLemmaAncode);
-            if (bOnlyMainPartOfSpeeches)
-                if (GetPredictionPartOfSpeech(pos.c_str(), m_Language) == UnknownPartOfSpeech) continue;
-
-
-            m_CurrentPredictedParadigms.push_back(it);
-        };
-
-    }
-    catch (...) {
-        m_CurrentPredictedParadigms.clear();
-        ErrorMessage("An exception occurred!");
-    }
-}
-
-
-std::string MorphoWizard::create_slf_from_predicted(int PredictParadigmNo, std::string& common_grammems, int line_size) const {
-
-    const CPredictSuffix& S = *m_CurrentPredictedParadigms[PredictParadigmNo];
-    const CFlexiaModel& P = m_FlexiaModels[S.m_FlexiaModelNo];
-
-    common_grammems = get_grammem_string(S.m_SourceCommonAncode.c_str());
-    std::string flex = P.get_first_flex();
-    std::string NewLemma = m_CurrentNewLemma.substr(0, m_CurrentNewLemma.length() - flex.size()) + flex;
-    if (NewLemma.find("|"))
-        NewLemma.erase(0, NewLemma.find("|") + 1);
-    return mrd_to_slf(NewLemma, P, UnknownAccentModelNo, UnknownAccent, line_size);
-
-    /*
-        // It was commented by Sokirko, because this code does not correctly process prefixes
-    std::string slf = "\n" + mrd_to_slf(S.m_SourceLemma, P, UnknownAccentModelNo, UnknownAccent, line_size);
-    std::string flex = P.get_first_flex();
-
-    std::string Base = "\n"+S.m_SourceLemma.substr(0, S.m_SourceLemma.length() - flex.size());
-    RmlMakeLower(Base, m_Language);
-
-    std::string NewBase = "\n"+m_CurrentNewLemma.substr(0, m_CurrentNewLemma.length() - flex.size());
-    RmlMakeLower(NewBase, m_Language);
-
-    for (int i =0; i <slf.size(); i++)
-        if (slf.substr(i, Base.length()) == Base)
-        {
-            slf.replace(i, Base.length(), NewBase);
-            i+= NewBase.size() - 1;
-        };
-    slf.erase(0, 1);
-    return slf;*/
-
-}
-
 
 void MorphoWizard::pack() {
     std::map<int, int> OldFlexiaModelsToNewFlexiaModels;
@@ -1790,7 +1647,7 @@ void MorphoWizard::pack() {
             GetMeter()->AddPos((uint32_t)m_LemmaToParadigm.size() / 4);
 
 
-    CreatePredictIndex();
+    m_Predictor.CreateIndex();
 
 
     m_bWasChanged = true;
@@ -1862,10 +1719,6 @@ bool MorphoWizard::change_prd_info(CParadigmInfo& I, const std::string& Lemma,
     return true;
 }
 
-//----------------------------------------------------------------------------
-void MorphoWizard::clear_predicted_paradigms() {
-    m_CurrentPredictedParadigms.clear();
-};
 
 
 std::string MorphoWizard::show_differences_in_two_paradigms(uint16_t FlexiaModelNo1, uint16_t FlexiaModelNo2) const {
@@ -2211,3 +2064,13 @@ uint16_t MorphoWizard::RegisterSession(const CMorphSession& S) {
     else
         return it - m_Sessions.begin();
 };
+
+std::string MorphoWizard::create_slf_for_lemm(std::string lemm, size_t flexiaModelNo, int line_size) const {
+
+    const CFlexiaModel& P = m_FlexiaModels[flexiaModelNo];
+    std::string flex = P.get_first_flex();
+    std::string NewLemma = lemm.substr(0, lemm.length() - flex.size()) + flex;
+    if (NewLemma.find("|"))
+        NewLemma.erase(0, NewLemma.find("|") + 1);
+    return mrd_to_slf(NewLemma, P, UnknownAccentModelNo, UnknownAccent, line_size);
+}

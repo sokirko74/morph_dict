@@ -1,11 +1,10 @@
 #pragma once 
 
-#pragma warning(disable:4786)
-#pragma warning(disable:4503)
 #include "../common/utilit.h"
 #include "morph_dict/AgramtabLib/agramtab_.h"
 #include "FormInfo.h"
 #include "DumpParadigm.h"
+#include "LemmaPredict.h"
 #include "OperationMeter.h"
 #include <filesystem>
 
@@ -47,46 +46,9 @@ typedef LemmaMap::const_iterator const_lemma_iterator_t;
 
 
 //----------------------------------------------------------------------------
-struct CPredictSuffix
-{
-    uint16_t	m_FlexiaModelNo;
-    std::string	m_Suffix;
-
-    //  grammatical code of the lemma
-    std::string	m_SourceLemmaAncode;
-
-    //  common gramcode of the lemma
-    std::string	m_SourceCommonAncode;
-
-    std::string	m_SourceLemma;
-    mutable size_t	m_Frequence;
-    std::string  m_PrefixSetStr;
-
-    bool operator  < (const  CPredictSuffix& X) const
-    {
-        if (m_FlexiaModelNo != X.m_FlexiaModelNo)
-            return m_FlexiaModelNo < X.m_FlexiaModelNo;
-
-        if (m_SourceLemmaAncode != X.m_SourceLemmaAncode)
-            return m_SourceLemmaAncode < X.m_SourceLemmaAncode;
-
-        return m_Suffix < X.m_Suffix;
-    };
-    bool operator  == (const  CPredictSuffix& X) const
-    {
-        return			(m_FlexiaModelNo == X.m_FlexiaModelNo)
-            && (m_Suffix == X.m_Suffix)
-            && (m_SourceLemmaAncode == X.m_SourceLemmaAncode);
-    };
-};
 
 //----------------------------------------------------------------------------
 class MorphWizardMeter;
-
-const int MinPredictSuffixLength = 2;
-const int MaxPredictSuffixLength = 5;
-
-typedef std::set<CPredictSuffix> predict_container_t;
 
 
 //----------------------------------------------------------------------------
@@ -98,9 +60,6 @@ class MorphoWizard : public CMorphWizardBase
     StringVector  m_PosesList;
     StringVector  m_GrammemsList;
     StringVector  m_TypeGrammemsList;
-
-
-    predict_container_t	m_PredictIndex[MaxPredictSuffixLength - MinPredictSuffixLength + 1];
 
 
     StringVector			m_Users;
@@ -125,6 +84,7 @@ public:
 
 
     std::vector<std::set<std::string> >	m_PrefixSets;
+    TLemmaPredictor m_Predictor;
 
     // the multimap from lemma to paradigms (the largest list)
     LemmaMap				m_LemmaToParadigm;
@@ -132,10 +92,6 @@ public:
 
     std::filesystem::path m_MwzFolder;
     std::filesystem::path m_GramtabPath;
-
-    std::string m_CurrentNewLemma;
-    std::vector< predict_container_t::const_iterator>				m_CurrentPredictedParadigms;
-
 
 
     //! a table of character properties for regular expressions which depend on CConcIndexator::m_Language
@@ -162,7 +118,6 @@ public:
     std::string	get_lock_file_name()   const;
     std::string	get_log_file_name()   const;
     void	MakeReadOnly();
-    void	CreatePredictIndex();
     void	pack();
     uint16_t	GetCurrentSessionNo() const;
     size_t	del_dup_lemm();
@@ -178,6 +133,7 @@ public:
     uint64_t					get_all_lemma_grammems(const_lemma_iterator_t it) const;
     std::string					get_common_grammems_string(const_lemma_iterator_t it) const;
     std::string					get_prefix_set(const_lemma_iterator_t it) const;
+    std::string                 get_prefix_set(CParadigmInfo i) const;
     std::string					get_pos_string_and_grammems(const std::string& code) const;
     const CMorphSession& get_session(int SessionNo) const;
     bool					IsGerman() const { return m_Language == morphGerman; };
@@ -204,14 +160,11 @@ public:
     void	slf_to_mrd(const std::string& s, std::string& lemm, CFlexiaModel& FlexiaModel, CAccentModel& AccentModel, BYTE& AuxAccent, int& line_no_err) const;
     void	check_paradigm(long line_no);
     void	remove_lemm(lemma_iterator_t it);
-    void	predict_lemm(const std::string& lemm, const int preffer_suf_len, int minimal_frequence, bool bOnlyMainPartOfSpeeches);
     std::string	get_slf_string(lemma_iterator_t it, std::string& dict, std::string& Prefixes, int line_size = 79);
     void	get_wordforms(const_lemma_iterator_t it, StringVector& forms) const;
-    std::string	create_slf_from_predicted(int PredictParadigmNo, std::string& dict, int line_size = 79) const;
     CParadigmInfo	add_lemma(const std::string& slf, std::string common_grammems, const std::string& prefixes, int& line_no_err, uint16_t SessionNo = UnknownSessionNo);
     void	set_to_delete_false();
     void	delete_checked_lemms();
-    void	clear_predicted_paradigms();
     bool	change_prd_info(CParadigmInfo& I, const std::string& Lemma, uint16_t NewParadigmNo, uint16_t newAccentModelNo, bool keepOldAccents);
     std::string	show_differences_in_two_paradigms(uint16_t FlexiaModelNo1, uint16_t FlexiaModelNo2) const;
 
@@ -236,6 +189,8 @@ public:
 
     std::string ToRMLEncoding(std::wstring strText) const;
     std::wstring FromRMLEncoding(std::string s) const;
+    std::string create_slf_for_lemm(std::string lemm, size_t flexiaModelNo, int line_size) const;
+
 private:
     BYTE	_GetReverseVowelNo(const std::string& form, uint16_t accentModelNo, uint16_t formInd) const;
     void	SetAccent(uint16_t AccentModelNo, BYTE AuxAccent, int FormNo, std::string& form) const;
