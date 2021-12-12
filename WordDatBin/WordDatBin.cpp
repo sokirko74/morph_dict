@@ -179,6 +179,8 @@ void initArgParser(int argc, const char **argv, ArgumentParser& parser) {
     parser.AddArgument("--input", "input file");
     parser.AddArgument("--output", "output file");
     parser.AddArgument("--language", "language");
+    parser.AddArgument("--morph-folder", "morph_folder");
+
     parser.Parse(argc, argv);
 }
 
@@ -189,7 +191,7 @@ int main(int argc, const char **argv) {
     initArgParser(argc, argv, args);
 
     try {
-        MorphHolderRus.LoadLemmatizer(args.GetLanguage());
+        MorphHolderRus.LoadLemmatizer(args.GetLanguage(), args.Retrieve("morph-folder"));
 
         if (loadDat(args.GetInputStream()))
             if (saveBin(args.CloseOutputStreamAndGetName()))
