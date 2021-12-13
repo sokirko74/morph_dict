@@ -2,6 +2,28 @@
 #include "wizard.h"
 #include "LemmaPredict.h"
 
+std::string CPredictSuffix::getCommonGrammemsUtf8() {
+    return convert_to_utf8(m_pWizard->get_grammem_string(m_SourceCommonAncode), m_pWizard->m_Language);
+}
+
+bool CPredictSuffix::operator  < (const  CPredictSuffix& X) const
+{
+    if (m_FlexiaModelNo != X.m_FlexiaModelNo)
+        return m_FlexiaModelNo < X.m_FlexiaModelNo;
+
+    if (m_SourceLemmaAncode != X.m_SourceLemmaAncode)
+        return m_SourceLemmaAncode < X.m_SourceLemmaAncode;
+
+    return m_Suffix < X.m_Suffix;
+};
+
+bool CPredictSuffix::operator  == (const  CPredictSuffix& X) const
+{
+    return			(m_FlexiaModelNo == X.m_FlexiaModelNo)
+        && (m_Suffix == X.m_Suffix)
+        && (m_SourceLemmaAncode == X.m_SourceLemmaAncode);
+};
+
 
 bool IsLessByLemmaLength(const CPredictSuffix& _X1, const CPredictSuffix& _X2) {
     return _X1.m_SourceLemma.length() < _X2.m_SourceLemma.length();
@@ -35,6 +57,7 @@ void TLemmaPredictor::CreateIndex() {
 
         // create predict suffix
         CPredictSuffix S;
+        S.m_pWizard = m_pWizard;
         S.m_FlexiaModelNo = value.m_FlexiaModelNo;
         S.m_SourceLemmaAncode = p.get_first_code();
         S.m_SourceCommonAncode = value.GetCommonAncodeIfCan();
@@ -61,10 +84,10 @@ void TLemmaPredictor::CreateIndex() {
     }
 };
 
-std::vector<const CPredictSuffix*> TLemmaPredictor::predict_lemm(const std::string& lemm, const int preffer_suf_len, const int minimal_frequence,
+std::vector<CPredictSuffix> TLemmaPredictor::predict_lemm(const std::string& lemm, const int preffer_suf_len, const int minimal_frequence,
     bool bOnlyMainPartOfSpeeches, TLemmPredictSortEnum sortBy) {
 
-    std::vector<const CPredictSuffix*>	predicts;
+    std::vector<CPredictSuffix>	predicts;
     if (preffer_suf_len < MinPredictSuffixLength) return predicts;
     if (preffer_suf_len > MaxPredictSuffixLength) return predicts;
 
@@ -91,7 +114,7 @@ std::vector<const CPredictSuffix*> TLemmaPredictor::predict_lemm(const std::stri
         std::string pos = m_pWizard->get_pos_string(s.m_SourceLemmaAncode);
         if (bOnlyMainPartOfSpeeches)
             if (GetPredictionPartOfSpeech(pos.c_str(), m_pWizard->m_Language) == UnknownPartOfSpeech) continue;
-        predicts.push_back(&s);
+        predicts.push_back(s);
     }
 
     std::sort(predicts.begin(), predicts.end(), IsLessForPredict(m_pWizard, sortBy));
@@ -106,46 +129,46 @@ IsLessForPredict::IsLessForPredict(const MorphoWizard* pWizard, TLemmPredictSort
     m_SortBy = sortBy;
 }
 
-bool  IsLessForPredict::operator()(const CPredictSuffix* s1, const CPredictSuffix* s2) const
+bool  IsLessForPredict::operator()(const CPredictSuffix& s1, const CPredictSuffix& s2) const
 {
     switch (m_SortBy)
     {
     case TLemmPredictSortEnum::Grammems:
     {
-        std::string g1 = m_pWizard->get_pos_string_and_grammems(s1->m_SourceLemmaAncode);
-        std::string g2 = m_pWizard->get_pos_string_and_grammems(s2->m_SourceLemmaAncode);
+        std::string g1 = m_pWizard->get_pos_string_and_grammems(s1.m_SourceLemmaAncode);
+        std::string g2 = m_pWizard->get_pos_string_and_grammems(s2.m_SourceLemmaAncode);
         if (g1 == g2) 
-            return s1->m_Frequence > s2->m_Frequence;
+            return s1.m_Frequence > s2.m_Frequence;
         else
             return g1 < g2;
     };
     case TLemmPredictSortEnum::TypeDict:
     {
-        std::string g1 = m_pWizard->get_grammem_string(s1->m_SourceCommonAncode);
-        std::string g2 = m_pWizard->get_grammem_string(s2->m_SourceCommonAncode);
+        std::string g1 = m_pWizard->get_grammem_string(s1.m_SourceCommonAncode);
+        std::string g2 = m_pWizard->get_grammem_string(s2.m_SourceCommonAncode);
         if (g1 == g2) 
-            return s1->m_Frequence > s2->m_Frequence;
+            return s1.m_Frequence > s2.m_Frequence;
         else
             return g1 < g2;
     };
     case TLemmPredictSortEnum::Lemma:
     {
-        if (s1->m_SourceLemma == s2->m_SourceLemma)
-            return s1->m_Frequence > s2->m_Frequence;
+        if (s1.m_SourceLemma == s2.m_SourceLemma)
+            return s1.m_Frequence > s2.m_Frequence;
         else
-            return s1->m_SourceLemma < s2->m_SourceLemma;
+            return s1.m_SourceLemma < s2.m_SourceLemma;
     };
-    case TLemmPredictSortEnum::Freq: return s1->m_Frequence > s2->m_Frequence;
-    case TLemmPredictSortEnum::Paradigm: return s1->m_FlexiaModelNo < s2->m_FlexiaModelNo;
+    case TLemmPredictSortEnum::Freq: return s1.m_Frequence > s2.m_Frequence;
+    case TLemmPredictSortEnum::Paradigm: return s1.m_FlexiaModelNo < s2.m_FlexiaModelNo;
     case TLemmPredictSortEnum::LemmaPrefix:
     {
-        if (s1->m_PrefixSetStr == s2->m_PrefixSetStr)
-            return s1->m_Frequence > s2->m_Frequence;
+        if (s1.m_PrefixSetStr == s2.m_PrefixSetStr)
+            return s1.m_Frequence > s2.m_Frequence;
         else
-            return s1->m_PrefixSetStr < s2->m_PrefixSetStr;
+            return s1.m_PrefixSetStr < s2.m_PrefixSetStr;
     };
     case TLemmPredictSortEnum::FormsCount:
-            return m_pWizard->m_FlexiaModels[s1->m_FlexiaModelNo].m_Flexia.size() < m_pWizard->m_FlexiaModels[s2->m_FlexiaModelNo].m_Flexia.size();
-    default: return *s1 < *s2;
+            return m_pWizard->m_FlexiaModels[s1.m_FlexiaModelNo].m_Flexia.size() < m_pWizard->m_FlexiaModels[s2.m_FlexiaModelNo].m_Flexia.size();
+    default: return s1 < s2;
     };
 };

@@ -2,6 +2,7 @@
 
 struct CPredictSuffix
 {
+    const MorphoWizard* m_pWizard;
     uint16_t	m_FlexiaModelNo;
     std::string	m_Suffix;
 
@@ -15,22 +16,11 @@ struct CPredictSuffix
     mutable size_t	m_Frequence;
     std::string  m_PrefixSetStr;
 
-    bool operator  < (const  CPredictSuffix& X) const
-    {
-        if (m_FlexiaModelNo != X.m_FlexiaModelNo)
-            return m_FlexiaModelNo < X.m_FlexiaModelNo;
-
-        if (m_SourceLemmaAncode != X.m_SourceLemmaAncode)
-            return m_SourceLemmaAncode < X.m_SourceLemmaAncode;
-
-        return m_Suffix < X.m_Suffix;
-    };
-    bool operator  == (const  CPredictSuffix& X) const
-    {
-        return			(m_FlexiaModelNo == X.m_FlexiaModelNo)
-            && (m_Suffix == X.m_Suffix)
-            && (m_SourceLemmaAncode == X.m_SourceLemmaAncode);
-    };
+    bool operator  < (const  CPredictSuffix& X) const;
+    bool operator  == (const  CPredictSuffix& X) const;
+    std::string getCommonGrammemsUtf8();
+    size_t getFreq() { return m_Frequence;}
+    size_t getFlexiaModelNo() { return m_FlexiaModelNo; }
 };
 
 const int MinPredictSuffixLength = 2;
@@ -57,7 +47,7 @@ class IsLessForPredict
     TLemmPredictSortEnum m_SortBy;
 public:
     IsLessForPredict(const MorphoWizard* pWizard, TLemmPredictSortEnum sortBy);
-    bool  operator()(const CPredictSuffix* s1, const CPredictSuffix* s2) const;
+    bool  operator()(const CPredictSuffix& s1, const CPredictSuffix& s2) const;
 };
 
 class TLemmaPredictor {
@@ -68,5 +58,5 @@ public:
     
     TLemmaPredictor(const MorphoWizard* wizard);
     void CreateIndex();
-    std::vector<const CPredictSuffix*> predict_lemm(const std::string& lemm, const int preffer_suf_len, int minimal_frequence, bool bOnlyMainPartOfSpeeches, TLemmPredictSortEnum sortBy);
+    std::vector<CPredictSuffix> predict_lemm(const std::string& lemm, const int preffer_suf_len, int minimal_frequence, bool bOnlyMainPartOfSpeeches, TLemmPredictSortEnum sortBy);
 };
