@@ -1,7 +1,7 @@
 #include "DumpParadigm.h"
 #include "wizard.h"
 #include "../common/util_classes.h"
-
+#include <sstream>
 
 bool CMorphSession::operator==(const CMorphSession& X) const {
     return (m_UserName == X.m_UserName)
@@ -147,26 +147,17 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
     return !m_SlfStr.empty();
 };
 
-bool CDumpParadigm::SaveHeaderToFile(FILE* fp) const {
-    fprintf(fp, "=====\n");
-
+std::string CDumpParadigm::ToString() const {
+    std::stringstream outp;
+    outp << "=====\n";
     if (!m_PrefixesStr.empty())
-        fprintf(fp, "%s = %s\n", PrefixesField, convert_to_utf8(m_PrefixesStr, m_pWizard->m_Language).c_str());
-
-
+        outp << PrefixesField << " = " << m_PrefixesStr << "\n";
     if (!m_TypeGrammemsStr.empty())
-        fprintf(fp, "%s = %s\n", TypeGrmField, convert_to_utf8(m_TypeGrammemsStr, m_pWizard->m_Language).c_str());
-
+        outp << TypeGrmField << " = " << m_TypeGrammemsStr << "\n";
     if (!m_Session.IsEmpty())
-        fprintf(fp, "%s = %s\n", SessionField, convert_to_utf8(m_Session.ToString(), m_pWizard->m_Language).c_str());
-    return true;
-}
-
-bool CDumpParadigm::SaveToFile(FILE* fp) const {
-    if (!SaveHeaderToFile(fp))
-        return false;
-    fprintf(fp, "%s", convert_to_utf8(m_SlfStr, m_pWizard->m_Language).c_str());
-    return true;
+        outp << SessionField << " = " << m_Session.ToString() << "\n";
+    outp << m_SlfStr;
+    return convert_to_utf8(outp.str(), m_pWizard->m_Language);
 };
 
 bool CDumpParadigm::ReadNextParadigmFromFile(FILE* fp, int& line_no, bool& bError, std::string& Errors) {
