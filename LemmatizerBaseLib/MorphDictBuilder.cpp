@@ -84,7 +84,7 @@ void  CMorphDictBuilder::GenerateUnitedFlexModels(const MorphoWizard& Wizard)
 	// Creating m_ModelInfo
 	m_ModelInfo.clear();
 	m_FlexiaModels.clear();
-	m_NPSs.clear();
+	m_ProductiveModels.clear();
 	if (Wizard.m_FlexiaModels.size() >=  MaxFlexiaModelsCount)
 	{
 		throw CExpc ("Cannot be more than %i flexia models\n", MaxFlexiaModelsCount-1); 
@@ -92,8 +92,10 @@ void  CMorphDictBuilder::GenerateUnitedFlexModels(const MorphoWizard& Wizard)
 
 	for(auto p : Wizard.m_FlexiaModels)
 	{
-		m_NPSs.push_back(GetPredictionPartOfSpeech(Wizard.get_pos_string(p.get_first_code()), 
-													Wizard.m_Language));
+		{
+			auto pos = Wizard.m_pGramTab->GetPartOfSpeech(p.get_first_code().c_str());
+			m_ProductiveModels.push_back(Wizard.m_pGramTab->PartOfSpeechIsProductive(pos) ? 1 : 0);
+		}
 		m_ModelInfo.push_back(std::vector<bool>(p.m_Flexia.size(), true));
 
 		if ( p.m_Flexia.size() >=  MaxNumberFormsInOneParadigm)

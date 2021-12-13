@@ -75,7 +75,7 @@ public:
 	CShortStringHolder			m_Bases;
 	std::vector<CLemmaInfoAndLemma>	m_LemmaInfos;
 	StringVector				m_Prefixes;
-	std::vector<BYTE>				m_NPSs;
+	std::vector<BYTE>	m_ProductiveModels;
 
 	CMorphDict(MorphLanguageEnum Language);
 	virtual ~CMorphDict();

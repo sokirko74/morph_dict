@@ -46,6 +46,8 @@ public:
     virtual bool GleicheGenderNumber(const char* gram_code1, const char* gram_code2) const = 0;
     virtual const size_t GetClauseTypesCount() const = 0;
     virtual bool  ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems) const;
+    virtual bool PartOfSpeechIsProductive(part_of_speech_t p) const = 0;
+
 
     /*
         IsStrongClauseRoot is a function which returns true iff part of speech this can occur only

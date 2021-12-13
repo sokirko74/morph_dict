@@ -488,3 +488,7 @@ std::string ConvertToPlural(const CAgramtab* pGramTab,  const std::string& s)
 
 };
 
+bool CGerGramTab::PartOfSpeechIsProductive(part_of_speech_t p) const {
+	return p == gSUB || p == gADJ || p == gVER || p == gADV;
+}
+

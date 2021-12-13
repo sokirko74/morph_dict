@@ -206,9 +206,6 @@ bool CEngGramTab::is_morph_article(part_of_speech_mask_t poses)  const
 	return false;
 };
 
-
-void TestMem1() 
-{
-	std::string Result;
-	Result.append("test",2);
+bool CEngGramTab::PartOfSpeechIsProductive(part_of_speech_t p) const {
+	return p == eNOUN || p == eADJ || p == eVERB || p == eADV;
 }

@@ -104,7 +104,7 @@ bool CLemmatizer::LemmatizeWord(std::string& InputWordStr, const bool cap, const
 
 			// отменяем предсказание по местоимениям, например _R("Семыкиным")
 			for (size_t i=0; i<results.size(); i++)
-				if (m_NPSs[results[i].m_ModelNo] == UnknownPartOfSpeech)
+				if (!m_ProductiveModels[results[i].m_ModelNo])
 				{
 					results.clear();
 					break;

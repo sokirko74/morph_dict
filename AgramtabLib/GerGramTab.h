@@ -69,7 +69,7 @@ public:
 	bool GleicheCase(const char* gram_code_noun, const char* gram_code_adj) const;
 	bool GleicheCaseNumber(const char* gram_code1, const char* gram_code2) const;
 	grammems_mask_t GleicheGenderNumberCase(const char* common_gram_code_noun, const char* gram_code_noun, const char* gram_code_adj) const;
-	
+	bool PartOfSpeechIsProductive(part_of_speech_t p) const override;
 };
 
 const grammems_mask_t gAllCases = (_QM(gNominativ) | _QM(gGenitiv) | _QM(gDativ) | _QM(gAkkusativ));

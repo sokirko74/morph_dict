@@ -236,9 +236,8 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 			if (ModelFreq[ModelNo] < MinimalFlexiaModelFrequence)
 				continue;
 
-		std::string pos = wizard.get_pos_string(paradigm.get_first_code());
-		part_of_speech_t nps =  GetPredictionPartOfSpeech(pos, wizard.m_Language);
-		if (nps == UnknownPartOfSpeech)
+		auto pos = wizard.m_pGramTab->GetPartOfSpeech(paradigm.get_first_code().c_str());
+		if (!wizard.m_pGramTab->PartOfSpeechIsProductive(pos))
 			continue;
 
 
@@ -250,7 +249,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 			std::string wordform = base + flexia;
 			if (wordform.length() < PostfixLength) continue;
 			std::string Postfix = wordform.substr(wordform.length() - PostfixLength);
-			AddElem(svMapRaw, Postfix, (int)lin, nps, (uint16_t)i, Postfix2Freq, m_LemmaInfos);
+			AddElem(svMapRaw, Postfix, (int)lin, pos, (uint16_t)i, Postfix2Freq, m_LemmaInfos);
 		}
 		
 	}

@@ -137,7 +137,6 @@ typedef enum { LocThes = 0, FinThes, CompThes, OmniThes, NoneThes } EThesType;
 typedef enum { EClause = 0, EWord, EGroup, ENoneType } EUnitType;
 
 
-extern int GetPredictionPartOfSpeech(const std::string& PartOfSpeech, MorphLanguageEnum langua);
 extern bool GetLanguageByString (std::string s, MorphLanguageEnum& Result);
 extern std::string GetStringByLanguage (MorphLanguageEnum Langua);
 // ============     Brackets =========================

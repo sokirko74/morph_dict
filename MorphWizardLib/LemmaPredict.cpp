@@ -111,9 +111,12 @@ std::vector<CPredictSuffix> TLemmaPredictor::predict_lemm(const std::string& lem
             if (flex != lemm.substr(lemm.length() - flex.size())) continue;
         };
 
-        std::string pos = m_pWizard->get_pos_string(s.m_SourceLemmaAncode);
-        if (bOnlyMainPartOfSpeeches)
-            if (GetPredictionPartOfSpeech(pos.c_str(), m_pWizard->m_Language) == UnknownPartOfSpeech) continue;
+        
+        if (bOnlyMainPartOfSpeeches) {
+            part_of_speech_t pos = m_pWizard->m_pGramTab->GetPartOfSpeech(s.m_SourceLemmaAncode.c_str());
+            if (!m_pWizard->m_pGramTab->PartOfSpeechIsProductive(pos))
+                continue;
+        }
         predicts.push_back(s);
     }
 

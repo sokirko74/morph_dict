@@ -846,59 +846,10 @@ struct tm  RmlGetCurrentTime ()
 
 
 
-//=======================           Morphology  =======================
-
-const int predict_poses_size = 4;
-
-const static std::string  predict_rus_pos[predict_poses_size] =
-{
-	_R("С"),
-	_R("ИНФИНИТИВ"),
-	_R("П"),
-	_R("Н"),
-};
-
-const static std::string predict_eng_pos[predict_poses_size] =
-{
-	"NOUN",
-	"VERB",
-	"ADJECTIVE",
-	"ADVERB",
-};
-const static std::string predict_ger_pos[predict_poses_size] =
-{
-	"SUB",
-	"VER",
-	"ADJ",
-	"ADV",
-};
-
-
-int GetPredictionPartOfSpeech(const std::string& PartOfSpeech, MorphLanguageEnum langua)
-{
-	const std::string* PossiblePoses;
-	switch (langua)
-	{
-		case morphEnglish: PossiblePoses = predict_eng_pos; break;
-		case morphGerman: PossiblePoses = predict_ger_pos; break;
-		case morphRussian: PossiblePoses = predict_rus_pos; break;
-		default : assert(false);
-	};
-	for (size_t k = 0; k < predict_poses_size; k++) {
-		if (PartOfSpeech == PossiblePoses[k])
-		{
-			return k;
-		};
-	}
-	return UnknownPartOfSpeech;
-};
-
 
 bool GetLanguageByString (std::string s, MorphLanguageEnum& Result)
 {
-	
 	EngRusMakeUpper(s);
-
 	if(s == "RUSSIAN"){
 		Result = morphRussian;
 		return true;

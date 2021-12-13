@@ -63,6 +63,7 @@ public:
 	bool IsStandardParamAbbr(const char* WordStrUpper) const;
 	bool FilterNounNumeral(std::string& gcNoun, const std::string& gcNum, grammems_mask_t& grammems) const override;
 	grammems_mask_t ChangeGleicheAncode1(GrammemCompare CompareFunc, const std::string& wordGramCodes, std::string& groupGramCodes, const grammems_mask_t wordGrammems) const override;
+	bool PartOfSpeechIsProductive(part_of_speech_t p) const override;
 };
 
 extern bool GenderNumberCaseRussian(const CAgramtabLine* l1, const CAgramtabLine* l2);

@@ -183,9 +183,9 @@ void CMorphDict::Load(std::string GrammarFileName)
 
 	{
 		size_t count = getCount(annotFile, "nps infos");
-		m_NPSs.clear();
-		ReadVectorInner(annotFile, m_NPSs, count);
-		assert(m_NPSs.size() == m_FlexiaModels.size());
+		m_ProductiveModels.clear();
+		ReadVectorInner(annotFile, m_ProductiveModels, count);
+		assert(m_ProductiveModels.size() == m_FlexiaModels.size());
 	}
 
 	m_Bases.ReadShortStringHolder(MakeFName(GrammarFileName, "bases"));
@@ -216,9 +216,9 @@ void CMorphDict::Save(std::string GrammarFileName) const
 	outp << m_LemmaInfos.size() << "\n";
 	WriteVectorStream(outp, m_LemmaInfos);
 
-	assert(m_NPSs.size() == m_FlexiaModels.size());
-	outp << m_NPSs.size() << "\n";
-	WriteVectorStream(outp, m_NPSs);
+	assert(m_ProductiveModels.size() == m_FlexiaModels.size());
+	outp << m_ProductiveModels.size() << "\n";
+	WriteVectorStream(outp, m_ProductiveModels);
 	outp.close();
 
 	m_Bases.WriteShortStringHolder(MakeFName(GrammarFileName, "bases"));
