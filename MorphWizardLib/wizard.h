@@ -69,7 +69,7 @@ class MorphoWizard : public CMorphWizardBase
     friend	class MorphWizardMeter;
     MorphWizardMeter* m_pMeter;	// Nick 30.11.2003
 
-    void load_gramtab(std::string path);
+    void load_gramtab(std::string path, bool useNationalConstants);
     void ReadSessions(std::ifstream& mrdFile);
     void ReadLemmas(std::ifstream& mrdFile);
 public:
@@ -109,7 +109,7 @@ public:
     ~MorphoWizard();
 
     //=================  general: loading, saving, logging ======================
-    void	load_wizard(std::string path, std::string user_name, bool bCreatePrediction = true);
+    void	load_wizard(std::string path, std::string user_name, bool bCreatePrediction = true, bool useNationalConstants=true);
     void	load_mrd(bool guest, bool bCreatePrediction);
     void	log(const std::string& messg);
     void	log(const std::string& lemm, const CFlexiaModel& p, bool is_added);

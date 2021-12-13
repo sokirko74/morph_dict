@@ -202,7 +202,7 @@ std::string MorphoWizard::get_log_file_name() const {
 
 const size_t MaxMrdLineLength = 10240;
 
-void MorphoWizard::load_gramtab(std::string path) {
+void MorphoWizard::load_gramtab(std::string path, bool useNationalConstants) {
     CAgramtab* pGramTab;
     switch (m_Language) {
     case morphRussian:
@@ -220,6 +220,7 @@ void MorphoWizard::load_gramtab(std::string path) {
 
     m_GramtabPath = m_MwzFolder / path;
     pGramTab->Read(m_GramtabPath.string().c_str());
+    pGramTab->m_bUseNationalConstants = useNationalConstants;
 
     m_pGramTab = pGramTab;
 
@@ -287,7 +288,7 @@ void MorphoWizard::StartLastSessionOfUser(std::string user_name) {
 };
 
 
-void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool bCreatePrediction) {
+void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool bCreatePrediction, bool useNationalConstants) {
     m_MwzFolder = std::filesystem::absolute(mwz_path).parent_path();
 
     std::ifstream mwzFile(mwz_path);
@@ -324,7 +325,7 @@ void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool
             }
         }
     }
-    load_gramtab(gramtab_path);
+    load_gramtab(gramtab_path, useNationalConstants);
     load_mrd(guest, bCreatePrediction);
     StartSession(user_name);
     m_bLoaded = true;

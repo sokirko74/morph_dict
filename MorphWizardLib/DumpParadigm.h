@@ -34,7 +34,7 @@ public:
 
 	CDumpParadigm(const MorphoWizard* wizard) : m_pWizard(wizard) {};
 	void	SetEmpty();
-	std::string	ToString() const;
+	std::string	ToStringUtf8() const;
 	bool	ReadNextParadigmFromFile(FILE* fp, int& line_no, bool& bError, std::string& Errors);
 
 };
