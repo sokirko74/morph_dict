@@ -147,7 +147,7 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
     return !m_SlfStr.empty();
 };
 
-std::string CDumpParadigm::ToString() const {
+std::string CDumpParadigm::ToStringUtf8() const {
     std::stringstream outp;
     outp << "=====\n";
     if (!m_PrefixesStr.empty())
