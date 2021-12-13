@@ -21,6 +21,7 @@ struct CPredictSuffix
     std::string getCommonGrammemsUtf8();
     size_t getFreq() { return m_Frequence;}
     size_t getFlexiaModelNo() { return m_FlexiaModelNo; }
+    std::string getSLF();
 };
 
 const int MinPredictSuffixLength = 2;

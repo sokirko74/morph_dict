@@ -24,6 +24,9 @@ bool CPredictSuffix::operator  == (const  CPredictSuffix& X) const
         && (m_SourceLemmaAncode == X.m_SourceLemmaAncode);
 };
 
+std::string CPredictSuffix::getSLF(std::string lemm) {
+    return m_pWizard->create_slf_for_lemm(lemm, m_FlexiaModelNo, 80);
+}
 
 bool IsLessByLemmaLength(const CPredictSuffix& _X1, const CPredictSuffix& _X2) {
     return _X1.m_SourceLemma.length() < _X2.m_SourceLemma.length();

@@ -1,7 +1,7 @@
 #include "DumpParadigm.h"
 #include "wizard.h"
 #include "../common/util_classes.h"
-
+#include <sstream>
 
 bool CMorphSession::operator==(const CMorphSession& X) const {
     return (m_UserName == X.m_UserName)
