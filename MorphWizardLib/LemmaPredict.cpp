@@ -32,6 +32,10 @@ std::string CPredictSuffix::getSLF_Utf8(std::string lemm) {
     return P.ToStringUtf8();
 }
 
+std::string CPredictSuffix::getWiktionaryTemplateRef() {
+    return m_pWizard->m_FlexiaModels[m_FlexiaModelNo].m_WiktionaryMorphTemplate;
+}
+
 bool IsLessByLemmaLength(const CPredictSuffix& _X1, const CPredictSuffix& _X2) {
     return _X1.m_SourceLemma.length() < _X2.m_SourceLemma.length();
 };
