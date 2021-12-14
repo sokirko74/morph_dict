@@ -383,7 +383,7 @@ uint32_t CMorphAutomat::EncodeMorphAutomatInfo (size_t ModelNo, size_t ItemNo, s
 {
 	return			(((uint32_t)((uint16_t)((uint32_t)(ModelNo) & 0xffff))) << 18)
 				|	(((uint32_t)((uint16_t)((uint32_t)(ItemNo) & 0xffff))) << 9)
-				|	PrefixNo;
+				|	(uint32_t)PrefixNo;
 
 };
 

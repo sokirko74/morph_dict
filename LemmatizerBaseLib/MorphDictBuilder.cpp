@@ -167,7 +167,7 @@ void  CMorphDictBuilder::CreateAutomat(const MorphoWizard& Wizard)
 	for( const_lemma_iterator_t it=Wizard.m_LemmaToParadigm.begin(); it!=Wizard.m_LemmaToParadigm.end(); it++ )
 	{
 
-		if (!(LemmaNo % 100))
+		if (!(LemmaNo % 3000))
 			std::cerr << "Lemma " << LemmaNo << "/" << Wizard.m_LemmaToParadigm.size() << " RegisterSize =" << RegisterSize << "    \r";
 			
 		size_t ModelNo = it->second.m_FlexiaModelNo;
