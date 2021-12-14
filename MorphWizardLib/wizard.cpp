@@ -22,8 +22,14 @@ std::string GetCurrentDate() {
 
 //==============================================================================
 const char FlexModelCommDelim[] = "q//q";
+const char WiktionaryMorphTemplateDelim[] = ";";
 
 bool CFlexiaModel::ReadFromString(std::string& s) {
+    size_t semicolon = s.find(WiktionaryMorphTemplateDelim);
+    if (semicolon != std::string::npos) {
+        m_WiktionaryMorphTemplate = s.substr(0, semicolon);
+        s.erase(0, semicolon + 1);
+    }
     size_t comm = s.rfind(FlexModelCommDelim);
     if (comm != std::string::npos) {
         m_Comments = s.substr(comm + strlen(FlexModelCommDelim));
@@ -54,20 +60,19 @@ bool CFlexiaModel::ReadFromString(std::string& s) {
 };
 
 std::string CFlexiaModel::ToString() const {
-    std::string Result;
+    std::stringstream outp;
+    if (!m_WiktionaryMorphTemplate.empty()) {
+        outp << m_WiktionaryMorphTemplate << WiktionaryMorphTemplateDelim;
+    }
     for (size_t i = 0; i < m_Flexia.size(); i++) {
-        Result += "%";
-        Result += m_Flexia[i].m_FlexiaStr;
-        Result += "*";
-        Result += m_Flexia[i].m_Gramcode;
+        outp << "%" << m_Flexia[i].m_FlexiaStr <<  "*" << m_Flexia[i].m_Gramcode;
         if (!m_Flexia[i].m_PrefixStr.empty()) {
-            Result += "*";
-            Result += m_Flexia[i].m_PrefixStr;
+            outp << "*" << m_Flexia[i].m_PrefixStr;
         };
     };
     if (!m_Comments.empty())
-        Result += FlexModelCommDelim + m_Comments;
-    return Result;
+        outp << FlexModelCommDelim << m_Comments;
+    return outp.str();
 };
 
 std::string CFlexiaModel::get_first_flex() const {

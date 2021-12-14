@@ -126,12 +126,11 @@ void CMorphDict::CreateModelsIndex()
 	for (size_t i = 0; i < m_LemmaInfos.size(); i++)
 		for (; CurrentModel < m_LemmaInfos[i].m_LemmaInfo.m_FlexiaModelNo; CurrentModel++)
 		{
-			//int debug = m_LemmaInfos[i].m_LemmaInfo.m_FlexiaModelNo;
-			m_ModelsIndex[CurrentModel + 1] = i;
+			m_ModelsIndex[CurrentModel + 1] = (int)i;
 		};
 
 	for (; CurrentModel < m_FlexiaModels.size(); CurrentModel++)
-		m_ModelsIndex[CurrentModel + 1] = m_LemmaInfos.size();
+		m_ModelsIndex[CurrentModel + 1] = (int)m_LemmaInfos.size();
 #ifdef DEBUG    
 	for (size_t i = 0; i < m_LemmaInfos.size(); i++)
 	{

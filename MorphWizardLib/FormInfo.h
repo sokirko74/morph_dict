@@ -25,6 +25,7 @@ struct CMorphForm
 
 struct  CFlexiaModel
 {
+	std::string				m_WiktionaryMorphTemplate;
 	std::string				m_Comments;
 	std::vector<CMorphForm>	m_Flexia;
 
