@@ -236,11 +236,7 @@ bool CMorphanHolder::GetParadigmCollection(std::string WordForm, std::vector<CFo
 };
 
 bool CMorphanHolder::IsInDictionary(std::string WordForm) const {
-	std::vector<CFormInfo>	Paradigms;
-	if (!GetParadigmCollection(WordForm, Paradigms)) {
-		return false;
-	};
-	return !Paradigms.empty();
+    return m_pLemmatizer->IsInDictionary(WordForm, true);
 }
 
 
