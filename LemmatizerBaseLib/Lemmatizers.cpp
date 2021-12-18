@@ -449,6 +449,7 @@ void CLemmatizer::PredictByDataBase(std::string InputWordStr,  std::vector<CAuto
 
 bool CLemmatizer::IsInDictionary(std::string &word, const bool cap) const {
     std::vector<CAutomAnnotationInner> results;
+	FilterSrc(word);
     return LemmatizeWord(word, cap, false, results, false);
 }
 
