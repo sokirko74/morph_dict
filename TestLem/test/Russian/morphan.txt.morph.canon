@@ -2,6 +2,7 @@
  {
   "commonGrammems": "од",
   "found": true,
+  "homonymWeight": 0,
   "morphInfo": "С жр,им,ед",
   "paradigm": [
    {
@@ -76,13 +77,15 @@
     "pos": "СУЩЕСТВИТЕЛЬНОЕ жр"
    }
   ],
-  "wordForm": "МАМА"
+  "wordForm": "МАМА",
+  "wordWeight": 1480
  }
 ]
 мыла	[
  {
   "commonGrammems": "но",
   "found": true,
+  "homonymWeight": 0,
   "morphInfo": "С ср,вн,рд,им,ед,мн",
   "paradigm": [
    {
@@ -149,11 +152,13 @@
     "pos": "СУЩЕСТВИТЕЛЬНОЕ ср"
    }
   ],
-  "wordForm": "МЫЛО"
+  "wordForm": "МЫЛО",
+  "wordWeight": 78
  },
  {
   "commonGrammems": "пе,нс",
   "found": true,
+  "homonymWeight": 0,
   "morphInfo": "Г дст,прш,жр,ед",
   "paradigm": [
    {
@@ -820,6 +825,7 @@
     "pos": "ПРИЧАСТИЕ"
    }
   ],
-  "wordForm": "МЫТЬ"
+  "wordForm": "МЫТЬ",
+  "wordWeight": 173
  }
 ]

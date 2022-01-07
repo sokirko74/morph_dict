@@ -2,6 +2,7 @@ Mutter	[
  {
   "commonGrammems": "",
   "found": true,
+  "homonymWeight": 0,
   "morphInfo": "SUB akk,dat,gen,nom,sin,fem",
   "paradigm": [
    {
@@ -47,13 +48,15 @@ Mutter	[
     "pos": "SUB fem"
    }
   ],
-  "wordForm": "MUTTER"
+  "wordForm": "MUTTER",
+  "wordWeight": 0
  }
 ]
 VÖGEL	[
  {
   "commonGrammems": "",
   "found": true,
+  "homonymWeight": 0,
   "morphInfo": "SUB akk,gen,nom,plu,mas",
   "paradigm": [
    {
@@ -99,6 +102,7 @@ VÖGEL	[
     "pos": "SUB mas"
    }
   ],
-  "wordForm": "VOGEL"
+  "wordForm": "VOGEL",
+  "wordWeight": 0
  }
 ]
