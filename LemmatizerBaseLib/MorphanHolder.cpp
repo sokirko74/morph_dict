@@ -551,6 +551,7 @@ nlohmann::json GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorph
         result["paradigm"] = GetParadigmFromDictionary(piParadigm, Holder, sortForms);
     }
     result["wordWeight"] = piParadigm->GetWordWeight();
+    result["homonymWeight"] = piParadigm->GetHomonymWeight();
     return result;
 }
 
