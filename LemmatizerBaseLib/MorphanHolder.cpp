@@ -96,27 +96,25 @@ next_paradigm:;
 	return res;
 }
 
-void CMorphanHolder::string_to_ids(const char *str, DwordVector &ids, bool bNorm) const
+DwordVector CMorphanHolder::GetLemmaIds(std::string lemma) const
 {
-	ids.clear();
+    DwordVector ids;
 	
 	std::vector<CFormInfo > ParadigmCollection;
 	
-	std::string Word = str;
-	if (!m_pLemmatizer->CreateParadigmCollection(bNorm, Word, true, false, ParadigmCollection))
+	if (!m_pLemmatizer->CreateParadigmCollection(true, lemma, true, false, ParadigmCollection))
 	{
-		fprintf (stderr,"cannot lemmatize %s\n", str);
-		return;
+		throw CExpc("cannot lemmatize %s\n", lemma.c_str());
 	}
 	
 
-	for(int i = 0; i < ParadigmCollection.size(); i++)
+	for(auto& p : ParadigmCollection)
 	{
-		const CFormInfo& Paradigm = ParadigmCollection[i];
-		if(!Paradigm.m_bFound) continue;
-
-		ids.push_back(Paradigm.GetParadigmId());
+        if (p.m_bFound) {
+            ids.push_back(p.GetParadigmId());
+        }
 	}
+    return ids;
 }
 
 std::string CMorphanHolder::id_to_string(long id) const

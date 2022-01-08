@@ -10,13 +10,21 @@
 #include <string>
 
 
-static part_of_speech_t GetTagFromStr(const CAgramtab& A, const char* tab_str)
+CAgramtab::CAgramtab()
 {
-    for (part_of_speech_t i = 0; i < A.GetPartOfSpeechesCount(); i++)
-        if (!strcmp(tab_str, A.GetPartOfSpeechStr(i)))
-            return i;
+    m_bInited = false;
+    m_bUseNationalConstants = true;
+};
 
-    return UnknownPartOfSpeech;
+
+part_of_speech_t CAgramtab::GetPartOfSpeechByStr(const std::string& part_of_speech) const
+{
+    assert(!m_PartOfSpeechesHashMap.empty());
+    auto it = m_PartOfSpeechesHashMap.find(part_of_speech);
+    if (it == m_PartOfSpeechesHashMap.end()) {
+        return UnknownPartOfSpeech;
+    }
+    return it->second;
 }
 
 
@@ -66,7 +74,7 @@ bool CAgramtab::ProcessPOSAndGrammems(const char* line_in_gramtab, part_of_speec
     //  getting the part of speech
     if (strcmp("*", strPos))
     {
-        PartOfSpeech = GetTagFromStr(*this, strPos);
+        PartOfSpeech = GetPartOfSpeechByStr(strPos);
         if (PartOfSpeech == UnknownPartOfSpeech)
             return false;
     }
@@ -113,15 +121,14 @@ static bool  ProcessAgramtabLine(CAgramtab& A, const char* tab_str, size_t LineN
     return A.ProcessPOSAndGrammems(s, A.GetLine(LineNo)->m_PartOfSpeech, A.GetLine(LineNo)->m_Grammems);
 };
 
-CAgramtab::CAgramtab()
-{
-    m_bInited = false;
-    m_bUseNationalConstants = true;
-};
 
 
 void CAgramtab::Read(const char* FileName)
 {
+    for (part_of_speech_t i = 0; i < GetPartOfSpeechesCount(); i++) {
+        m_PartOfSpeechesHashMap.insert({ GetPartOfSpeechStr(i), i });
+    }
+
     if (FileName == nullptr)
         throw CExpc("file name is missing in gramtab");
 

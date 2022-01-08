@@ -4,7 +4,7 @@
 
 #pragma once
 #include "../common/utilit.h"
-
+#include <unordered_map>
 
 struct CAgramtabLine
 {
@@ -19,7 +19,7 @@ struct CAgramtabLine
 typedef bool(*GrammemCompare)(const CAgramtabLine* l1, const CAgramtabLine* l2);
 
 class CAgramtab {
-
+    std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMap;
 public:
     const static inline char* GramtabFileName = "gramtab.tab";
     bool	m_bInited;
@@ -33,8 +33,12 @@ public:
     virtual CAgramtabLine*& GetLine(size_t LineNo) = 0;
     virtual const CAgramtabLine* GetLine(size_t LineNo)  const = 0;
     virtual size_t GetMaxGrmCount()  const = 0;
-    virtual part_of_speech_t GetPartOfSpeechesCount()  const = 0;
-    virtual const char* GetPartOfSpeechStr(part_of_speech_t i) const = 0;
+    virtual part_of_speech_t GetPartOfSpeechesCount()  const { 
+        throw std::runtime_error("unimplemented GetPartOfSpeechesCount=");
+    };
+    virtual const char* GetPartOfSpeechStr(part_of_speech_t i) const {
+        throw std::runtime_error("unimplemented GetPartOfSpeechStr");
+    }
     virtual grammem_t GetGrammemsCount()  const = 0;
     virtual const char* GetGrammemStr(size_t i) const = 0;
     virtual size_t GramcodeToLineIndex(const char* s) const = 0;
@@ -111,5 +115,7 @@ public:
     bool CheckGramCode(const char* gram_code) const;
     virtual bool FilterNounNumeral(std::string& gcNoun, const std::string& gcNum, grammems_mask_t& grammems) const { assert(false); return false; };
     virtual grammems_mask_t ChangeGleicheAncode1(GrammemCompare, const std::string&, std::string&, const grammems_mask_t) const { assert(false); return 0; };
+    part_of_speech_t GetPartOfSpeechByStr(const std::string& part_of_speech) const;
+
 };
 

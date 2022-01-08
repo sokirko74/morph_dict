@@ -55,113 +55,113 @@ static void addLines(std::string& str, tagLines& lines) {
     }
 }
 
-static bool loadDat(std::istream& ifs) {
+bool check_part_of_speech(part_of_speech_t pos, part_of_speech_mask_t poses) {
+    if (((1 << pos) & poses) > 0) {
+        return true;
+    }
+    if (MorphHolder.m_pGramTab->is_morph_adj(1<<pos) && MorphHolder.m_pGramTab->is_morph_adj(poses)) {
+        return true;
+    }
+    if (MorphHolder.m_pGramTab->is_verb_form(1<<pos) && MorphHolder.m_pGramTab->is_verb_form(poses)) {
+        return true;
+    }
+    return false;
+}
+bool check_word_form(const CFormInfo& paradigm, uint16_t formNo, std::string wordForm, part_of_speech_t pos, grammems_mask_t gra) {
+    std::string ancode = paradigm.GetAncode(formNo); 
+    assert(ancode.size() == 2);
+    part_of_speech_mask_t poses;
+    grammems_mask_t grammems;
+    MorphHolder.m_pGramTab->GetPartOfSpeechAndGrammems((const BYTE*)ancode.c_str(), poses, grammems);
+    if (!check_part_of_speech(pos, poses)) {
+        return false;
+    }
+    grammems |= MorphHolder.m_pGramTab->GetAllGrammems(paradigm.GetCommonAncode().c_str());
+    if ((grammems & gra) != gra) {
+        return false;;
+    }
+    if (paradigm.GetWordForm(formNo) != wordForm) {
+        return false;
+    }
+    return true;
+
+}
+
+static void loadDat(std::istream& ifs, MorphLanguageEnum langua) {
     std::string str;
     tagLines lines;
 
-    char buf[2048];
+    std::string line;
     int lin = 0;
-
-    while (ifs.getline(buf, 2048)) {
+    while (getline(ifs, line)) {
+        std::string buf_s = convert_from_utf8(line.c_str(), langua);
+        Trim(buf_s);
         lin++;
-        StringTokenizer tok(buf, " ");
-        std::string swrd = tok.next_token();
-        std::string spid = tok.next_token();
-        std::string spos = tok.next_token();
-        std::string s1 = tok.next_token();
-        std::string s2 = tok.next_token();
-        if (swrd.empty() || spid.empty() || spos.empty()) {
-            std::cout << "Error in line: " << lin << " skipped" << std::endl;
+        if (buf_s.empty()) {
             continue;
         }
-        if (s1.empty() && s2.empty()) {
-            std::cout << "Error in line: " << lin << " skipped" << std::endl;
-            continue;
-        };
-        std::string sgrm;
-        int val = -1;
-
-        if (s2.empty())
-            val = atoi(s1.c_str());
-        else {
-            sgrm = s1;
-            val = atoi(s2.c_str());
-        };
-
-
-        if (val < 0 && atoi(sgrm.c_str()) >= 0) {
-            val = atoi(sgrm.c_str());
-            sgrm.erase();
+        auto elems = split_string(buf_s, ' ');
+        if (elems.size() != 4 && elems.size() != 5) {
+            throw std::runtime_error(Format("Error in line: %i skipped", lin));
         }
-        //
-        std::string grm = spos;
-        grm += " ";
-        grm += sgrm;
-        BYTE pos;
-        uint64_t gra;
-        std::string def;
-        if (!MorphHolder.m_pGramTab->ProcessPOSAndGrammemsIfCan(grm.c_str(), &pos, &gra)
-            || !MorphHolder.m_pGramTab->GetGramCodeByGrammemsAndPartofSpeechIfCan(pos, gra, def)) {
-            std::cout << "Error in line: " << lin << " skipped" << std::endl;
-            continue;
+        std::string wordForm = elems[0];
+        std::string lemma = elems[1];
+        std::string partOfSpeechStr = elems[2];
+        int freq = atoi(elems.back().c_str());
+        if (freq < 0)
+        {
+            throw std::runtime_error("bad freq on line " + line);
         }
-
-        //
-        if (str.empty() && swrd == "*")
-            continue;
-        if (swrd != "*") {
-            if (!str.empty() && lines.size() > 0)
-                addLines(str, lines);
-            str = swrd;
-            lines.clear();
-        }
-
-
-        std::vector<CFormInfo> ParadigmCollection;
-
-        std::string s = str;
-        if (!MorphHolder.m_pLemmatizer->CreateParadigmCollection(true, spid, true, false, ParadigmCollection))
-            throw CExpc(Format("Cannot lemmatize \"%s\"", spid.c_str()));
-
-
-        int k = 0;
-        for (; k < ParadigmCollection.size(); k++) {
-            const CFormInfo& Pagadigm = ParadigmCollection[k];
-            CGroup group;
-            group.pid = Pagadigm.GetParadigmId();
-            group.anc = Pagadigm.GetAncode(0);
-            group.anc = group.anc.substr(0, 2);
-            if (group.anc == def) {
-                group.m_FormNo = 0;
-                { // finding the  input form in the paradigm
-
-                    for (; group.m_FormNo < Pagadigm.GetCount(); group.m_FormNo++)
-                        if (Pagadigm.GetWordForm(group.m_FormNo) == str)
-                            break;
-
-                    if (group.m_FormNo == Pagadigm.GetCount()) continue;
-                };
-
-                std::pair<tagLines::iterator, bool> res;
-                res = lines.insert(tagLines::value_type(group, val));
-                if (!res.second)
-                    std::cout << "Duplicate pid/anc: " << lin << " skipped" << std::endl;
-                break;
+        grammems_mask_t gra = 0;
+        part_of_speech_t pos;
+        if (elems.size() == 5) {
+            auto s = partOfSpeechStr + " " + elems[3];
+            if (!MorphHolder.m_pGramTab->ProcessPOSAndGrammemsIfCan(s.c_str(), &pos, &gra)) {
+                throw std::runtime_error(Format("Bad part of speech or grammems: line %i ", lin));
+                continue;
             }
         }
-        if (k >= ParadigmCollection.size()) {
-            std::cout << "Can't calculate pid/anc: Line N " << lin << std::endl << "Operation aborted" << std::endl;
-            return false;
+        else {
+            pos = MorphHolder.m_pGramTab->GetPartOfSpeechByStr(partOfSpeechStr);
+            if (pos == UnknownPartOfSpeech) {
+                throw std::runtime_error(Format("Bad part of speech: line %i ", lin));
+            }
+        }
+        if (wordForm != "*") {
+            if (!str.empty() && lines.size() > 0)
+                addLines(str, lines);
+            str = wordForm;
+            lines.clear();
+        }
+        std::vector<CFormInfo> ParadigmCollection;
+        if (!MorphHolder.m_pLemmatizer->CreateParadigmCollection(true, lemma, true, false, ParadigmCollection))
+            throw CExpc(Format("Cannot lemmatize \"%s\"", lemma.c_str()));
+        size_t foundCount = 0;
+        for (auto p : ParadigmCollection) {
+            for (uint16_t j = 0; j < p.GetCount(); ++j) {
+                if (check_word_form(p, j, str, pos, gra)) {
+                    CGroup group;
+                    group.pid = p.GetParadigmId();
+                    group.m_FormNo = j;
+                    group.anc = p.GetAncode(j);
+                    auto res = lines.insert(tagLines::value_type(group, freq));
+                    if (!res.second) {
+                        std::cout << "Duplicate pid/anc: line:" << lin << " skipped" << std::endl;
+                    }
+                    else {
+                        foundCount++;
+                    }
+                }
+            }
+        }
+        if (foundCount == 0) {
+            throw std::runtime_error(Format("Can't calculate pid/anc: Line N %i", lin));
         }
     }
-    //
     if (!str.empty() && lines.size() > 0)
         addLines(str, lines);
     std::cout << "done" << std::endl;
-    return true;
 }
-
-//////////////////////////////////////////////////////////////////////////////
 
 static bool saveBin(std::string name) {
     std::cout << "Saving " << name.c_str() << "... ";
@@ -205,17 +205,19 @@ int main(int argc, const char** argv) {
     try {
         MorphHolder.LoadLemmatizer(args.GetLanguage(), args.Retrieve("morph-folder"));
 
-        if (loadDat(args.GetInputStream())) {
-            if (saveBin(args.CloseOutputStreamAndGetName()))
-                return 0;
-        }
+        loadDat(args.GetInputStream(), args.GetLanguage());
+
+        if (saveBin(args.CloseOutputStreamAndGetName()))
+            return 0;
     }
     catch (CExpc e) {
-        fprintf(stderr, "exception occurred: %s!\n", e.m_strCause.c_str());
-        return 1;
+        std::cerr << "exception occurred:" << e.m_strCause << "\n";
+    }
+    catch (std::runtime_error e) {
+        std::cerr << "exception occurred:" << e.what() << "\n";
     }
     catch (...) {
-        std::cout << std::endl << "An error in try{} has occurred!" << std::endl;
+        std::cerr << std::endl << "A general exception" << std::endl;
     }
 
     return 1;
