@@ -121,14 +121,23 @@ static bool  ProcessAgramtabLine(CAgramtab& A, const char* tab_str, size_t LineN
     return A.ProcessPOSAndGrammems(s, A.GetLine(LineNo)->m_PartOfSpeech, A.GetLine(LineNo)->m_Grammems);
 };
 
-
-
-void CAgramtab::Read(const char* FileName)
+void CAgramtab::BuildPartOfSpeechMap()
 {
     for (part_of_speech_t i = 0; i < GetPartOfSpeechesCount(); i++) {
         m_PartOfSpeechesHashMap.insert({ GetPartOfSpeechStr(i), i });
     }
 
+}
+
+void CAgramtab::SetUseNationalConstants(bool value)
+{
+    m_bUseNationalConstants = value;
+    BuildPartOfSpeechMap();
+}
+
+void CAgramtab::Read(const char* FileName)
+{
+    BuildPartOfSpeechMap();
     if (FileName == nullptr)
         throw CExpc("file name is missing in gramtab");
 

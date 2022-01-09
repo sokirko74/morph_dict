@@ -225,7 +225,7 @@ void MorphoWizard::load_gramtab(std::string path, bool useNationalConstants) {
 
     m_GramtabPath = m_MwzFolder / path;
     pGramTab->Read(m_GramtabPath.string().c_str());
-    pGramTab->m_bUseNationalConstants = useNationalConstants;
+    pGramTab->SetUseNationalConstants(useNationalConstants);
 
     m_pGramTab = pGramTab;
 

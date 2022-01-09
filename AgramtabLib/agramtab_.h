@@ -20,11 +20,14 @@ typedef bool(*GrammemCompare)(const CAgramtabLine* l1, const CAgramtabLine* l2);
 
 class CAgramtab {
     std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMap;
+    void BuildPartOfSpeechMap();
+protected:
+    bool m_bUseNationalConstants;
+    bool	m_bInited;
+
 public:
     const static inline char* GramtabFileName = "gramtab.tab";
-    bool	m_bInited;
     MorphLanguageEnum  m_Language;
-    bool m_bUseNationalConstants;
 
     CAgramtab();
     virtual ~CAgramtab();
@@ -116,6 +119,6 @@ public:
     virtual bool FilterNounNumeral(std::string& gcNoun, const std::string& gcNum, grammems_mask_t& grammems) const { assert(false); return false; };
     virtual grammems_mask_t ChangeGleicheAncode1(GrammemCompare, const std::string&, std::string&, const grammems_mask_t) const { assert(false); return 0; };
     part_of_speech_t GetPartOfSpeechByStr(const std::string& part_of_speech) const;
-
+    void SetUseNationalConstants(bool value);
 };
 
