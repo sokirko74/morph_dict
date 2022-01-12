@@ -68,9 +68,10 @@ void initArgParser(int argc, const char **argv, ArgumentParser& parser) {
     parser.AddOption("--sort");
     parser.AddOption("--forms");
     parser.AddOption("--morphan");
-    parser.AddArgument("--RML", "set env variable RML before running", true);
+    parser.AddArgument("--morph-folder", "use binary dict from this folder", true);
     parser.AddOption("--speed-test", "attention, input file must be in a single-byte encoding");
     parser.AddOption("--echo");
+    parser.AddOption("--misspell");
     parser.Parse(argc, argv);
 }
 
@@ -84,13 +85,13 @@ int main(int argc, const char **argv) {
     bool bEchoInput = args.Exists("echo");
     
 	std::cerr << "Loading..\n";
-    if (args.Exists("RML")) {
-        SetEnvVariable("RML", args.Retrieve("RML"));
-    }
-    
-
+   
     try {
-        Holder.LoadLemmatizer(language);
+        if (args.Exists("morph-folder")) {
+            Holder.LoadLemmatizer(language, args.Retrieve("morph-folder"));
+        } else {
+            Holder.LoadLemmatizer(language);
+        }
 
         if (args.Exists("speed-test")) {
             CheckSpeed(args.GetInputStream(), args.GetOutputStream());
@@ -106,16 +107,24 @@ int main(int argc, const char **argv) {
 			    args.GetOutputStream() << s << "\t";
 		    }
 		    s = convert_from_utf8(s.c_str(), language);
+            Trim(s);
 		    std::string result;
-
-                if (args.Exists("morphan")) {
-                    result = Holder.LemmatizeJson(s.c_str(), printForms, true, true);
+            if (args.Exists("misspell")) {
+                if (Holder.IsInDictionary(s)) {
+                    result = "in dictionary\n";
                 }
                 else {
-                    result = Holder.PrintMorphInfoUtf8(s, printIds, printForms, sortParadigms);
-                
+                    result = Holder.CorrectMisspelledWord(s);
                 }
-                args.GetOutputStream() << result << "\n";
+            }
+            else if (args.Exists("morphan")) {
+                result = Holder.LemmatizeJson(s.c_str(), printForms, true, true);
+            }
+            else {
+                result = Holder.PrintMorphInfoUtf8(s, printIds, printForms, sortParadigms);
+                
+            }
+            args.GetOutputStream() << result << "\n";
     	};
     }
     catch (CExpc c) {

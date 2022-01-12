@@ -115,8 +115,14 @@ public:
 
 };
 
+struct CFuzzyResult {
+	std::string CorrectedString;
+};
+
 class CMorphAutomat : public CABCEncoder
 {
+	void CMorphAutomat::FuzzySearchRecursive(const CMorphAutomRelation& node, std::string& word, std::vector<CFuzzyResult>& results, int** rows,
+		char** path_rows, int fuzziness, BYTE* path, int depth) const;
 
 protected:
 
@@ -151,5 +157,5 @@ public:
 	uint32_t	EncodeMorphAutomatInfo(size_t ModelNo, size_t ItemNo, size_t PrefixNo) const;
 	void	DecodeMorphAutomatInfo(uint32_t Info, size_t& ModelNo, size_t& ItemNo, size_t& PrefixNo) const;
 	std::string	GetFirstResult(const std::string& Text) const;
-
+	std::vector<CFuzzyResult> FuzzySearch(std::string word, int fuzziness) const;
 };

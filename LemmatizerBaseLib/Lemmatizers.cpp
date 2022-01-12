@@ -6,7 +6,10 @@
 #include "Paradigm.h"
 #include "rus_numerals.h"
 
-CLemmatizer::CLemmatizer(MorphLanguageEnum Language) : CMorphDict(Language), m_Predict(Language)
+CLemmatizer::CLemmatizer(MorphLanguageEnum Language) : 
+	CMorphDict(Language), 
+	m_bEnablePrediction(true),
+	m_Predict(Language)
 {	
 	m_bLoaded = false;
 	m_bUseStatistic = false;
@@ -55,13 +58,10 @@ bool CLemmatizer::IsHyphenPrefix(const std::string& Prefix) const
 	return m_HyphenPrefixes.find(Prefix) != m_HyphenPrefixes.end();
 };
 
-
 const CStatistic& CLemmatizer::GetStatistic() const 
 {	
 	return m_Statistic;	
 }
-
-
 
 bool CLemmatizer::IsPrefix(const std::string& Prefix) const
 {
@@ -138,11 +138,6 @@ bool CLemmatizer::LemmatizeWord(std::string& InputWordStr, const bool cap, const
 	return bResult;
 }
 
-
-
-
-
-
 void CLemmatizer::AssignWeightIfNeed(std::vector<CAutomAnnotationInner>& FindResults) const
 {
 
@@ -217,6 +212,8 @@ void CLemmatizer::ReadOptions(std::string FileName)
 		if (line.empty()) continue;
 		if (line == "AllowRussianJo")
 			m_bAllowRussianJo = true;
+		if (line == "SkipPredictBase")
+			m_bEnablePrediction = false;
 	};
 };
 
@@ -227,16 +224,14 @@ void CLemmatizer::LoadDictionariesFromPath(std::string load_path)
 	// implicity load homonyms statistic for literature
 	m_Statistic.Load(MakePath(load_path, "l"));
 	m_bUseStatistic = true;
-	m_Predict.Load(MakePath(load_path, PREDICT_BIN_PATH));
-
-	//  building frequences of flexia models
-	{
+	ReadOptions(MakePath(load_path, OPTIONS_FILE));
+	if (m_bEnablePrediction) {
+		m_Predict.Load(MakePath(load_path, PREDICT_BIN_PATH));
 		m_Predict.m_ModelFreq.resize(m_FlexiaModels.size(), 0);
 		const size_t count = m_LemmaInfos.size();
 		for (size_t i = 0; i < count; i++)
 			m_Predict.m_ModelFreq[m_LemmaInfos[i].m_LemmaInfo.m_FlexiaModelNo]++;
 	};
-	ReadOptions(MakePath(load_path, OPTIONS_FILE));
 	m_PrefixesSet.clear();
 	m_PrefixesSet.insert(m_Prefixes.begin(), m_Prefixes.end());
 }
@@ -453,8 +448,16 @@ bool CLemmatizer::IsInDictionary(std::string &word, const bool cap) const {
     return LemmatizeWord(word, cap, false, results, false);
 }
 
-
-
+std::string CLemmatizer::_CorrectMisspelledWord(std::string word, size_t maxStrDistance) const
+{
+	RmlMakeUpper(word, GetLanguage());
+	size_t WordOffset = 0;
+	auto res = m_pFormAutomat->FuzzySearch(word, maxStrDistance);
+	if (!res.empty()) {
+		return res[0].CorrectedString;
+	}
+	return std::string();
+}
 
 
 CLemmatizerRussian::CLemmatizerRussian() : CLemmatizer(morphRussian)

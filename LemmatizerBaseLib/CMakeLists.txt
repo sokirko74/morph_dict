@@ -14,7 +14,7 @@ add_library(LemmatizerBaseLib
         Statistic.cpp
         MorphanHolder.cpp
         rus_numerals.cpp
-        )
+        FuzzySearch.cpp)
 
 target_link_libraries(LemmatizerBaseLib
         AgramtabLib

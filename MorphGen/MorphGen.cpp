@@ -26,8 +26,8 @@ void initArgParser(int argc, const char** argv, ArgumentParser& parser) {
     parser.AddOption("--help");
     parser.AddArgument("--input", "input file");
     parser.AddArgument("--output-folder", "output folder");
-    parser.AddArgument("--postfix-len", "postfix len");
-    parser.AddArgument("--min-freq", "min freq");
+    parser.AddArgument("--postfix-len", "postfix len", true);
+    parser.AddArgument("--min-freq", "min freq", true);
     parser.AddOption("--allow-russian-jo");
     parser.AddOption("--allow-russian-jejo");
     parser.Parse(argc, argv);
@@ -40,20 +40,28 @@ int main(int argc, const char* argv[])
     initArgParser(argc, argv, args);
     bool bAllowRussianJeJo = args.Exists("allow-russian-jejo");
     bool bAllowRussianJo = bAllowRussianJeJo || args.Exists("allow-russian-jo");
-    int PostfixLength = atoi(args.Retrieve("postfix-len").c_str());
-    if ((PostfixLength == 0) || (PostfixLength > 5))
-    {
-        std::cerr << "PostfixLength is std::set to " << PostfixLength << "\n";
-        std::cerr << "PostfixLength should be between 1 and 5\n";
-        return 1;
-    };
+    bool bGeneratePredictBase = true;
+    int PostfixLength = -1;
+    int MinFreq = -1;
+    if (!args.Exists("postfix-len") || !args.Exists("min-freq")) {
+        bGeneratePredictBase = false;
+        std::cerr << "skip prediction base generation \n";
+    }
+    else {
+        PostfixLength = atoi(args.Retrieve("postfix-len").c_str());
+        if ((PostfixLength == 0) || (PostfixLength > 5))
+        {
+            std::cerr << "PostfixLength is std::set to " << PostfixLength << "\n";
+            std::cerr << "PostfixLength should be between 1 and 5\n";
+            return 1;
+        };
 
-    int MinFreq = atoi(args.Retrieve("min-freq").c_str());
-    if (MinFreq <= 0) {
-        std::cerr << "MinFreq should be more than 0\n";
-        return 1;
-    };
-
+        int MinFreq = atoi(args.Retrieve("min-freq").c_str());
+        if (MinFreq <= 0) {
+            std::cerr << "MinFreq should be more than 0\n";
+            return 1;
+        };
+    }
     MorphLanguageEnum wizardLangua;
     try {
 
@@ -84,12 +92,13 @@ int main(int argc, const char* argv[])
             auto outFileName = std::filesystem::path(output_folder) / MORPH_MAIN_FILES;
             R.Save(outFileName.string());
             std::cerr << "Successful written indices of the main automat to " << outFileName << std::endl;
-
-            if (!R.GenPredictIdx(Wizard, PostfixLength, MinFreq, output_folder))
-            {
-                std::cerr << "Cannot create prediction base\n";
-                return 1;
-            };
+            if (bGeneratePredictBase) {
+                if (!R.GenPredictIdx(Wizard, PostfixLength, MinFreq, output_folder))
+                {
+                    std::cerr << "Cannot create prediction base\n";
+                    return 1;
+                };
+            }
         }
 
         
@@ -104,6 +113,9 @@ int main(int argc, const char* argv[])
             };
             if (bAllowRussianJo)
                 fprintf(opt_fp, "AllowRussianJo\n");
+            if (!bGeneratePredictBase) {
+                fprintf(opt_fp, "SkipPredictBase\n");
+            }
             fclose(opt_fp);
             std::cerr << "Options file was created\n";
         }

@@ -570,3 +570,7 @@ std::string CMorphanHolder::LemmatizeJson(std::string WordForm, bool withParadig
     ConvertToUtfRecursive(result, m_CurrentLanguage);
     return result.dump(prettyJson ? 1 : -1);
 }
+
+std::string CMorphanHolder::CorrectMisspelledWord(std::string word) const {
+    return convert_to_utf8(m_pLemmatizer->_CorrectMisspelledWord(word), m_CurrentLanguage);
+}
