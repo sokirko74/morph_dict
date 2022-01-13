@@ -65,6 +65,7 @@ void CMorphAutomat::FuzzySearchRecursive(const CMorphAutomRelation& node, std::s
     if (row[word_length] <= fuzziness && node.GetRelationalChar() == MorphAnnotChar) {
         CFuzzyResult r;
         r.CorrectedString = std::string(path, path + depth - 1); // -1 AnnotChar
+        r.StringDistance = fuzziness;
         results.push_back(r);
     }
     if (minimum <= fuzziness) {
@@ -105,5 +106,6 @@ std::vector<CFuzzyResult> CMorphAutomat::FuzzySearch(std::string word, int fuzzi
 	}
 	deleteArray(rows, buffer_size_f);
 	deleteArray(path_rows, buffer_size_f);
+    sort(results.begin(), results.end());
 	return results;
 }

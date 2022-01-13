@@ -454,6 +454,9 @@ std::string CLemmatizer::_CorrectMisspelledWord(std::string word, size_t maxStrD
 	size_t WordOffset = 0;
 	auto res = m_pFormAutomat->FuzzySearch(word, maxStrDistance);
 	if (!res.empty()) {
+		for (auto i : res) {
+			std::cout << "str distance " << i.StringDistance << ", correct = "<< i.CorrectedString << "\n";
+		}
 		return res[0].CorrectedString;
 	}
 	return std::string();

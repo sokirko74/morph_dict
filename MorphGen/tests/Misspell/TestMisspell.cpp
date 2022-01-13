@@ -13,7 +13,7 @@ void Misspell(CMorphanHolder& holder, std::string word, std::string canon) {
 
 int main(int argc, const char* argv[])
 {
-    if (argc != 2) {
+    if (argc < 2) {
         std::cerr << "usage: TestMisspell <folder>";
         return 1;
     }
@@ -21,10 +21,16 @@ int main(int argc, const char* argv[])
         std::string folder = argv[1];
         CMorphanHolder holder;
         holder.LoadLemmatizer(morphRussian, folder);
-        Misspell(holder, "сакирко",  "СОКИРКО");
-        Misspell(holder, "сакурко", "СОКИРКО");
-        Misspell(holder, "сакурку", "");
-        return 0;
+        if (argc == 2) {
+            Misspell(holder, "сакирко",  "СОКИРКО");
+            Misspell(holder, "сакурко", "СОКИРКО");
+            Misspell(holder, "сакурку", "");
+            return 0;
+        }
+        else {
+            auto word = convert_from_utf8(argv[2], holder.m_CurrentLanguage);
+            std::cout << holder.CorrectMisspelledWord(word) << "\n";
+        }
     }
     catch (CExpc c) {
         std::cerr << c.m_strCause << "\n";

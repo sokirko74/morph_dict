@@ -117,11 +117,15 @@ public:
 
 struct CFuzzyResult {
 	std::string CorrectedString;
+	int StringDistance;
+	bool operator < (const  CFuzzyResult& x) {
+		return StringDistance < x.StringDistance;
+	}
 };
 
 class CMorphAutomat : public CABCEncoder
 {
-	void CMorphAutomat::FuzzySearchRecursive(const CMorphAutomRelation& node, std::string& word, std::vector<CFuzzyResult>& results, int** rows,
+	void FuzzySearchRecursive(const CMorphAutomRelation& node, std::string& word, std::vector<CFuzzyResult>& results, int** rows,
 		char** path_rows, int fuzziness, BYTE* path, int depth) const;
 
 protected:

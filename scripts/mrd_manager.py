@@ -60,7 +60,7 @@ def read_lemmas(file_name):
     lemmas = list()
     with open(file_name) as inp:
         for l in inp:
-            lemmas.append(l)
+            lemmas.append(l.strip())
     return lemmas
 
 

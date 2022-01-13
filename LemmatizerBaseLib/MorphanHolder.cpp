@@ -572,5 +572,12 @@ std::string CMorphanHolder::LemmatizeJson(std::string WordForm, bool withParadig
 }
 
 std::string CMorphanHolder::CorrectMisspelledWord(std::string word) const {
-    return convert_to_utf8(m_pLemmatizer->_CorrectMisspelledWord(word), m_CurrentLanguage);
+    std::string r;
+    if (IsInDictionary(word)) {
+        r =  word;
+    }
+    else {
+        r = m_pLemmatizer->_CorrectMisspelledWord(word);
+    }
+    return convert_to_utf8(r, m_CurrentLanguage);
 }

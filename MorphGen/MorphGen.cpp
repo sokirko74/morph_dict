@@ -119,8 +119,13 @@ int main(int argc, const char* argv[])
             fclose(opt_fp);
             std::cerr << "Options file was created\n";
         }
-        std::filesystem::copy_file(Wizard.m_GramtabPath, output_folder / Wizard.m_GramtabPath.filename(), std::filesystem::copy_options::overwrite_existing);
-        
+        {
+            std::filesystem::path src =  Wizard.m_GramtabPath;
+            std::filesystem::path trg = output_folder / Wizard.m_GramtabPath.filename();
+            if (!std::filesystem::equivalent(src, trg))  {
+                std::filesystem::copy_file(src, trg, std::filesystem::copy_options::overwrite_existing);
+            }
+        }
     }
     catch (CExpc e)
     {
