@@ -20,14 +20,16 @@ int main(int argc, const char* argv[])
     try {
         std::string folder = argv[1];
         CMorphanHolder holder;
-        holder.LoadLemmatizer(morphRussian, folder);
+        holder.LoadLemmatizer(morphFioDisclosures, folder);
         if (argc == 2) {
-            Misspell(holder, "сакирко",  "СОКИРКО");
-            Misspell(holder, "сакурко", "СОКИРКО");
-            Misspell(holder, "сакурку", "");
+            Misspell(holder, "сакирко_а_в", "СОКИРКО_А_В");
+            Misspell(holder, "сакурко_а_в", "СОКИРКО_А_В");
+            Misspell(holder, "зокирко_а_в", "ЗОКИРКА_А_В");
+            Misspell(holder, "сакурку_а_в", "");
             return 0;
         }
         else {
+
             auto word = convert_from_utf8(argv[2], holder.m_CurrentLanguage);
             std::cout << holder.CorrectMisspelledWord(word) << "\n";
         }

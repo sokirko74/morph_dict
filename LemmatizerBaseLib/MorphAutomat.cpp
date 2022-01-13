@@ -12,7 +12,7 @@ static int  InitAlphabet(MorphLanguageEnum Language, int* pCode2Alphabet, int* p
 	assert(!is_upper_alpha((BYTE)AnnotChar, Language));
 	std::string additionalEnglishChars = "'1234567890";
 	std::string additionalGermanChars = "";
-	std::string additionalRussianChars = "&_";
+	std::string additionalFioDisclosuresChars = "_.";
 	int AlphabetSize = 0;
 	for (size_t i = 0; i < 256; i++)
 	{
@@ -25,8 +25,8 @@ static int  InitAlphabet(MorphLanguageEnum Language, int* pCode2Alphabet, int* p
 			|| ((Language == morphGerman)
 				&& (additionalGermanChars.find((BYTE)i) != std::string::npos)
 				)
-			|| ((Language == morphRussian)
-				&& (additionalRussianChars.find((BYTE)i) != std::string::npos)
+			|| ((Language == morphFioDisclosures)
+				&& (additionalFioDisclosuresChars.find((BYTE)i) != std::string::npos)
 				)
 			|| ((Language == morphURL)
 				&& is_alpha((BYTE)i, morphURL)

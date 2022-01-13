@@ -59,7 +59,16 @@ inline uint64_t GetMaxQWORD ()
 
 
 // morph_dict&syntax
-typedef enum {	morphUnknown = 0, morphRussian = 1, morphEnglish = 2, morphGerman = 3, morphGeneric = 4, morphURL=5, morphDigits=6} MorphLanguageEnum;
+typedef enum {	
+	morphUnknown = 0, 
+	morphRussian = 1, 
+	morphEnglish = 2, 
+	morphGerman = 3, 
+	morphGeneric = 4, 
+	morphURL = 5, 
+	morphDigits = 6,
+	morphFioDisclosures = 7,
+} MorphLanguageEnum;
 
 template <class T1, class T2, class T3>
 struct	troika : public std::pair<T1, T2>

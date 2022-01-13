@@ -39,6 +39,11 @@ void CMorphanHolder::CreateMorphDicts(MorphLanguageEnum langua)
         m_pGramTab = new CRusGramTab;
         m_pLemmatizer = new CLemmatizerRussian;
     }
+    else if (langua == morphFioDisclosures)
+    {
+        m_pGramTab = new CRusGramTab;
+        m_pLemmatizer = new CLemmatizer(morphFioDisclosures);
+    }
     else
         if (langua == morphGerman)
         {

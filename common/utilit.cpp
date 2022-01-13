@@ -856,7 +856,12 @@ bool GetLanguageByString (std::string s, MorphLanguageEnum& Result)
 	else if(s == "URL_ABC"){
 		Result = morphURL;
 		return true;
-	}else 
+	}
+	else if (s == "FIO_DISCLOSURES") {
+		Result = morphFioDisclosures;
+		return true;
+	}
+	else
 		return false;
 	
 };
@@ -868,6 +873,7 @@ std::string GetStringByLanguage (MorphLanguageEnum Langua)
 		case morphEnglish: return "English";
 		case morphGerman: return  "German";
 		case morphGeneric: return  "Generic";
+		case morphFioDisclosures: return  "FIO_DISCLOSURES";
 		case morphURL: return  "URL_ABC";
 		default :return "unk";
 	}
@@ -1182,6 +1188,7 @@ bool is_alpha (BYTE x, MorphLanguageEnum Langua)
 {
 	switch (Langua)
 	{
+		case morphFioDisclosures:
 		case morphRussian : return is_russian_alpha(x);
 		case morphEnglish : return is_english_alpha(x);
 		case morphGerman : return is_german_alpha(x);
@@ -1196,6 +1203,7 @@ bool is_lower_alpha(BYTE x, MorphLanguageEnum Langua)
 {
 	switch (Langua)
 	{
+		case morphFioDisclosures:
 		case morphRussian : return is_russian_lower(x);
 		case morphEnglish : return is_english_lower(x);
 		case morphGerman : return is_german_lower(x);
@@ -1210,6 +1218,7 @@ bool is_upper_alpha(BYTE x, MorphLanguageEnum Langua)
 {
 	switch (Langua)
 	{
+		case morphFioDisclosures:
 		case morphRussian : return is_russian_upper(x);
 		case morphEnglish : return is_english_upper(x);
 		case morphGerman : return is_german_upper(x);
@@ -1325,6 +1334,7 @@ bool CheckLanguage(const T& src, size_t Length, MorphLanguageEnum langua)
 	SymbolCheckerFunc SymbolChecker = 0;
 
 	switch (langua) {
+		case morphFioDisclosures:
 		case morphRussian : SymbolChecker =  is_russian_alpha; break;
 		case morphGerman : SymbolChecker =  is_german_alpha; break;
 		case morphEnglish : SymbolChecker =  is_english_alpha; break;
@@ -2097,7 +2107,7 @@ size_t FindFloatingPoint(const char* str)
 
 std::string convert_from_utf8(const char* utf8str, const MorphLanguageEnum langua) {
 	try {
-		if (langua == morphRussian) {
+		if (langua == morphRussian || langua == morphFioDisclosures) {
 			return convert_utf8_to_cp1251(utf8str);
 		}
 		return convert_utf8_to_cp1252(utf8str);
@@ -2110,7 +2120,7 @@ std::string convert_from_utf8(const char* utf8str, const MorphLanguageEnum langu
 
 std::string convert_to_utf8(const std::string& str, const MorphLanguageEnum langua) {
 	try {
-		if (langua == morphRussian) {
+		if (langua == morphRussian || langua == morphFioDisclosures) {
 			return convert_cp1251_to_utf8(str);
 		}
 		return convert_cp1252_to_utf8(str);

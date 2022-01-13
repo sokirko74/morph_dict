@@ -43,15 +43,16 @@ bool CFlexiaModel::ReadFromString(std::string& s) {
     StringTokenizer Tok(s.c_str(), "%");
     m_Flexia.clear();
     while (Tok()) {
-        std::string OneRecord = Tok.val();
-        size_t ast = OneRecord.find('*');
-        if (ast == std::string::npos) return false;
-        size_t last_ast = OneRecord.find_last_of('*');
-        std::string Prefix;
+        std::string record = Tok.val();
+        size_t ast = record.find('*');
+        if (ast == std::string::npos || ast == record.length() - 1) return false;
+        size_t last_ast = record.find_last_of('*');
+        std::string prefix;
         if (last_ast != ast)
-            Prefix = OneRecord.substr(last_ast + 1);
-
-        CMorphForm G(OneRecord.substr(ast + 1, last_ast - ast - 1), OneRecord.substr(0, ast), Prefix);
+            prefix = record.substr(last_ast + 1);
+        auto flexia_str = record.substr(0, ast);
+        auto gramcode = record.substr(ast + 1, last_ast - ast - 1);
+        CMorphForm G(gramcode, flexia_str, prefix);
         m_Flexia.push_back(G);
 
     };
@@ -210,6 +211,7 @@ const size_t MaxMrdLineLength = 10240;
 void MorphoWizard::load_gramtab(std::string path, bool useNationalConstants) {
     CAgramtab* pGramTab;
     switch (m_Language) {
+    case morphFioDisclosures:
     case morphRussian:
         pGramTab = new CRusGramTab;
         break;
@@ -220,7 +222,7 @@ void MorphoWizard::load_gramtab(std::string path, bool useNationalConstants) {
         pGramTab = new CGerGramTab;
         break;
     default:
-        throw CExpc("Unknown language: " + GetStringByLanguage(m_Language));
+        throw CExpc("Unknown language to load gramtab: " + GetStringByLanguage(m_Language));
     };
 
     m_GramtabPath = m_MwzFolder / path;

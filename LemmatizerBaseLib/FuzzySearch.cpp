@@ -1,3 +1,4 @@
+// inspired by https://github.com/brmson/dawg-levenshtein/blob/master/Dawg.cpp
 #include "MorphAutomat.h"
 
 enum OpType {
@@ -62,13 +63,15 @@ void CMorphAutomat::FuzzySearchRecursive(const CMorphAutomRelation& node, std::s
             minimum = row[i];
         }
     }
-    if (row[word_length] <= fuzziness && node.GetRelationalChar() == MorphAnnotChar) {
-        CFuzzyResult r;
-        r.CorrectedString = std::string(path, path + depth - 1); // -1 AnnotChar
-        r.StringDistance = fuzziness;
-        results.push_back(r);
+    if (node.GetRelationalChar() == MorphAnnotChar) {
+        if (row[word_length] <= fuzziness) {
+            CFuzzyResult r;
+            r.CorrectedString = std::string(path, path + depth - 1); // -1 AnnotChar
+            r.StringDistance = row[word_length];
+            results.push_back(r);
+        }
     }
-    if (minimum <= fuzziness) {
+    else if (minimum <= fuzziness) {
         size_t nodeNo = node.GetChildNo();
         size_t count = GetChildrenCount(nodeNo);
         for (size_t i = 0; i < count; i++) {
