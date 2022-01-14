@@ -72,7 +72,7 @@ public:
                                      bool bUsePrediction) const;
     bool CreateParadigmFromID(uint32_t id, CFormInfo &Result) const;
     bool IsInDictionary(std::string &word, const bool cap) const;
-    std::string _CorrectMisspelledWord(std::string InputWordStr,  size_t maxStrDistance=2) const;
+    std::vector<CFuzzyResult> _CorrectMisspelledWord(std::string InputWordStr,  size_t maxStrDistance=2) const;
 };
 
 

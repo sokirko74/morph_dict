@@ -1152,6 +1152,7 @@ bool is_lower_vowel(BYTE x, MorphLanguageEnum Langua)
 {
 	switch (Langua)
 	{
+		case morphFioDisclosures:
 		case morphRussian : return is_russian_lower_vowel(x);
 		case morphEnglish : return is_english_lower_vowel(x);
 		case morphGerman : return is_german_lower_vowel(x);
@@ -1164,6 +1165,7 @@ bool is_upper_vowel(BYTE x, MorphLanguageEnum Langua)
 {
 	switch (Langua)
 	{
+		case morphFioDisclosures:
 		case morphRussian : return is_russian_upper_vowel(x);
 		case morphEnglish : return is_english_upper_vowel(x);
 		case morphGerman : return is_german_upper_vowel(x);

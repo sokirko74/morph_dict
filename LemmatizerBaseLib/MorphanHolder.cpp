@@ -576,13 +576,16 @@ std::string CMorphanHolder::LemmatizeJson(std::string WordForm, bool withParadig
     return result.dump(prettyJson ? 1 : -1);
 }
 
-std::string CMorphanHolder::CorrectMisspelledWord(std::string word) const {
-    std::string r;
+std::vector<CFuzzyResult> CMorphanHolder::CorrectMisspelledWord(std::string word) const {
+    std::vector<CFuzzyResult> r;
     if (IsInDictionary(word)) {
-        r =  word;
+        r.push_back({word, 0});
     }
     else {
         r = m_pLemmatizer->_CorrectMisspelledWord(word);
     }
-    return convert_to_utf8(r, m_CurrentLanguage);
+    for (auto& a: r) {
+        a.CorrectedString = convert_to_utf8(a.CorrectedString, m_CurrentLanguage);
+    }
+    return r;
 }

@@ -448,18 +448,17 @@ bool CLemmatizer::IsInDictionary(std::string &word, const bool cap) const {
     return LemmatizeWord(word, cap, false, results, false);
 }
 
-std::string CLemmatizer::_CorrectMisspelledWord(std::string word, size_t maxStrDistance) const
+std::vector<CFuzzyResult> CLemmatizer::_CorrectMisspelledWord(std::string word, size_t maxStrDistance) const
 {
 	RmlMakeUpper(word, GetLanguage());
-	size_t WordOffset = 0;
 	auto res = m_pFormAutomat->FuzzySearch(word, maxStrDistance);
-	if (!res.empty()) {
-		for (auto i : res) {
-			std::cout << "str distance " << i.StringDistance << ", correct = "<< i.CorrectedString << "\n";
+	for (int i = 0; i < res.size(); ++i) {
+		if (res[0] < res[i]) {
+			res.erase(res.begin() + i, res.end());
+			break;
 		}
-		return res[0].CorrectedString;
 	}
-	return std::string();
+	return res;
 }
 
 

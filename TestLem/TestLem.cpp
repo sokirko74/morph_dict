@@ -114,7 +114,9 @@ int main(int argc, const char **argv) {
                     result = "in dictionary\n";
                 }
                 else {
-                    result = Holder.CorrectMisspelledWord(s);
+                    for (auto a: Holder.CorrectMisspelledWord(s)) {
+                        result += Format(" corrected = %s distance= %i;", a.CorrectedString.c_str(), a.StringDistance);
+                    }
                 }
             }
             else if (args.Exists("morphan")) {
