@@ -508,6 +508,7 @@ nlohmann::json GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMor
     return result;
 };
 
+
 nlohmann::json GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool withParadigm, bool sortForms)
 {
     auto result = nlohmann::json::object();

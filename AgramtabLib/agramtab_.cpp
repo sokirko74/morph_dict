@@ -58,7 +58,7 @@ std::string   CAgramtab::GrammemsToStr(grammems_mask_t grammems) const
     return szGrammems;
 }
 
-bool CAgramtab::ProcessPOSAndGrammems(const char* line_in_gramtab, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems)  const
+bool CAgramtab::ProcessPOSAndGrammems(const char* line_in_gramtab, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems, bool deduce_grammems)  const
 {
     if (strlen(line_in_gramtab) > 300) return false;
 

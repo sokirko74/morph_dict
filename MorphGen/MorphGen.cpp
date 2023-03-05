@@ -122,7 +122,7 @@ int main(int argc, const char* argv[])
         {
             std::filesystem::path src =  Wizard.m_GramtabPath;
             std::filesystem::path trg = output_folder / Wizard.m_GramtabPath.filename();
-            if (!std::filesystem::equivalent(src, trg))  {
+            if (!std::filesystem::exists(trg) || !std::filesystem::equivalent(src, trg))  {
                 std::filesystem::copy_file(src, trg, std::filesystem::copy_options::overwrite_existing);
             }
         }

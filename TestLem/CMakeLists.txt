@@ -2,7 +2,7 @@ declare_cmake_min_version()
 
 project(TestLem)
 
-add_executable (TestLem TestLem.cpp)
+add_executable (TestLem "TestLem.cpp")
 
 target_link_libraries(TestLem
         LemmatizerBaseLib
@@ -25,12 +25,13 @@ endmacro(TestLemLang)
 
 TestLemLang(Russian test/Russian/test.txt "")
 TestLemLang(Russian test/Russian/morphan.txt --morphan)
-TestLemLang(Russian test/Russian/predict.txt "")
 
 TestLemLang(German test/German/test.txt "")
 TestLemLang(German test/German/morphan.txt --morphan)
 
 TestLemLang(English test/English/test.txt "")
+
+add_subdirectory (test/PredictTest)
 
 if (BUILD_DICTS)
     add_dependencies (TestLem MorphDicts)
