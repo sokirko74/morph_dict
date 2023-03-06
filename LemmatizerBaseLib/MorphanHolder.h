@@ -14,7 +14,6 @@ class CMorphanHolder
 {
 protected:
 	std::string GetGrammems(const char* tab_str) const;
-	bool GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>& Paradigms) const;
 	void CreateMorphDicts(MorphLanguageEnum langua);
 public:
 	MorphLanguageEnum				m_CurrentLanguage;
@@ -35,5 +34,6 @@ public:
 	std::string LemmatizeJson(std::string WordForm, bool withParadigms, bool prettyJson=false, bool sortForms=false) const;
 	bool IsInDictionary(std::string WordForm) const;
 	std::vector<CFuzzyResult> CorrectMisspelledWord(std::string WordForm) const;
+	bool GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>& Paradigms) const;
 };
 

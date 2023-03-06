@@ -197,10 +197,12 @@ std::string CRusGramTab::LineIndexToGramcode(uint16_t i) const
 };
 
 
-bool CRusGramTab::ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems) const
+bool CRusGramTab::ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems, bool deduce_grammems) const
 {
 	if (!CAgramtab::ProcessPOSAndGrammems(tab_str, PartOfSpeech, grammems)) return false;
-
+	if (!deduce_grammems) {
+		return true;
+	}
 
 
 	// неизменяемые слова как будто принадлежат всем падежам

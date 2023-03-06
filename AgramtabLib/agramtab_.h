@@ -52,7 +52,7 @@ public:
     virtual bool GleicheSubjectPredicate(const char* gram_code1, const char* gram_code2) const = 0;
     virtual bool GleicheGenderNumber(const char* gram_code1, const char* gram_code2) const = 0;
     virtual const size_t GetClauseTypesCount() const = 0;
-    virtual bool  ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems) const;
+    virtual bool  ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems, bool deduce_grammems = true) const;
     virtual bool PartOfSpeechIsProductive(part_of_speech_t p) const = 0;
 
 

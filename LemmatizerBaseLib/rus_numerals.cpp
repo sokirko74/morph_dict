@@ -1,6 +1,79 @@
 #include "rus_numerals.h"
+#include <algorithm>
 
-std::string IntToStr (double i) 
+
+const CNumeralToNumber NumeralToNumber[] =
+{
+	{_R("ОДИН"),_R("ПЕРВЫЙ"),"","","I",1,false,{_R("ОДНО") }},
+	{_R("ПОЛТОРА"),"","","","",1.5,false,{_R("ПОЛУТОРО") }},
+	{_R("ДВА"),_R("ВТОРОЙ"),_R("ВДВОЕМ"),_R("ДВОЕ"),"II",2,false, {_R("ДВУХЪ"), _R("ДВУХ"),_R("ДВУ")}},
+	{_R("ТРИ"),_R("ТРЕТИЙ"),_R("ВТРОЕМ"), _R("ТРОЕ"),"III",3,false, {_R("ТРЕХЪ"),_R("ТРЕХ")}},
+	{_R("ЧЕТЫРЕ"),_R("ЧЕТВЕРТЫЙ"),_R("ВЧЕТВЕРОМ"),_R("ЧЕТВЕРО"),"IV",4,false, {_R("ЧЕТЫРЕХЪ"), _R("ЧЕТЫРЕХ")}},
+	{_R("ПЯТЬ"),_R("ПЯТЫЙ"),_R("ВПЯТЕРОМ"), _R("ПЯТЕРО"),"V",5,false, {_R("ПЯТИ")}},
+	{_R("ШЕСТЬ"),_R("ШЕСТОЙ"),_R("ВШЕСТЕРОМ"), _R("ШЕСТЕРО"),"VI",6,false,{_R("ШЕСТИ")}},
+	{_R("СЕМЬ"),_R("СЕДЬМОЙ"),_R("ВСЕМЕРОМ"), _R("СЕМЕРО"),"VII",7,false, {_R("СЕМИ")}},
+	{_R("ВОСЕМЬ"),_R("ВОСЬМОЙ"),_R("ВВОСЬМЕРОМ"),_R("ВОСЬМЕРО"),"VIII",8,false, {_R("ВОСЕМИ")}},
+	{_R("ДЕВЯТЬ"),_R("ДЕВЯТЫЙ"),_R("ВДЕВЯТЕРОМ"),_R("ДЕВЯТЕРО"),"IX",9 ,false, {_R("ДЕВЯТИ")}},
+	{_R("ДЕСЯТЬ"),_R("ДЕСЯТЫЙ"),_R("ВДЕСЯТЕРОМ"),_R("ДЕСЯТЕРО"),"X",10,false, {_R("ДЕСЯТИ")}},
+	{_R("ОДИННАДЦАТЬ"),_R("ОДИННАДЦАТЫЙ"),_R("ВОДИННАДЦАТЕРОМ"),"","XI",11,false, {_R("ОДИННАДЦАТИ")}},
+	{_R("ДВЕНАДЦАТЬ"),_R("ДВЕНАДЦАТЫЙ"), _R("ВДВЕНАДЦАТЕРОМ"),"","XII",12,false, {_R("ДВЕНАДЦАТИ")}},
+	{_R("ТРИНАДЦАТЬ"),_R("ТРИНАДЦАТЫЙ"), _R("ВТРИНАДЦАТЕРОМ"),"","XIII",13,false, {_R("ТРИНАДЦАТИ")}},
+	{_R("ЧЕТЫРНАДЦАТЬ"),_R("ЧЕТЫРНАДЦАТЫЙ"),_R("ВЧЕТЫРНАДЦАТЕРОМ"),"","XIV",14,false, {_R("ЧЕТЫРНАДЦАТИ")} },
+	{_R("ПЯТНАДЦАТЬ"),_R("ПЯТНАДЦАТЫЙ"), _R("ВПЯТНАДЦАТЕРОМ"),"","XV",15,false, {_R("ПЯТНАДЦАТИ")}},
+	{_R("ШЕСТНАДЦАТЬ"),_R("ШЕСТНАДЦАТЫЙ"), _R("ВШЕСТНАДЦАТЕРОМ"),"","XVI",16,false, {_R("ШЕСТНАДЦАТИ")} },
+	{_R("СЕМНАДЦАТЬ"),_R("СЕМНАДЦАТЫЙ"), _R("ВСЕМНАДЦАТЕРОМ"),"","XVII",17,false, {_R("СЕМНАДЦАТИ")}},
+	{_R("ВОСЕМНАДЦАТЬ"),_R("ВОСЕМНАДЦАТЫЙ"), _R("ВВОСЕМНАДЦАТЕРОМ"),"","XIII",18,false, {_R("ВОСЕМНАДЦАТИ")}},
+	{_R("ДЕВЯТНАДЦАТЬ"),_R("ДЕВЯТНАДЦАТЫЙ"), _R("ВДЕВЯТНАДЦАТЕРОМ"),"","XIX",19,false, {_R("ДЕВЯТНАДЦАТИ")} },
+	{_R("ДВАДЦАТЬ"),_R("ДВАДЦАТЫЙ"), _R("ВДВАДЦАТЕРОМ"),"","XX",20,false, {_R("ДВАДЦАТИ")}},
+	{_R("ТРИДЦАТЬ"),_R("ТРИДЦАТЫЙ"), _R("ВТРИДЦАТЕРОМ"),"","XXX",30,false, {_R("ТРИДЦАТИ")}},
+	{_R("СОРОК"),_R("СОРОКОВОЙ"), "","","XL",40,false, {_R("СОРОКА")}},
+	{_R("ПЯТЬДЕСЯТ"),_R("ПЯТИДЕСЯТЫЙ"), _R("ВПЯТИДЕСЯТЕРОМ"),"","L",50,false, {_R("ПЯТИДЕСЯТИ")}},
+	{_R("ШЕСТЬДЕСЯТ"),_R("ШЕСТИДЕСЯТЫЙ"), _R("ВШЕСТИДЕСЯТЕРОМ"),"","LX",60,false, {_R("ШЕСТИДЕСЯТИ")}},
+	{_R("СЕМЬДЕСЯТ"),_R("СЕМИДЕСЯТЫЙ"), _R("ВСЕМИДЕСЯТЕРОМ"),"","LXX",70,false, {_R("СЕМИДЕСЯТИ")}},
+	{_R("ВОСЕМЬДЕСЯТ"),_R("ВОСЬМИДЕСЯТЫЙ"), _R("ВВОСЬМИДЕСЯТЕРОМ"),"","LXXX",80,false, {_R("ВОСЬМИДЕСЯТИ")}},
+	{_R("ДЕВЯНОСТО"),_R("ДЕВЯНОСТЫЙ"), "","","XC",90,false, {_R("ДЕВЯНОСТО")}},
+	{_R("СТО"),_R("СОТЫЙ"),"","","C",100,false, {_R("СТО")}},
+	{_R("ДВЕСТИ"),_R("ДВУХСОТЫЙ"),"","","CC",200,false, {_R("ДВУХСОТ")}},
+	{_R("ТРИСТА"),_R("ТРЕХСОТЫЙ"),"","","CCC",300,false, {_R("ТРЕХСОТ")}},
+	{_R("ЧЕТЫРЕСТА"),_R("ЧЕТЫРЕХСОТЫЙ"),"","CD","I",400,false, {_R("ЧЕТЫРЕХСОТ")}},
+	{_R("ПЯТЬСОТ"),_R("ПЯТИСОТЫЙ"), "","","D",500,false, {_R("ПЯТИСОТ")}},
+	{_R("ШЕСТЬСОТ"),_R("ШЕСТИСОТЫЙ"), "","","DC",600,false, {_R("ШЕСТИСОТ")}},
+	{_R("СЕМЬСОТ"),_R("СЕМИСОТЫЙ"), "","","DCC",700,false, {_R("СЕМИСОТ")}},
+	{_R("ВОСЕМЬСОТ"),_R("ВОСЬМИСОТЫЙ"), "","","DCCC",800,false, {_R("ВОСЬМИСОТ")}},
+	{_R("ДЕВЯТЬСОТ"),_R("ДЕВЯТИСОТЫЙ"),"","","CM",900,false, {_R("ДЕВЯТИСОТ")}},
+	{_R("ТЫСЯЧА"),_R("ТЫСЯЧНЫЙ"),"","","M",1000,true, {_R("ТЫСЯЧЕ")}},
+	{_R("МИЛЛИОН"),_R("МИЛЛИОННЫЙ"),"","","",1000000,true,{_R("МИЛЛИОНО")} },
+	{_R("МИЛЛИАРД"),_R("МИЛЛИАРДНЫЙ"),"","","",1000000000,true, {_R("МИЛЛИАРДНО")} },
+	{_R("ТРИЛЛИОН"),_R("ТРИЛЛИОННЫЙ"),"","","",1000000000000.0,true, {_R("ТРИЛЛИОНО")} },
+	{_R("КВАДРИЛЛИОН"),_R("КВАДРИЛЛИОННЫЙ"),"","","",1000000000000000.0,true, {_R("КВАДРИЛЛИОН")} }
+};
+
+//ноль не должен быть включен в NumeralToNumber
+CNumeralToNumber RUSSIAN_ZERO = { _R("НОЛЬ"),_R("НУЛЕВОЙ"),"","","",0,true,{_R("НУЛЬ")} }; // нульмодемный
+
+
+CRussianNumerals::CRussianNumerals() {
+	for (auto a : NumeralToNumber) {
+		m_Numerals.push_back(a);
+	}
+	m_NumeralsReverseWithZero.insert(m_NumeralsReverseWithZero.end(), m_Numerals.begin(), m_Numerals.end());
+	m_NumeralsReverseWithZero.push_back(RUSSIAN_ZERO);
+	std::reverse(m_NumeralsReverseWithZero.begin(), m_NumeralsReverseWithZero.end());
+	for (auto& n : m_NumeralsReverseWithZero) {
+		for (auto& p : n.m_AdjForms) {
+			m_AdjPrefixes.push_back(CAdjPrefix(p, &n));
+		}
+	}
+	std::sort(m_AdjPrefixes.begin(), m_AdjPrefixes.end());
+
+}
+
+const std::vector<CNumeralToNumber>& CRussianNumerals::GetAllNumeralReverse() const
+{
+	return m_NumeralsReverseWithZero;
+}
+
+std::string DoubleToStr (double i) 
 {
 	if (i == 1.5) return "1.5";
 	char s[55];
@@ -14,121 +87,78 @@ std::string IntToStr (double i)
 	return s;
 };
 
-std::string FindByNumber(uint64_t Number)
-{
-	for(int i = 0 ; i < NumeralToNumberCount ; i++ )
-		if( Number == NumeralToNumber[i].m_Number)
-			return NumeralToNumber[i].m_Cardinal;
-	return "";
-};
 
-std::string FindByNumber(uint64_t Number, NumberFormEnum formType)
-{
-	for(int i = 0 ; i < NumeralToNumberCount ; i++ )
-		if (Number == NumeralToNumber[i].m_Number) {
-			switch (formType) {
-				case nfeCardinal: return NumeralToNumber[i].m_Cardinal;	
-				case nfeOridnal: return NumeralToNumber[i].m_Ordinal;
-				case nfeGenitiv: return NumeralToNumber[i].m_GenitForm;
-			}
+bool CRussianNumerals::CheckIsNumeral(const std::string& lemma) const {
+	for (auto n: m_NumeralsReverseWithZero) {
+		if (lemma == n.m_Cardinal || lemma == n.m_Ordinal) {
+			return true;
 		}
+	}
+	return false;
+}
+
+std::string CRussianNumerals::FindByNumber(uint64_t Number) const 
+{
+	// without zero
+	for (auto n : m_Numerals) {
+		if (Number == n.m_Number)
+			return n.m_Cardinal;
+	}
 	return "";
 };
 
-int IsAdverbRule(const std::string& Lemma)
+
+int CRussianNumerals::IsAdverbRule(const std::string& Lemma) const
 {
-	for(int i = 0 ; i < NumeralToNumberCount ; i++ )
-		if (Lemma == NumeralToNumber[i].m_Adverb)
-			return NumeralToNumber[i].m_Number;
+	for (auto n : m_Numerals) {
+		if (Lemma == n.m_Adverb)
+			return n.m_Number;
+	}
 
    return -1;
 };
 
 
-double GetCardinalNumeral(const std::string& word)
+double CRussianNumerals::GetCardinalNumeral(const std::string& word) const 
 {
-	for(int i = 0 ; i < NumeralToNumberCount ; i++ )
-		if( word == NumeralToNumber[i].m_Cardinal )
-			return NumeralToNumber[i].m_Number;
+	for (auto n : m_Numerals) {
+		if (word == n.m_Cardinal)
+			return n.m_Number;
+	}
 	return -1;
 };
 
-double GetOrdinalNumeral(const std::string& word)
+double CRussianNumerals::GetOrdinalNumeral(const std::string& word) const 
 {
-	for(size_t i = 0 ; i < NumeralToNumberCount; i++ )
-		if (word == NumeralToNumber[i].m_Ordinal) {
-			return  NumeralToNumber[i].m_Number;
+	for (auto n : m_Numerals) {
+		if (word == n.m_Ordinal) {
+			return  n.m_Number;
 		}
+	}
 	return -1;
 };
 
-double GetNounNumeral(const std::string& word)
+double CRussianNumerals::GetNounNumeral(const std::string& word) const
 {
-	for(int i = 0 ; i < NumeralToNumberCount; i++ )
-        if( word == NumeralToNumber[i].m_CoollectiveNumber )
-			return NumeralToNumber[i].m_Number;
+	for (auto n : m_Numerals) {
+		if (word == n.m_CoollectiveNumber)
+			return n.m_Number;
+	}
 	return -1;
 };
 
-// не используется пока
-std::string spellout_number_ru(uint64_t x,  NumberFormEnum formType)
-{	 
-	if (x == 0) 
-		return formType == nfeCardinal ? _R("НОЛЬ")  : _R("НУЛЕВОЙ");
-	if (x < 20)
-		return FindByNumber(x, formType);
-	if (x < 100) {
-		if (x % 10 == 0)
-			return FindByNumber(x, formType);
-		else
-			return FindByNumber((x / 10)*10) + " " + FindByNumber(x % 10, formType);
-	}
-	if (x < 1000) {
-		if (x % 100 == 0)
-			return FindByNumber(x, formType);
-		else
-			return FindByNumber(x / 100 * 100) + " " + spellout_number_ru(x % 100, formType);
-	}
-	if (x < 1000000) {
-		if (x % 1000 == 0)
-			if (x % 10000 == 1000 && (x % 100000) / 10000 != 1) {
-				std::string s1 = (x % 1000000 != 1000 ? spellout_number_ru((x / 10000) * 10, nfeGenitiv) + " " : "");
-				std::string s2 = (formType == nfeCardinal ? _R("ОДНА ТЫСЯЧА") : _R("ОДНОТЫСЯЧНЫЙ"));
-				return s1 + s2;
-			}
-			else
-			if (formType == nfeCardinal)
-				if ( x % 10000 != 0 && x % 10000 < 5000 && (x % 100000)/10000 != 1) 
-					return (x % 10000 == 2000 ? (x % 1000000 != 2000 ? spellout_number_ru((x / 10000)*10, formType) + " " : "") + _R("ДВЕ") :
-					spellout_number_ru(x / 1000, formType)) + _R(" ТЫСЯЧИ");
-				else return spellout_number_ru(x / 1000, formType) + _R(" ТЫСЯЧ");
-			else 
-				return spellout_number_ru(x / 1000 , nfeGenitiv) + _R("ТЫСЯЧНЫЙ");
-		else
-			return spellout_number_ru((x / 1000) * 1000, nfeCardinal) + " " +
-						spellout_number_ru(x % 1000, formType);
-	}
-	for(int p=2; p<6; p++)
-	if (x < 1000*pow(1000,p)) {
-		uint64_t Q = pow(1000,p);
-		std::string m = FindByNumber(Q);
-		if (x % Q == 0)
-			if ( x % (10*Q) == Q ) return spellout_number_ru(x / Q , nfeGenitiv) +
-				(formType == nfeCardinal ? " " + m : m + _R("НЫЙ"));
-			else
-			if (formType  == nfeCardinal)
-				if ( x % (10*Q) != 0 && x % (10*Q) < 5*Q && (x % (100*Q))/(10*Q) != 1) 
-					return  spellout_number_ru(x / Q, formType) + " " + m + _R("А"); //МИЛЛИОНА
-				else return spellout_number_ru(x / Q, formType) + " " + m + _R("ОВ"); //МИЛЛИОНОВ
-			else return spellout_number_ru(x / Q , nfeGenitiv) + m + _R("НЫЙ"); //МИЛЛИОНЫЙ
-		else
-			return spellout_number_ru((x / Q) * Q, nfeCardinal) + " " +
-						spellout_number_ru(x % Q, formType);
-	}
-	#ifdef WIN32
-		return Format("%I64i", x);
-	#else
-		return Format("%lli", x);
-	#endif
+
+const CAdjPrefix* CRussianNumerals::FindAdjPrefix(std::string word) const
+{
+	for (const CAdjPrefix& a: m_AdjPrefixes) {
+		if (startswith(word, a.Prefix))
+		{
+			return &a;
+		};
+	};
+	return nullptr;
 }
+
+const  CRussianNumerals RussianNumerals = CRussianNumerals();
+
 
