@@ -43,8 +43,8 @@ class  CRussianNumerals {
 	
 public:
 	CRussianNumerals();
-	const std::vector<CNumeralToNumber>& CRussianNumerals::GetAllNumeralReverse() const;
-	const std::vector<CNumeralToNumber>& CRussianNumerals::GetAllNumeral() const;
+	const std::vector<CNumeralToNumber>& GetAllNumeralReverse() const;
+	const std::vector<CNumeralToNumber>& GetAllNumeral() const;
 	bool CheckIsNumeral(const std::string& lemma) const;
 	std::string FindByNumber(uint64_t Number)  const;
 	int IsAdverbRule(const std::string& Lemma) const;
