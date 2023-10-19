@@ -1,48 +1,7 @@
 ﻿import argparse
+from mrd_file import TMrdFile
 
 #adhoc script, do not support in future. Official support is only in C++
-
-
-class TMrdFile:
-    def __init__(self):
-        self.flexia_models = list()
-        self.accent_models = list()
-        self.user_sessions = list()
-        self.prefixes = list()
-        self.lemmas = list()
-
-    @staticmethod
-    def read_section(inp):
-        cnt = inp.readline().strip()
-        assert cnt.isdigit()
-        cnt = int(cnt)
-        assert cnt > 0
-        lines = list()
-        for i in range(cnt):
-            lines.append(inp.readline().strip())
-        return lines
-
-    @staticmethod
-    def write_section(outp, lst):
-        outp.write("{}\n".format(len(lst)))
-        for l in lst:
-            outp.write("{}\n".format(l))
-
-    def read(self, filename):
-        with open(filename) as inp:
-            self.flexia_models = self.read_section(inp)
-            self.accent_models = self.read_section(inp)
-            self.user_sessions= self.read_section(inp)
-            self.prefixes = self.read_section(inp)
-            self.lemmas = self.read_section(inp)
-
-    def write(self, filename):
-        with open(filename, "w", newline='\n') as outp:
-            self.write_section(outp, self.flexia_models)
-            self.write_section(outp, self.accent_models)
-            self.write_section(outp, self.user_sessions)
-            self.write_section(outp, self.prefixes)
-            self.write_section(outp, self.lemmas)
 
 
 def read_mrd_selection_list(file_name):
@@ -103,11 +62,10 @@ def main():
     args = parse_args()
     dict = TMrdFile()
     if args.action == "delete_by_file":
-        dict.read_mrd_selection_list(args.in_mrd_path)
-        lemmas_to_delete = read_list(args.word_list);
+        lemmas_to_delete = read_mrd_selection_list((args.word_list)
         delete_by_file(dict, lemmas_to_delete)
     elif args.action == "create_for_misspell":
-        words = read_lemmas(args.word_list);
+        words = read_lemmas(args.word_list)
         create_for_misspell(dict, words)
 
     dict.write(args.out_mrd_path)
