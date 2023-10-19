@@ -160,7 +160,7 @@ void CAgramtab::Read(const char* FileName)
         size_t gram_index = GramcodeToLineIndex(s.c_str());
 
         if (GetLine(gram_index)) {
-            throw CExpc(Format("line %s in  %s contains a dublicate gramcode", FileName, s));
+            throw CExpc(Format("line %s in  %s contains a dublicate gramcode", FileName, s.c_str()));
         }
         GetLine(gram_index) = pAgramtabLine;
         if (!ProcessAgramtabLine(*this, s.c_str(), gram_index)) {
