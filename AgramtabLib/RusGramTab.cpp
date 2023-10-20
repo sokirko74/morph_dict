@@ -476,11 +476,6 @@ bool CRusGramTab::GleicheCase(const char* gram_code1, const char* gram_code2) co
 }
 
 
-const size_t CRusGramTab::GetClauseTypesCount() const
-{
-	return RUSSIAN_CLAUSE_TYPE_COUNT;
-};
-
 long CRusGramTab::GetClauseTypeByName(const char* TypeName) const
 {
 	for (int i = 0; i < RUSSIAN_CLAUSE_TYPE_COUNT; i++)
