@@ -7,7 +7,14 @@ add_library(MorphWizardLib
         FormInfo.cpp
         DumpParadigm.cpp
         DumpParadigm.h
- "LemmaPredict.cpp" "LemmaPredict.h")
+        LemmaPredict.cpp
+        DumpParadigm.h
+        FormInfo.h
+        LemmaPredict.h
+        OperationMeter.h
+        wizard.h
+
+)
 
 target_link_libraries(MorphWizardLib
     AgramtabLib
