@@ -10,6 +10,11 @@
 #include <iostream>
 #include <sstream>
 
+
+#include <plog/Initializers/RollingFileInitializer.h>
+#include <plog/Initializers/ConsoleInitializer.h>
+
+
 //  for mkdir
 #ifdef WIN32
 	#include <direct.h>
@@ -2263,4 +2268,35 @@ std::vector<std::string> split_string(const std::string& s, char delim) {
 		}
 	}
 	return elems;
+}
+
+class MyFormatter
+{
+public:
+	static plog::util::nstring header()
+	{
+		return plog::util::nstring();
+	}
+
+	static plog::util::nstring format(const plog::Record& record)
+	{
+		plog::util::nostringstream ss;
+		//ss << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_hour << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_min << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_sec << PLOG_NSTR(".") << std::setfill(PLOG_NSTR('0')) << std::setw(3) << static_cast<int> (record.getTime().millitm) << PLOG_NSTR(" ");
+		ss << std::setfill(PLOG_NSTR(' ')) << std::setw(5) << std::left << severityToString(record.getSeverity()) << PLOG_NSTR(" ");
+		//ss << PLOG_NSTR("[") << record.getTid() << PLOG_NSTR("] ");
+		ss << PLOG_NSTR("[") << record.getFunc() << PLOG_NSTR("@") << record.getLine() << PLOG_NSTR("] ");
+		ss << record.getMessage() << PLOG_NSTR("\n");
+		return ss.str();
+	}
+};
+
+
+static plog::ConsoleAppender<MyFormatter> consoleAppender; 
+
+void init_plog(std::string filename) {
+	if (std::filesystem::exists(filename)) {
+		std::filesystem::remove(filename);
+	}
+	plog::init<MyFormatter>(plog::debug, filename.c_str()).addAppender(&consoleAppender);
+
 }

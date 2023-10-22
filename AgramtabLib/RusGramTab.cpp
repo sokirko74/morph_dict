@@ -197,14 +197,7 @@ std::string CRusGramTab::LineIndexToGramcode(uint16_t i) const
 };
 
 
-bool CRusGramTab::ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems, bool deduce_grammems) const
-{
-	if (!CAgramtab::ProcessPOSAndGrammems(tab_str, PartOfSpeech, grammems)) return false;
-	if (!deduce_grammems) {
-		return true;
-	}
-
-
+grammems_mask_t CRusGramTab::DeduceGrammems(part_of_speech_t PartOfSpeech, grammems_mask_t grammems) const {
 	// неизменяемые слова как будто принадлежат всем падежам
 	if ((_QM(rIndeclinable) & grammems)
 		&& (PartOfSpeech != PREDK)
@@ -227,7 +220,16 @@ bool CRusGramTab::ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& P
 	if (PartOfSpeech != PREDK)
 		if ((_QM(rIndeclinable) & grammems) && !(_QM(rSingular) & grammems))
 			grammems |= _QM(rPlural) | _QM(rSingular);
+	
+	return grammems;
+}
 
+bool CRusGramTab::ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems, bool deduce_grammems) const
+{
+	if (!CAgramtab::ProcessPOSAndGrammems(tab_str, PartOfSpeech, grammems)) return false;
+	if (deduce_grammems) {
+		grammems = DeduceGrammems(PartOfSpeech, grammems);
+	}
 	return true;
 };
 
