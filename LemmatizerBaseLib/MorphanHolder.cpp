@@ -334,7 +334,7 @@ std::string GetGramInfoStr(std::string GramInfo, const CMorphanHolder *Holder)
     return Result;
 };
 
-std::vector<CFormGroup> GetParadigmByGroups(const std::vector<CFormAndGrammems> &Forms, const CMorphanHolder *Holder, grammems_mask_t &CommonGrammems)
+std::vector<CFormGroup> GetParadigmGroupedLikeInTextbook(const std::vector<CFormAndGrammems> &Forms, const CMorphanHolder *Holder, grammems_mask_t &CommonGrammems)
 {
     std::vector<CFormGroup> Results;
     std::vector<bool> IncludedVector;
@@ -374,7 +374,7 @@ std::vector<CFormGroup> GetParadigmByGroups(const std::vector<CFormAndGrammems> 
 
     CFormGroup LastGroup;
     LastGroup.m_IntersectGrammems = 0;
-    for (i = 0; i < Forms.size(); i++)
+    for (size_t i = 0; i < Forms.size(); i++)
         if (!IncludedVector[i])
             LastGroup.m_FormNos.push_back(i);
 
@@ -382,9 +382,9 @@ std::vector<CFormGroup> GetParadigmByGroups(const std::vector<CFormAndGrammems> 
         Results.push_back(LastGroup);
 
     CommonGrammems = GetMaxQWORD();
-    for (i = 0; i < Forms.size(); i++)
-
-        CommonGrammems &= Forms[i].m_Grammems;
+    for (const auto& f : Forms) {
+        CommonGrammems &= f.m_Grammems;
+    }
 
     return Results;
 };
@@ -398,7 +398,7 @@ std::vector<CFormGroup> BuildInterfaceParadigmPart(const CMorphanHolder *Holder,
     std::vector<CFormAndGrammems> FormAndGrammemsPart;
     FormAndGrammemsPart.insert(FormAndGrammemsPart.begin(), FormAndGrammems.begin() + FormNo, FormAndGrammems.begin() + EndFormNo);
     FormNo = EndFormNo;
-    return GetParadigmByGroups(FormAndGrammemsPart, Holder, commonGrammems);
+    return GetParadigmGroupedLikeInTextbook(FormAndGrammemsPart, Holder, commonGrammems);
 };
 
 std::vector<CFormAndGrammems> BuildFormAndGrammems(const CMorphanHolder *Holder, const CFormInfo *piParadigm)

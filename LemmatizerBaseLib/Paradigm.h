@@ -9,6 +9,7 @@
 #include "MorphDict.h"
 
 class CLemmatizer;
+class CAgramtab;
 
 
 class CFormInfo 
@@ -51,8 +52,10 @@ public:
 	std::string	GetCommonAncode() const;
 	char	GetLemSign() const; 
 	size_t	GetLemmaPrefixLength() const; 
-    std::string  FormatAsInPlmLine() const;
     void    SetUserPrefix(const std::string& UserPrefix);
     void    SetUserUnknown();
+	
+	std::string  GetGramInfoStr(const CAgramtab* gramtab) const;
+	std::string  FormatAsInPlmLine() const;
 };
 

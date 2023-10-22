@@ -14,9 +14,11 @@ class CRusGramTab : public CAgramtab {
 public:
     CAgramtabLine *Lines[rMaxGrmCount];
 
-    CRusGramTab();
-
     ~CRusGramTab() override;
+
+	bool		ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems, bool deduce_grammems = true) const;
+	grammems_mask_t DeduceGrammems(part_of_speech_t PartOfSpeech, grammems_mask_t grammems) const;
+	const char* GetRegistryString() const;
 
     part_of_speech_t GetPartOfSpeechesCount() const override;
 

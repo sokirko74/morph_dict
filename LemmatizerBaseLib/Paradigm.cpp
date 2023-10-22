@@ -6,6 +6,7 @@
 #include "Paradigm.h"
 #include "morph_dict/MorphWizardLib/wizard.h"
 
+
 CFormInfo::CFormInfo()
 {
 	m_pParent = NULL;
@@ -295,3 +296,13 @@ std::string CFormInfo::FormatAsInPlmLine() const
 		Result += " -1 0";
     return Result;
 };
+
+std::string CFormInfo::GetGramInfoStr(const CAgramtab* gramtab) const
+{
+	std::string s;
+	s += " " + gramtab->GetTabStringByGramCode(GetCommonAncode().c_str());
+	const std::string& ancode = (m_bFound) ? GetAncode(0) : GetSrcAncode();
+	for (int i = 0; i < ancode.length(); i += 2)
+		s += " " + gramtab->GetTabStringByGramCode(ancode.c_str() + i);
+	return s;
+}

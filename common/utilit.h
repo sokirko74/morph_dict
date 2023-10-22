@@ -24,6 +24,7 @@
 #include  <string.h>
 #include  <unordered_set>
 #include <limits>
+#include <plog/Log.h>
 
 #pragma warning (disable : 4018)
 #pragma warning (disable : 4244)
@@ -309,3 +310,5 @@ inline bool endswith(const std::string& main, const std::string& suffix) {
 extern std::vector<std::string> list_path_by_file_mask(std::string filemask);
 extern std::string join_string(const std::vector<std::string>& items, const std::string& delimiter);
 extern std::vector<std::string> split_string(const std::string& s, char delim);
+
+extern void init_plog(std::string filename);
