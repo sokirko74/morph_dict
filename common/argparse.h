@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <fstream>
-
+#include <plog/Log.h>
 
 class ArgumentParser {
 private:
@@ -22,6 +22,7 @@ private:
 
     std::unordered_map<String, String> ArgumentValues;
     MorphLanguageEnum  Language = morphUnknown;
+    plog::Severity LogLevel = plog::Severity::info;
     std::istream* InputStream;
     std::ifstream  InputStreamFile;
     std::ostream* OutputStream;
@@ -112,6 +113,16 @@ private:
                 }
 
             }
+            if (a.Name == "log-level") {
+                auto log_level_str = Retrieve("log-level");
+                if (!log_level_str.empty()) {
+                    LogLevel = plog::severityFromString(Retrieve("log-level").c_str());
+                    if (LogLevel == plog::Severity::none) {
+                        ArgumentError("bad log-level " + Retrieve("log-level"));
+                    }
+                }
+            }
+
             if (a.Name == "input") {
                 if (Retrieve("input") != "-") {
                     auto path = Retrieve("input");
@@ -197,6 +208,10 @@ public:
 
     MorphLanguageEnum GetLanguage() const {
         return Language;
+    }
+
+    plog::Severity GetLogLevel() const {
+        return LogLevel;
     }
 
     std::ostream& GetOutputStream() const {

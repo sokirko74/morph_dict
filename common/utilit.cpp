@@ -452,38 +452,6 @@ std::string	CreateTempFileName()
     static std::ofstream logger;
 #endif
 
-void rml_TRACE( const char* format, ... )
-{
-#ifdef _DEBUG
-
-        if (!format) {
-            return;
-        }
-        va_list arglst;
-        char buffer[2000];
-        if (strlen (format) >  200)
-        {
-            #ifdef WIN32
-                OutputDebugString("!!!!! too long debug line!!!");
-            #endif
-            return;
-        };
-        va_start( arglst, format );
-        vsprintf(buffer, format, arglst);
-        va_end( arglst );
-
-        #ifdef WIN32
-            OutputDebugString(buffer);
-        #endif
-
-		if (!logger.is_open()) {
-			logger.open("trace.log", std::ios::binary);
-		}
-		logger << convert_to_utf8(buffer, morphRussian)	;
-		logger.flush();
-#endif
-};
-
 
 bool IsEmptyLine ( const char *t)
 {
@@ -2293,10 +2261,10 @@ public:
 
 static plog::ConsoleAppender<MyFormatter> consoleAppender; 
 
-void init_plog(std::string filename) {
+void init_plog(plog::Severity severity, std::string filename) {
 	if (std::filesystem::exists(filename)) {
 		std::filesystem::remove(filename);
 	}
-	plog::init<MyFormatter>(plog::debug, filename.c_str()).addAppender(&consoleAppender);
+	plog::init<MyFormatter>(severity, filename.c_str()).addAppender(&consoleAppender);
 
 }

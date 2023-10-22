@@ -135,7 +135,6 @@ extern std::string	Format( const char* format, ... );
 extern std::string&  TrimLeft (std::string& str);
 extern std::string&  TrimRight (std::string& str);
 extern std::string&	Trim (std::string& str);
-extern void		rml_TRACE( const char* format, ... );
 extern bool		LoadFileToString(std::string FileName, std::string& Result);
 
 
@@ -311,4 +310,4 @@ extern std::vector<std::string> list_path_by_file_mask(std::string filemask);
 extern std::string join_string(const std::vector<std::string>& items, const std::string& delimiter);
 extern std::vector<std::string> split_string(const std::string& s, char delim);
 
-extern void init_plog(std::string filename);
+extern void init_plog(plog::Severity severity, std::string filename);
