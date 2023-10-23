@@ -2,9 +2,7 @@
 // ==========  Dialing Lemmatizer (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko
 
-#ifndef MorphDictBuilder_h
-#define MorphDictBuilder_h
-
+#pragma once
 
 #include "MorphDict.h"
 #include "MorphAutomBuilder.h"
@@ -22,20 +20,16 @@ class CMorphDictBuilder : public CMorphDict
 	std::vector< std::vector <bool> >		m_ModelInfo;
 	std::vector< DwordVector >	m_PrefixSets;
 
-	
+
 	void				ClearRegister();
-	
-	
 	bool				CheckFlexiaGramInfo(const MorphoWizard& Wizard) const;
 	void				GeneratePrefixes(const MorphoWizard& Wizard);
-
-	//  debug functions 
+		//  debug functions 
 	bool				CheckRegister() const;
-	
-	CMorphAutomatBuilder*	GetFormBuilder() {return (CMorphAutomatBuilder*)m_pFormAutomat; };
-	
-	
-	
+	CMorphAutomatBuilder* GetFormBuilder() { return (CMorphAutomatBuilder*)m_pFormAutomat; };
+
+
+
 public:
 	CMorphDictBuilder(MorphLanguageEnum Language);
 	~CMorphDictBuilder();
@@ -43,10 +37,7 @@ public:
 	void	CreateAutomat(const MorphoWizard& Wizard);
 	void	GenerateLemmas(const MorphoWizard& Wizard);
 	void	GenerateUnitedFlexModels(const MorphoWizard& Wizard);
-	bool	GenPredictIdx(const MorphoWizard& wizard, int PostfixLength, int MinFreq, std::string path);
+	bool	GenPredictIdx(const MorphoWizard& wizard, int PostfixLength, int MinFreq, std::string path, nlohmann::json& output_opts);
 };
 
 
-
-
-#endif

@@ -182,6 +182,7 @@ MorphoWizard::MorphoWizard():
     m_bFullTrace = true;
     m_pGramTab = 0;
     m_pMeter = 0;
+    m_Language = morphUnknown;
 }
 
 MorphoWizard::~MorphoWizard() {
@@ -313,6 +314,10 @@ void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool
             std::string lang = el.value();
             if (!GetLanguageByString(lang, m_Language))
                 throw CExpc("Unknown language: " + lang);
+        }
+        else if (el.key() == "PLUG_NOUN") {
+            assert (m_Language != morphUnknown);
+            m_PlugNoun = convert_from_utf8(std::string(el.value()).c_str(), m_Language);
         }
         else if (el.key() == "GRAMTAB") {
             gramtab_path = el.value();

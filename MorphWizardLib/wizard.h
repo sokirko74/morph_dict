@@ -43,15 +43,9 @@ typedef std::multimap<std::string, CParadigmInfo>		LemmaMap;
 typedef LemmaMap::iterator lemma_iterator_t;
 typedef LemmaMap::const_iterator const_lemma_iterator_t;
 
-
-
-//----------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------
 class MorphWizardMeter;
 
 
-//----------------------------------------------------------------------------
 class MorphoWizard : public CMorphWizardBase
 {
 
@@ -103,6 +97,7 @@ public:
     bool						m_ReadOnly;
     std::string						m_LanguageStr;
     std::string						m_MrdPath;
+    std::string m_PlugNoun;
     bool						m_bFullTrace;
 
     MorphoWizard();

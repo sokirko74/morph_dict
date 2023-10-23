@@ -2,9 +2,7 @@
 // ==========  Dialing Lemmatizer (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko
 
-#ifndef AhoKorasickMorph_h
-#define AhoKorasickMorph_h
-
+#pragma once 
 
 #include "MorphAutomat.h"
 #include "../MorphWizardLib/FormInfo.h"
@@ -90,6 +88,3 @@ public:
 	std::string	GetAllMorphInterpsStr (const std::string& Text,const size_t TextPos, bool bFullInterp) const;
 };
 
-
-
-#endif

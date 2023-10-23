@@ -7,11 +7,6 @@
 #include <fstream>
 
 
-//======================================================
-//=============        CMorphDict               =============
-//======================================================
-
-
 CMorphDict::CMorphDict(MorphLanguageEnum language) :
 	m_SearchInfoLess(m_Bases)
 {

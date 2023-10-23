@@ -2,5 +2,6 @@
   "MRD_FILE": 	"morphs.mrd",
   "LANG":	 "GERMAN",
   "USERS": [ "gri","alex","boris", "masha", "af", "oleg", "nim" ],
-  "GRAMTAB":  "gramtab.tab"
+  "GRAMTAB":  "gramtab.tab",
+  "PLUG_NOUN": "UNKNOWN"
 }

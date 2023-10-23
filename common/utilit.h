@@ -286,12 +286,24 @@ inline std::string _R(const char* buffer) {
 	return convert_from_utf8(buffer, morphRussian);
 }
 
+inline std::string _R(const std::string& s) {
+	return _R(s.c_str());
+}
+
 inline std::string _E(const char* buffer) {
 	return convert_from_utf8(buffer, morphEnglish);
 }
 
+inline std::string _E(const std::string& s) {
+	return _E(s.c_str());
+}
+
 inline std::string _G(const char* buffer) {
 	return convert_from_utf8(buffer, morphGerman);
+}
+
+inline std::string _G(const std::string& s) {
+	return _G(s.c_str());
 }
 
 inline bool startswith(const std::string& main, const std::string& prefix) {

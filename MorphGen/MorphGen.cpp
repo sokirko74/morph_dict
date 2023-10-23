@@ -28,37 +28,44 @@ void initArgParser(int argc, const char** argv, ArgumentParser& parser) {
     parser.AddArgument("--output-folder", "output folder");
     parser.AddArgument("--postfix-len", "postfix len", true);
     parser.AddArgument("--min-freq", "min freq", true);
+    parser.AddArgument("--log-level", "log level", true);
     parser.AddOption("--allow-russian-jo");
     parser.AddOption("--allow-russian-jejo");
     parser.Parse(argc, argv);
 }
 
 
+void write_opt_file(std::string opt_file, bool bAllowRussianJo, bool SkipPredictBase) {
+}
+
 int main(int argc, const char* argv[])
 {
     ArgumentParser args;
     initArgParser(argc, argv, args);
+    init_plog(args.GetLogLevel(), "morph_gen.log");
     bool bAllowRussianJeJo = args.Exists("allow-russian-jejo");
-    bool bAllowRussianJo = bAllowRussianJeJo || args.Exists("allow-russian-jo");
-    bool bGeneratePredictBase = true;
     int PostfixLength = -1;
     int MinFreq = -1;
+
+    nlohmann::json opts;
+    opts["AllowRussianJo"] = bAllowRussianJeJo || args.Exists("allow-russian-jo");
+    opts["SkipPredictBase"] = false;
     if (!args.Exists("postfix-len") || !args.Exists("min-freq")) {
-        bGeneratePredictBase = false;
-        std::cerr << "skip prediction base generation \n";
+        opts["SkipPredictBase"] = true;
+        LOGI << "skip prediction base generation ";
     }
     else {
         PostfixLength = atoi(args.Retrieve("postfix-len").c_str());
         if ((PostfixLength == 0) || (PostfixLength > 5))
         {
-            std::cerr << "PostfixLength is std::set to " << PostfixLength << "\n";
-            std::cerr << "PostfixLength should be between 1 and 5\n";
+            LOGI << "PostfixLength is std::set to " << PostfixLength << "";
+            LOGI << "PostfixLength should be between 1 and 5";
             return 1;
         };
 
         int MinFreq = atoi(args.Retrieve("min-freq").c_str());
         if (MinFreq <= 0) {
-            std::cerr << "MinFreq should be more than 0\n";
+            LOGI << "MinFreq should be more than 0";
             return 1;
         };
     }
@@ -70,15 +77,15 @@ int main(int argc, const char* argv[])
         MorphoWizard Wizard;
         Wizard.load_wizard(args.Retrieve("input").c_str(), "guest", false);
         wizardLangua = Wizard.m_Language;
-        if (!bAllowRussianJo)
+        if (!opts["AllowRussianJo"])
         {
-            std::cerr << "prepare_for_RML\n";
+            LOGI << "prepare_for_RML";
             if (!Wizard.prepare_for_RML())
                 return 1;
         };
         if (bAllowRussianJeJo)
         {
-            std::cerr << "prepare_for_RML2\n";
+            LOGI << "prepare_for_RML2";
             if (!Wizard.prepare_for_RML2())
                 return 1;
         };
@@ -88,37 +95,27 @@ int main(int argc, const char* argv[])
             R.GenerateLemmas(Wizard);
             R.GenerateUnitedFlexModels(Wizard);
             R.CreateAutomat(Wizard);
-            std::cerr << "Saving...\n";
+            LOGI << "Saving...";
             auto outFileName = std::filesystem::path(output_folder) / MORPH_MAIN_FILES;
             R.Save(outFileName.string());
-            std::cerr << "Successful written indices of the main automat to " << outFileName << std::endl;
-            if (bGeneratePredictBase) {
-                if (!R.GenPredictIdx(Wizard, PostfixLength, MinFreq, output_folder))
+            LOGI << "Successful written indices of the main automat to " << outFileName << std::endl;
+            if (not opts["SkipPredictBase"]) {
+                if (!R.GenPredictIdx(Wizard, PostfixLength, MinFreq, output_folder, opts))
                 {
-                    std::cerr << "Cannot create prediction base\n";
+                    LOGI << "Cannot create prediction base";
                     return 1;
                 };
             }
         }
 
-        
-        { // generating options file
-            auto OptFileName = std::filesystem::path(output_folder) / OPTIONS_FILE;
-            std::cerr << "writing options file " << OptFileName << std::endl;
-            FILE* opt_fp = fopen(OptFileName.string().c_str(), "w");
-            if (!opt_fp)
-            {
-                std::cerr << "Cannot write to file " << OptFileName << std::endl;
-                return 1;
-            };
-            if (bAllowRussianJo)
-                fprintf(opt_fp, "AllowRussianJo\n");
-            if (!bGeneratePredictBase) {
-                fprintf(opt_fp, "SkipPredictBase\n");
-            }
-            fclose(opt_fp);
-            std::cerr << "Options file was created\n";
+        {
+            auto opt_path = std::filesystem::path(output_folder) / OPTIONS_FILE;
+            LOGI << "writing options file " << opt_path;
+            std::ofstream file(opt_path);
+            file << opts.dump(4);
+            file.close();
         }
+
         {
             std::filesystem::path src =  Wizard.m_GramtabPath;
             std::filesystem::path trg = output_folder / Wizard.m_GramtabPath.filename();
@@ -129,19 +126,19 @@ int main(int argc, const char* argv[])
     }
     catch (CExpc e)
     {
-        std::cerr << "exception=" << e.m_strCause << std::endl;
+        LOGE << "exception=" << e.m_strCause << std::endl;
         return 1;
     }
     catch (const std::exception& ex) {
-        std::cerr << "exception=" << ex.what()<< std::endl;
+        LOGE << "exception=" << ex.what()<< std::endl;
         return 1;
     }
     catch (...)
     {
-        std::cerr << "Can not Generate,  general exception\n";
+        LOGE << "Can not Generate,  general exception";
         return 1;
     }
-    std::cerr << "exit with success\n";
+    LOGI << "exit with success";
     return 0;
 }
 

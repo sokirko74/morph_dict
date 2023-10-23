@@ -51,7 +51,7 @@ static void addLines(std::string& str, tagLines& lines) {
     std::pair<tagHomon::iterator, bool> res;
     res = homon.insert(tagHomon::value_type(str, lines));
     if (!res.second) {
-        std::cout << "Duplicate word: " << str << " skipped." << std::endl;
+        LOGD << "Duplicate word: " << str << " skipped.";
     }
 }
 
@@ -118,7 +118,6 @@ static void loadDat(std::istream& ifs, MorphLanguageEnum langua) {
             auto s = partOfSpeechStr + " " + elems[3];
             if (!MorphHolder.m_pGramTab->ProcessPOSAndGrammemsIfCan(s.c_str(), &pos, &gra)) {
                 throw std::runtime_error(Format("Bad part of speech or grammems: line %i ", lin));
-                continue;
             }
         }
         else {
@@ -146,7 +145,7 @@ static void loadDat(std::istream& ifs, MorphLanguageEnum langua) {
                     group.anc = p.GetAncode(j);
                     auto res = lines.insert(tagLines::value_type(group, freq));
                     if (!res.second) {
-                        std::cout << "Duplicate pid/anc: line:" << lin << " skipped" << std::endl;
+                        LOGD << "Duplicate pid/anc: line:" << lin << " skipped" << std::endl;
                     }
                     else {
                         foundCount++;
@@ -160,11 +159,11 @@ static void loadDat(std::istream& ifs, MorphLanguageEnum langua) {
     }
     if (!str.empty() && lines.size() > 0)
         addLines(str, lines);
-    std::cout << "done" << std::endl;
+    LOGI << "done";
 }
 
 static bool saveBin(std::string name) {
-    std::cout << "Saving " << name.c_str() << "... ";
+    LOGI << "Saving " << name.c_str() << "... ";
     tagHomon::iterator it;
     for (it = homon.begin(); it != homon.end(); it++) {
         std::string str = it->first;
@@ -185,7 +184,7 @@ static bool saveBin(std::string name) {
     std::sort(homonweight.begin(), homonweight.end(), less4homonode());
 
     WriteVector(name, homonweight);;
-    std::cout << "done" << std::endl;
+    LOGI << "done";
     return true;
 }
 
@@ -194,6 +193,7 @@ void initArgParser(int argc, const char** argv, ArgumentParser& parser) {
     parser.AddArgument("--input", "input file");
     parser.AddArgument("--output", "output file");
     parser.AddArgument("--morph-folder", "morph_folder");
+    parser.AddArgument("--log-level", "log level", true);
     parser.AddArgument("--language", "language");
     parser.Parse(argc, argv);
 }
@@ -201,7 +201,7 @@ void initArgParser(int argc, const char** argv, ArgumentParser& parser) {
 int main(int argc, const char** argv) {
     ArgumentParser args;
     initArgParser(argc, argv, args);
-
+    init_plog(args.GetLogLevel(), "stat_dat_bin.log");
     try {
         MorphHolder.LoadLemmatizer(args.GetLanguage(), args.Retrieve("morph-folder"));
 
@@ -211,14 +211,15 @@ int main(int argc, const char** argv) {
             return 0;
     }
     catch (CExpc e) {
-        std::cerr << "exception occurred:" << e.m_strCause << "\n";
+        LOGE << "exception occurred:" << e.m_strCause;
     }
-    catch (std::runtime_error e) {
-        std::cerr << "exception occurred:" << e.what() << "\n";
+    catch (std::exception e) {
+        LOGE << "exception occurred:" << e.what();
     }
     catch (...) {
-        std::cerr << std::endl << "A general exception" << std::endl;
+        LOGE << "A general exception";
     }
 
     return 1;
 }
+

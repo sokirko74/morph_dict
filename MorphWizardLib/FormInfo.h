@@ -109,7 +109,7 @@ class CMorphWizardBase {
 public:
 	MorphLanguageEnum		m_Language;
 
-	//  a std::vector of all Paradigms 
+	//  a vector of all Paradigms 
 	std::vector<CFlexiaModel>	m_FlexiaModels;
 
 	// all accent models

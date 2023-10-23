@@ -5,6 +5,8 @@
 #include "morph_dict/common/utilit.h"
 #include "Paradigm.h"
 #include "rus_numerals.h"
+#include <fstream>
+
 
 CLemmatizer::CLemmatizer(MorphLanguageEnum Language) : 
 	CMorphDict(Language), 
@@ -199,38 +201,53 @@ bool CLemmatizer::GetAllAncodesAndLemmasQuick(std::string& InputWordStr, bool ca
 	
 }
 
+std::string CLemmatizer::GetPlugNounGramCode() const {
+	return m_PlugNounGramCode;
+}
 
-void CLemmatizer::ReadOptions(std::string FileName)
+void CLemmatizer::ReadOptions(std::string file_path)
 {
-	std::string Options;
-	LoadFileToString(FileName, Options);
-	StringTokenizer lines(Options.c_str(), "\r\n");
-	while (lines())
-	{
-		std::string line = lines.val();
-		Trim(line);
-		if (line.empty()) continue;
-		if (line == "AllowRussianJo")
-			m_bAllowRussianJo = true;
-		if (line == "SkipPredictBase")
+	LOGV << "load " << file_path;
+	try {
+		std::ifstream opt_file(file_path);
+		nlohmann::json jf = nlohmann::json::parse(opt_file);
+		opt_file.close();
+
+		m_bAllowRussianJo = jf.value("AllowRussianJo", false);
+		if (jf.value("SkipPredictBase", false))
 			m_bEnablePrediction = false;
-	};
+		std::string s = jf.value("PlugNounGramCode", "");
+		m_PlugNounGramCode = convert_from_utf8(s.c_str(), m_Language);
+	}
+	catch (nlohmann::json::exception e) {
+		LOGE << "error " << e.what() << " while reading " << file_path;
+		throw CExpc(e.what());
+	}
 };
+
 
 void CLemmatizer::LoadDictionariesFromPath(std::string load_path)
 {
+	LOGV << "load " << load_path;
 	Load(MakePath(load_path, MORPH_MAIN_FILES));
 	m_bLoaded = true;
-	// implicity load homonyms statistic for literature
+
+	LOGV << "load literature statistics " << MakePath(load_path, "l");
 	m_Statistic.Load(MakePath(load_path, "l"));
+
 	m_bUseStatistic = true;
+
 	ReadOptions(MakePath(load_path, OPTIONS_FILE));
+
 	if (m_bEnablePrediction) {
-		m_Predict.Load(MakePath(load_path, PREDICT_BIN_PATH));
+		auto predict_path = MakePath(load_path, PREDICT_BIN_PATH);
+		LOGV << "load " << predict_path;
+		m_Predict.Load(predict_path);
+
 		m_Predict.m_ModelFreq.resize(m_FlexiaModels.size(), 0);
-		const size_t count = m_LemmaInfos.size();
-		for (size_t i = 0; i < count; i++)
-			m_Predict.m_ModelFreq[m_LemmaInfos[i].m_LemmaInfo.m_FlexiaModelNo]++;
+		for (const auto& l : m_LemmaInfos) {
+			++m_Predict.m_ModelFreq[l.m_LemmaInfo.m_FlexiaModelNo];
+		}
 	};
 	m_PrefixesSet.clear();
 	m_PrefixesSet.insert(m_Prefixes.begin(), m_Prefixes.end());
@@ -264,20 +281,18 @@ bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& InputWordStr
 {
     Result.clear();
 	FilterSrc(InputWordStr);
-	std::vector<CAutomAnnotationInner>	FindResults;
-	bool bFound = LemmatizeWord(InputWordStr, capital, bUsePrediction, FindResults, true);
+	std::vector<CAutomAnnotationInner>	found;
+	bool bFound = LemmatizeWord(InputWordStr, capital, bUsePrediction, found, true);
 		
-	AssignWeightIfNeed(FindResults);
+	AssignWeightIfNeed(found);
 
-	for (size_t i = 0; i < FindResults.size(); i++)
+	for (const auto& a: found)
 	{
-		const CAutomAnnotationInner& A = FindResults[i];
 		// if bNorm, then  ignore words which are not lemma
-		if (   bNorm && (A.m_ItemNo!=0)) continue;
+		if (bNorm && (a.m_ItemNo!=0)) continue;
 		
 		CFormInfo P;
-		P.Create(this, A, InputWordStr, bFound);
-
+		P.Create(this, a, InputWordStr, bFound);
 		Result.push_back(P);
 	}
 

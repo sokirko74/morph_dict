@@ -2,5 +2,6 @@
   "MRD_FILE": 	"morphs.mrd",
   "LANG":	 "ENGLISH",
   "USERS": [ "gri","alex","boris", "masha", "af", "oleg", "nim" ],
-  "GRAMTAB":  "gramtab.tab"
+  "GRAMTAB":  "gramtab.tab",
+  "PLUG_NOUN": "DURNOVO"
 }
