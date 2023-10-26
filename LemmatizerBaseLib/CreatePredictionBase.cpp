@@ -192,7 +192,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 
 	LOGI << "finish prepare";
 
-	std::string plug_noun = convert_to_utf8(wizard.m_pGramTab->GetPlugNouInfo().m_Lemma, m_Language);
+	std::string plug_noun = wizard.m_pGramTab->GetPlugNouInfo().m_Lemma;
 	
 	int PlugLemmaInfoNo = -1;
 
