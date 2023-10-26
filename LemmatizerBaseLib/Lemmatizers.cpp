@@ -201,10 +201,6 @@ bool CLemmatizer::GetAllAncodesAndLemmasQuick(std::string& InputWordStr, bool ca
 	
 }
 
-std::string CLemmatizer::GetPlugNounGramCode() const {
-	return m_PlugNounGramCode;
-}
-
 void CLemmatizer::ReadOptions(std::string file_path)
 {
 	LOGV << "load " << file_path;
@@ -216,8 +212,6 @@ void CLemmatizer::ReadOptions(std::string file_path)
 		m_bAllowRussianJo = jf.value("AllowRussianJo", false);
 		if (jf.value("SkipPredictBase", false))
 			m_bEnablePrediction = false;
-		std::string s = jf.value("PlugNounGramCode", "");
-		m_PlugNounGramCode = convert_from_utf8(s.c_str(), m_Language);
 	}
 	catch (nlohmann::json::exception e) {
 		LOGE << "error " << e.what() << " while reading " << file_path;

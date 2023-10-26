@@ -313,10 +313,6 @@ void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool
             if (!GetLanguageByString(lang, m_Language))
                 throw CExpc("Unknown language: " + lang);
         }
-        else if (el.key() == "PLUG_NOUN") {
-            assert (m_Language != morphUnknown);
-            m_PlugNoun = convert_from_utf8(std::string(el.value()).c_str(), m_Language);
-        }
         else if (el.key() == "USERS") {
             if (!guest) {
                 bool login = false;

@@ -13,6 +13,11 @@ enum NamingAlphabet {
     naLatin = 2
 };
 
+struct CPlugNounInfo {
+    std::string m_Lemma;
+    std::string m_GramCode;
+};
+
 struct CAgramtabLine {
     explicit CAgramtabLine(size_t SourceLineNo);
 
@@ -27,6 +32,7 @@ typedef bool(*GrammemCompare)(const CAgramtabLine *l1, const CAgramtabLine *l2);
 class CAgramtab {
     std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMapNatio;
     std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMapLatin;
+    CPlugNounInfo m_PlugNoun;
 
     void BuildPartOfSpeechMap();
 
@@ -41,7 +47,7 @@ protected:
     };
 
 public:
-    const static inline char *GramtabFileName = "gramtab.tab";
+    
     MorphLanguageEnum m_Language;
 
     CAgramtab();
@@ -58,6 +64,10 @@ public:
     virtual part_of_speech_t GetPartOfSpeechesCount() const {
         throw std::runtime_error("unimplemented GetPartOfSpeechesCount=");
     };
+
+    const CPlugNounInfo& GetPlugNouInfo() const {
+        return m_PlugNoun;
+    }
 
     virtual const char* GetPartOfSpeechStr(part_of_speech_t i, NamingAlphabet na = naDefault) const = 0;
     

@@ -192,7 +192,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 
 	LOGI << "finish prepare";
 
-	output_opts["PlugNoun"] = convert_to_utf8(wizard.m_PlugNoun, m_Language);
+	std::string plug_noun = convert_to_utf8(wizard.m_pGramTab->GetPlugNouInfo().m_Lemma, m_Language);
 	
 	int PlugLemmaInfoNo = -1;
 
@@ -209,7 +209,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 		const CFlexiaModel& paradigm = m_FlexiaModels[ModelNo];
 		std::string	base = m_Bases[m_LemmaInfos[lin].m_LemmaStrNo].GetString();
 
-		if (base + paradigm.get_first_flex() == wizard.m_PlugNoun)
+		if (base + paradigm.get_first_flex() == plug_noun)
 		{
 			PlugLemmaInfoNo = (int)lin;
 			output_opts["PlugNounGramCode"] = convert_to_utf8(paradigm.get_first_code(), m_Language);
@@ -241,7 +241,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 
 	if (PlugLemmaInfoNo == -1)
 	{
-		LOGE << "Cannot find a word for the default noun prediction (\"" << wizard.m_PlugNoun << 
+		LOGE << "Cannot find a word for the default noun prediction (\"" << plug_noun <<
 			"\") while  generating "<< GetStringByLanguage(wizard.m_Language)  <<" prediction base";
 		return false;
 	};

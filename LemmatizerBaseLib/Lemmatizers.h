@@ -21,7 +21,6 @@ typedef enum {
 
 class CLemmatizer : public CMorphDict {
     bool m_bEnablePrediction;
-    std::string m_PlugNounGramCode;
 protected:
     // Postfixes-particles, that do not change the meaning 
     std::set<std::string> m_HyphenPostfixes;
@@ -74,7 +73,6 @@ public:
     bool CreateParadigmFromID(uint32_t id, CFormInfo &Result) const;
     bool IsInDictionary(std::string &word, const bool cap) const;
     std::vector<CFuzzyResult> _CorrectMisspelledWord(std::string InputWordStr,  size_t maxStrDistance=2) const;
-    std::string GetPlugNounGramCode() const;
 };
 
 

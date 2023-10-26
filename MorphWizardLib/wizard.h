@@ -97,7 +97,6 @@ public:
     bool						m_ReadOnly;
     std::string						m_LanguageStr;
     std::string						m_MrdPath;
-    std::string m_PlugNoun;
     bool						m_bFullTrace;
 
     MorphoWizard();
