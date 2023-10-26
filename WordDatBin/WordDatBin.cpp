@@ -63,7 +63,7 @@ bool readDat(std::istream &ifs, std::set<CStatInfo> &Infos) {
         };
 
         I.m_Pos = 1;
-        I.m_Grammems = 1;
+        I.m_Grammems = 0;
         if (!MorphHolderRus.m_pGramTab->ProcessPOSAndGrammemsIfCan(sgrm.c_str(), &I.m_Pos, &I.m_Grammems)) {
             std::cout << "Error in morph. pattern line: " << buf << " skipped" << std::endl;
             continue;
@@ -133,14 +133,14 @@ static bool loadDat(std::istream &ifs) {
         return false;
 
     DealWithUniqueLemmas(Infos);
-
+    size_t cnt = 0;
     for (std::set<CStatInfo>::const_iterator it = Infos.begin(); it != Infos.end(); it++) {
         const CStatInfo &I = *it;
         bool bFound = false;
         std::vector<CFormInfo> ParadigmCollection;
         std::string s = I.m_Lemma;
         if (!MorphHolderRus.m_pLemmatizer->CreateParadigmCollection(true, s, true, false, ParadigmCollection)) {
-            std::cout << "Exception in Lemmatizer (probably wrong ABC: " << I.m_Lemma << " skipped" << std::endl;
+            LOGE << "Exception in Lemmatizer (probably wrong ABC: " << I.m_Lemma << " skipped" << std::endl;
             continue;
         }
 
@@ -160,10 +160,14 @@ static bool loadDat(std::istream &ifs) {
             bFound = true;
         }
         if (!bFound) {
-            //std::cout << "Can't produce PID: " << I.DumpToString() << " skipped" << std::endl;
+            LOGD << "Can't produce PID: " << I.DumpToString() << " skipped" << std::endl;
             continue;
         }
+        else {
+            ++cnt;
+        }
     }
+    LOGI << "built " << cnt << " lemma freq";
     return true;
 }
 
@@ -180,19 +184,21 @@ void initArgParser(int argc, const char **argv, ArgumentParser& parser) {
     parser.AddArgument("--output", "output file");
     parser.AddArgument("--language", "language");
     parser.AddArgument("--morph-folder", "morph_folder");
+    parser.AddArgument("--log-level", "log level", true);
 
     parser.Parse(argc, argv);
 }
 
 int main(int argc, const char **argv) {
-    std::cout << "start\n";
 
     ArgumentParser args;
     initArgParser(argc, argv, args);
+    init_plog(args.GetLogLevel(), "word_dat_bin.log");
 
     try {
         MorphHolderRus.LoadLemmatizer(args.GetLanguage(), args.Retrieve("morph-folder"));
-
+        MorphHolderRus.m_pGramTab->SetUseNationalConstants(false);
+        PLOGI << "morphology for " << GetStringByLanguage(MorphHolderRus.m_pGramTab->m_Language) << " loaded";
         if (loadDat(args.GetInputStream()))
             if (saveBin(args.CloseOutputStreamAndGetName()))
                 return 0;

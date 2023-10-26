@@ -15,12 +15,11 @@ add_library(AgramtabLib
         GramInfo.h
         rus_consts.h
         RusGramTab.h
-
-)
+ )
 
 target_link_libraries(AgramtabLib
         morphology_common
 )
 
 add_subdirectory (tests/CheckGramTab)
-#add_subdirectory (scripts/gramtab_to_json)
+#add_subdirectory (scripts/gramtab_to_en)
