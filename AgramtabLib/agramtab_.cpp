@@ -271,7 +271,7 @@ std::string CAgramtab::ReadFromFolder(std::string folder) {
 
     std::ifstream inp(path);
     if (!inp.good()) {
-        throw CExpc("Cannot read gramtab for language " + GetStringByLanguage(m_Language));
+        throw CExpc("Cannot read gramtab for language %s path=%s", GetStringByLanguage(m_Language).c_str(), path.string().c_str());
     }
     nlohmann::json jf = nlohmann::json::parse(inp);
     inp.close();
