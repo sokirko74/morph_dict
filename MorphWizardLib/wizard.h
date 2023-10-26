@@ -63,7 +63,7 @@ class MorphoWizard : public CMorphWizardBase
     friend	class MorphWizardMeter;
     MorphWizardMeter* m_pMeter;	// Nick 30.11.2003
 
-    void load_gramtab(std::string path, bool useNationalConstants);
+    void load_gramtab(bool useNationalConstants);
     void ReadSessions(std::ifstream& mrdFile);
     void ReadLemmas(std::ifstream& mrdFile);
 public:

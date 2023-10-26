@@ -209,7 +209,7 @@ std::string MorphoWizard::get_log_file_name() const {
 
 const size_t MaxMrdLineLength = 10240;
 
-void MorphoWizard::load_gramtab(std::string path, bool useNationalConstants) {
+void MorphoWizard::load_gramtab(bool useNationalConstants) {
     CAgramtab* pGramTab;
     switch (m_Language) {
     case morphFioDisclosures:
@@ -226,8 +226,7 @@ void MorphoWizard::load_gramtab(std::string path, bool useNationalConstants) {
         throw CExpc("Unknown language to load gramtab: " + GetStringByLanguage(m_Language));
     };
 
-    m_GramtabPath = m_MwzFolder / path;
-    pGramTab->Read(m_GramtabPath.string().c_str());
+    m_GramtabPath = pGramTab->ReadFromFolder(m_MwzFolder.string());
     pGramTab->SetUseNationalConstants(useNationalConstants);
 
     m_pGramTab = pGramTab;
@@ -305,7 +304,6 @@ void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool
     if (m_pGramTab) delete m_pGramTab;
     nlohmann::json jf = nlohmann::json::parse(mwzFile);
     bool guest = user_name == "guest";
-    std::string gramtab_path = CAgramtab::GramtabFileName;
     for (auto& el : jf.items()) {
         if (el.key() == "MRD_FILE") {
             m_MrdPath = el.value();
@@ -318,9 +316,6 @@ void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool
         else if (el.key() == "PLUG_NOUN") {
             assert (m_Language != morphUnknown);
             m_PlugNoun = convert_from_utf8(std::string(el.value()).c_str(), m_Language);
-        }
-        else if (el.key() == "GRAMTAB") {
-            gramtab_path = el.value();
         }
         else if (el.key() == "USERS") {
             if (!guest) {
@@ -337,7 +332,7 @@ void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool
             }
         }
     }
-    load_gramtab(gramtab_path, useNationalConstants);
+    load_gramtab(useNationalConstants);
     load_mrd(guest, bCreatePrediction);
     StartSession(user_name);
     m_bLoaded = true;

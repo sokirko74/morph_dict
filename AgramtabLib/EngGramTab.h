@@ -18,9 +18,10 @@ public:
 	~CEngGramTab();
 	
 	part_of_speech_t GetPartOfSpeechesCount() const;
-	const char* GetPartOfSpeechStr(part_of_speech_t i) const;
+	const char* GetPartOfSpeechStr(part_of_speech_t i, NamingAlphabet na = naDefault) const;
+	const char* GetPartOfSpeechStrLong(part_of_speech_t i) const override;
 	grammem_t GetGrammemsCount()  const;
-	const char* GetGrammemStr(size_t i) const;
+	const char* GetGrammemStr(size_t i, NamingAlphabet na = naDefault) const;
 	size_t GetMaxGrmCount() const;
 	CAgramtabLine*& GetLine(size_t LineNo) {return Lines[LineNo];}
 	const CAgramtabLine* GetLine(size_t LineNo) const {return Lines[LineNo];};

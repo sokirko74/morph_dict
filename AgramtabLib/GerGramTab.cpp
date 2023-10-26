@@ -117,15 +117,19 @@ part_of_speech_t CGerGramTab::GetPartOfSpeechesCount() const {
 	return GERMAN_PART_OF_SPEECH_COUNT;
 };
 
-const char* CGerGramTab::GetPartOfSpeechStr(part_of_speech_t i) const { 
+const char* CGerGramTab::GetPartOfSpeechStr(part_of_speech_t i, NamingAlphabet) const {
 		return GermanPartOfSpeech[i].c_str();
 };
+
+const char* CGerGramTab::GetPartOfSpeechStrLong(part_of_speech_t i) const {
+	return GetPartOfSpeechStr(i);
+}
 
 grammem_t CGerGramTab::GetGrammemsCount()  const {
 		return GermanGrammemsCount;
 };
 
-const char* CGerGramTab::GetGrammemStr(size_t i) const { 
+const char* CGerGramTab::GetGrammemStr(size_t i, NamingAlphabet) const {
 	return GermanGrammems[i].c_str(); 
 };
 

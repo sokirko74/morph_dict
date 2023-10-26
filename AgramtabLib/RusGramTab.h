@@ -11,21 +11,26 @@ class CRusGramTab : public CAgramtab {
     const static size_t rStartUp = 0xC0E0; //Аа
     const static size_t rEndUp = 0x10000;  //яя
     const static size_t rMaxGrmCount = rEndUp - rStartUp; // // 16159  (16 Кб)
+protected:
+
+    grammems_mask_t DeduceGrammems(part_of_speech_t PartOfSpeech, grammems_mask_t grammems) const override;
+
 public:
     CAgramtabLine *Lines[rMaxGrmCount];
 
     CRusGramTab();
     ~CRusGramTab() override;
 
-	grammems_mask_t DeduceGrammems(part_of_speech_t PartOfSpeech, grammems_mask_t grammems) const;
 
     part_of_speech_t GetPartOfSpeechesCount() const override;
 
-    const char *GetPartOfSpeechStr(part_of_speech_t i) const override;
+    const char *GetPartOfSpeechStr(part_of_speech_t i, NamingAlphabet na = naDefault) const override;
+
+    const char* GetPartOfSpeechStrLong(part_of_speech_t i) const  override;
 
     grammem_t GetGrammemsCount() const override;
 
-    const char *GetGrammemStr(size_t i) const override;
+    const char *GetGrammemStr(size_t i, NamingAlphabet na=naDefault) const override;
 
     size_t GetMaxGrmCount() const override;
 
@@ -37,8 +42,7 @@ public:
 
     std::string LineIndexToGramcode(uint16_t i) const override;
 
-    bool ProcessPOSAndGrammems(const char *tab_str, part_of_speech_t &PartOfSpeech, grammems_mask_t &grammems,
-                               bool deduce_grammems = true) const override;
+    bool ProcessPOSAndGrammems(const char *tab_str, part_of_speech_t &PartOfSpeech, grammems_mask_t &grammems) const override;
 
     const char *GetRegistryString() const override;
 

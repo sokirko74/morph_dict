@@ -58,15 +58,19 @@ part_of_speech_t CEngGramTab::GetPartOfSpeechesCount() const {
 	return ENGLISH_PART_OF_SPEECH_COUNT;
 };
 
-const char* CEngGramTab::GetPartOfSpeechStr(part_of_speech_t i) const { 
+const char* CEngGramTab::GetPartOfSpeechStr(part_of_speech_t i, NamingAlphabet na ) const {
 	return EnglishPartOfSpeech[i].c_str();
 };
+
+const char* CEngGramTab::GetPartOfSpeechStrLong(part_of_speech_t i) const {
+	return GetPartOfSpeechStr(i);
+}
 
 grammem_t CEngGramTab::GetGrammemsCount()  const {
 	return EnglishGrammemsCount;
 };
 
-const char* CEngGramTab::GetGrammemStr(size_t i) const { 
+const char* CEngGramTab::GetGrammemStr(size_t i, NamingAlphabet na) const {
 	return EnglishGrammems[i].c_str();
 };
 

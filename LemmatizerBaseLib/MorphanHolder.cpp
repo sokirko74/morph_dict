@@ -72,7 +72,7 @@ void CMorphanHolder::LoadLemmatizer(MorphLanguageEnum langua, std::string custom
         }
         else {
             m_pLemmatizer->LoadDictionariesFromPath(custom_folder);
-            m_pGramTab->Read(MakePath(custom_folder, m_pGramTab->GramtabFileName).c_str());
+            m_pGramTab->ReadFromFolder(custom_folder);
         }
 		m_CurrentLanguage = langua;
 }
@@ -290,17 +290,25 @@ const std::string ParagigmGroups[ParagigmGroupsCount] = {
         _R("МС ед,жр"),
         _R("МС ед,ср"),
         "VBE sg",
-        "VBE pl"};
+        "VBE pl"
+};
 
 struct CFormAndGrammems
 {
+    MorphLanguageEnum m_Langua;
     std::string m_Form;
-    std::string m_POS;
+    part_of_speech_t m_PartOfSpeech;
     grammems_mask_t m_Grammems;
 
+    int get_sort_key() const {
+        if (m_Langua == morphRussian && m_PartOfSpeech == INFINITIVE) {
+            return -1;
+        }
+        return m_PartOfSpeech;
+    }
     bool operator<(const CFormAndGrammems &X) const
     {
-        return m_POS < X.m_POS;
+        return get_sort_key() < X.get_sort_key();
     };
 };
 
@@ -351,12 +359,11 @@ std::vector<CFormGroup> GetParadigmGroupedLikeInTextbook(const std::vector<CForm
         if (!pGramtab->ProcessPOSAndGrammems(ParagigmGroups[GroupNo].c_str(), POS, Grammems))
             continue;
         ;
-        std::string strPOS = pGramtab->GetPartOfSpeechStr(POS);
         CFormGroup F;
         F.m_IntersectGrammems = GetMaxQWORD();
         for (long i = 0; i < Forms.size(); i++)
             if (!IncludedVector[i])
-                if (Forms[i].m_POS == strPOS)
+                if (Forms[i].m_PartOfSpeech == POS)
                     if ((Grammems & Forms[i].m_Grammems) == Grammems)
                     {
                         int k = 0;
@@ -393,7 +400,7 @@ std::vector<CFormGroup> BuildInterfaceParadigmPart(const CMorphanHolder *Holder,
 {
     int EndFormNo = FormNo + 1;
     for (; EndFormNo < FormAndGrammems.size(); EndFormNo++)
-        if (FormAndGrammems[FormNo].m_POS != FormAndGrammems[EndFormNo].m_POS)
+        if (FormAndGrammems[FormNo].m_PartOfSpeech != FormAndGrammems[EndFormNo].m_PartOfSpeech)
             break;
     std::vector<CFormAndGrammems> FormAndGrammemsPart;
     FormAndGrammemsPart.insert(FormAndGrammemsPart.begin(), FormAndGrammems.begin() + FormNo, FormAndGrammems.begin() + EndFormNo);
@@ -412,18 +419,13 @@ std::vector<CFormAndGrammems> BuildFormAndGrammems(const CMorphanHolder *Holder,
         for (long i = 0; i < GramInfo.length(); i += 2)
         {
             CFormAndGrammems F;
+            F.m_Langua = Holder->m_CurrentLanguage;
             F.m_Form = piParadigm->GetWordForm(j);
             BYTE AccentedCharNo = piParadigm->GetAccentedVowel(j);
             if (AccentedCharNo != 255)
                 F.m_Form.insert(AccentedCharNo + 1, "'");
             F.m_Grammems = pGramtab->GetAllGrammems(GramInfo.substr(i, 2).c_str());
-            part_of_speech_t POS = pGramtab->GetPartOfSpeech(GramInfo.substr(i, 2).c_str());
-            F.m_POS = pGramtab->GetPartOfSpeechStr(POS);
-
-            // для сортировки
-            if (F.m_POS == _R("ИНФИНИТИВ"))
-                F.m_POS.insert(0, " ");
-
+            F.m_PartOfSpeech = pGramtab->GetPartOfSpeech(GramInfo.substr(i, 2).c_str());
             FormAndGrammems.push_back(F);
         };
     };
@@ -431,43 +433,6 @@ std::vector<CFormAndGrammems> BuildFormAndGrammems(const CMorphanHolder *Holder,
     return FormAndGrammems;
 }
 
-static std::string GetInterfacePOS(std::string POS)
-{
-    Trim(POS);
-    if (POS == _R("Г"))
-        return _R("ЛИЧНАЯ ФОРМА");
-    if (POS == _R("С"))
-        return _R("СУЩЕСТВИТЕЛЬНОЕ");
-    if (POS == _R("П"))
-        return _R("ПРИЛАГАТЕЛЬНОЕ");
-    if (POS == _R("МС"))
-        return _R("МЕСТОИМЕНИЕ");
-    if (POS == _R("МС-П"))
-        return _R("МЕСТОИМЕНИЕ-ПРИЛАГАТЕЛЬНОЕ");
-    if (POS == _R("МС-ПРЕДК"))
-        return _R("МЕСТОИМЕНИЕ-ПРЕДИКАТИВ");
-    if (POS == _R("ЧИСЛ"))
-        return _R("ЧИСЛИТЕЛЬНОЕ");
-    if (POS == _R("ЧИСЛ-П"))
-        return _R("ПОРЯДКОВОЕ ЧИСЛИТЕЛЬНОЕ");
-    if (POS == _R("Н"))
-        return _R("НАРЕЧИЕ");
-    if (POS == _R("ПРЕДК"))
-        return _R("ПРЕДИКАТИВ");
-    if (POS == _R("ПРЕДЛ"))
-        return _R("ПРЕДЛОГ");
-    if (POS == _R("МЕЖД"))
-        return _R("МЕЖДОМЕТИЕ");
-    if (POS == _R("ВВОДН"))
-        return _R("ВВОДНОЕ СЛОВО");
-    if (POS == _R("ЧАСТ"))
-        return _R("ЧАСТИЦА");
-    if (POS == _R("КР_ПРИЛ"))
-        return _R("КРАТКОЕ ПРИЛАГАТЕЛЬНОЕ");
-    if (POS == _R("КР_ПРИЧАСТИЕ"))
-        return _R("КРАТКОЕ ПРИЧАСТИЕ");
-    return POS;
-};
 
 nlohmann::json GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool sortForms)
 {
@@ -482,7 +447,7 @@ nlohmann::json GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMor
         const std::vector<CFormGroup> FormGroups = BuildInterfaceParadigmPart(Holder, FormAndGrammems, FormNo, commonGrammems);
         assert(FormNo > saveFormNo);
         auto prdPart = nlohmann::json::object();
-        std::string pos = GetInterfacePOS(FormAndGrammems[saveFormNo].m_POS);
+        std::string pos = pGramtab->GetPartOfSpeechStrLong(FormAndGrammems[saveFormNo].m_PartOfSpeech);
         if (commonGrammems > 0)
             pos += std::string(" ") + pGramtab->GrammemsToStr(commonGrammems);
         prdPart["pos"] = TrimCommaRight(pos);

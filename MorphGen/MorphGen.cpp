@@ -99,7 +99,7 @@ int main(int argc, const char* argv[])
             auto outFileName = std::filesystem::path(output_folder) / MORPH_MAIN_FILES;
             R.Save(outFileName.string());
             LOGI << "Successful written indices of the main automat to " << outFileName << std::endl;
-            if (not opts["SkipPredictBase"]) {
+            if (!opts["SkipPredictBase"]) {
                 if (!R.GenPredictIdx(Wizard, PostfixLength, MinFreq, output_folder, opts))
                 {
                     LOGI << "Cannot create prediction base";

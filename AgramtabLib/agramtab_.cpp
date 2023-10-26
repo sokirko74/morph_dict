@@ -17,11 +17,12 @@ CAgramtab::CAgramtab()
 };
 
 
-part_of_speech_t CAgramtab::GetPartOfSpeechByStr(const std::string& part_of_speech) const
+part_of_speech_t CAgramtab::GetPartOfSpeechByStr(const std::string& part_of_speech, NamingAlphabet na) const
 {
-    assert(!m_PartOfSpeechesHashMap.empty());
-    auto it = m_PartOfSpeechesHashMap.find(part_of_speech);
-    if (it == m_PartOfSpeechesHashMap.end()) {
+    bool use_nat = (na == naDefault && m_bUseNationalConstants) || (na == naNational);
+    auto& dict = use_nat ? m_PartOfSpeechesHashMapNatio : m_PartOfSpeechesHashMapLatin;
+    auto it = dict.find(part_of_speech);
+    if (it == dict.end()) {
         return UnknownPartOfSpeech;
     }
     return it->second;
@@ -58,7 +59,7 @@ std::string   CAgramtab::GrammemsToStr(grammems_mask_t grammems) const
     return szGrammems;
 }
 
-bool CAgramtab::ProcessPOSAndGrammems(const char* line_in_gramtab, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems, bool deduce_grammems)  const
+bool CAgramtab::ProcessPOSAndGrammems(const char* line_in_gramtab, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems)  const
 {
     if (strlen(line_in_gramtab) > 300) return false;
 
@@ -111,20 +112,12 @@ bool  CAgramtab::ProcessPOSAndGrammemsIfCan(const char* tab_str, part_of_speech_
     return ProcessPOSAndGrammems(tab_str, *PartOfSpeech, *grammems);
 };
 
-static bool  ProcessAgramtabLine(CAgramtab& A, const char* tab_str, size_t LineNo)
-{
-    const char* s = tab_str + strspn(tab_str, " ");
-    s += strcspn(s, " ");
-    s += strspn(s, " ");
-    s += strcspn(s, " ");
-    s += strspn(s, " ");;
-    return A.ProcessPOSAndGrammems(s, A.GetLine(LineNo)->m_PartOfSpeech, A.GetLine(LineNo)->m_Grammems);
-};
 
 void CAgramtab::BuildPartOfSpeechMap()
 {
     for (part_of_speech_t i = 0; i < GetPartOfSpeechesCount(); i++) {
-        m_PartOfSpeechesHashMap.insert({ GetPartOfSpeechStr(i), i });
+        m_PartOfSpeechesHashMapNatio.insert({ GetPartOfSpeechStr(i, naNational), i });
+        m_PartOfSpeechesHashMapLatin.insert({ GetPartOfSpeechStr(i, naLatin), i });
     }
 
 }
@@ -134,41 +127,6 @@ void CAgramtab::SetUseNationalConstants(bool value)
     m_bUseNationalConstants = value;
     BuildPartOfSpeechMap();
 }
-
-void CAgramtab::Read(const char* FileName)
-{
-    BuildPartOfSpeechMap();
-    if (FileName == nullptr)
-        throw CExpc("file name is missing in gramtab");
-
-    for (size_t i = 0; i < GetMaxGrmCount(); i++)
-        GetLine(i) = 0;
-
-    std::ifstream inp(FileName);
-    if (!inp.is_open())
-        throw CExpc(Format("cannot open %s", FileName));
-    size_t LineNo = 0;;
-    std::string line;
-    while (std::getline(inp, line))
-    {
-        LineNo++;
-        std::string s = convert_from_utf8(line.c_str(), m_Language);
-        Trim(s);
-        if (s.empty() || (s.rfind("//", 0) == 0)) continue;
-
-        CAgramtabLine* pAgramtabLine = new CAgramtabLine(LineNo);
-        size_t gram_index = GramcodeToLineIndex(s.c_str());
-
-        if (GetLine(gram_index)) {
-            throw CExpc(Format("line %s in  %s contains a dublicate gramcode", FileName, s.c_str()));
-        }
-        GetLine(gram_index) = pAgramtabLine;
-        if (!ProcessAgramtabLine(*this, s.c_str(), gram_index)) {
-            throw CExpc(Format("fail on line %s file %s", s.c_str(), FileName));
-        }
-    }
-    m_bInited = true;
-};
 
 
 bool CAgramtab::GetPartOfSpeechAndGrammems(const BYTE* AnCodes, uint32_t& Poses, grammems_mask_t& Grammems) const
@@ -306,9 +264,61 @@ grammems_mask_t CAgramtab::GetAllGrammems(const char* gram_code) const
     return grammems;
 }
 
+std::string CAgramtab::ReadFromFolder(std::string folder) {
+    BuildPartOfSpeechMap();
+
+    auto path = std::filesystem::path(folder) / "gramtab.json";
+
+    std::ifstream inp(path);
+    if (!inp.good()) {
+        throw CExpc("Cannot read gramtab for language " + GetStringByLanguage(m_Language));
+    }
+    nlohmann::json jf = nlohmann::json::parse(inp);
+    inp.close();
+
+    std::unordered_map<std::string, grammem_t> grammem_dict;
+    for (part_of_speech_t i = 0; i < GetGrammemsCount(); i++) {
+        grammem_dict.insert({ GetGrammemStr(i, naLatin), i });
+    }
+
+    for (size_t i = 0; i < GetMaxGrmCount(); i++)
+        GetLine(i) = 0;
+
+    size_t line_no = 0;
+    for (auto& [key, val] : jf.items()) {
+        std::string gramcode = convert_from_utf8(key.c_str(), m_Language);
+        part_of_speech_t pos = UnknownPartOfSpeech;
+        const auto pos_it = val.find("p");
+        if (pos_it != val.end()) {
+            const std::string& pos_str = pos_it.value();
+            if (!pos_str.empty()) {
+                pos = m_PartOfSpeechesHashMapLatin.at(pos_str);
+            }
+        }
+        grammems_mask_t grammems = 0;
+        nlohmann::json grs = val["g"];
+        for (auto it = grs.begin(); it != grs.end(); ++it) {
+            grammems |= _QM(grammem_dict[*it]);
+        }
+
+        CAgramtabLine* pAgramtabLine = new CAgramtabLine(line_no);
+        pAgramtabLine->m_Grammems = DeduceGrammems(pos, grammems);
+        pAgramtabLine->m_PartOfSpeech = pos;
+        size_t gram_index = GramcodeToLineIndex(gramcode.c_str());
+        if (GetLine(gram_index)) {
+            throw CExpc(Format("line %s in  %s contains a dublicate gramcode", path, key.c_str()));
+        }
+        GetLine(gram_index) = pAgramtabLine;
+        line_no++;
+    }
+    m_bInited = true;
+    return path.string();
+}
+
 void CAgramtab::LoadFromRegistry()
 {
-    Read(::GetRegistryString(GetRegistryString()).c_str());
+    auto key = Format("Software\\Dialing\\Lemmatizer\\%s\\DictPath", GetStringByLanguage(m_Language).c_str());
+    ReadFromFolder(::GetRegistryString(key));
 };
 
 part_of_speech_t CAgramtab::GetFirstPartOfSpeech(const part_of_speech_mask_t poses) const
@@ -348,7 +358,7 @@ std::string	CAgramtab::GetGramCodes(part_of_speech_t pos, grammems_mask_t gramme
         {
             const CAgramtabLine* L = GetLine(i);
             if ((L->m_PartOfSpeech == pos)
-                && (CompareFunc ? CompareFunc(L, &L0) : (L->m_Grammems & grammems) == L->m_Grammems && !(pos == NOUN && (L->m_Grammems & rAllGenders) == rAllGenders)) //  ((grammems & (L->m_Grammems & mask)) == grammems)
+                && (CompareFunc ? CompareFunc(L, &L0) : (L->m_Grammems & grammems) == L->m_Grammems && !(pos == NOUN && (L->m_Grammems & rAllGenders) == rAllGenders)) 
                 )
                 Result += LineIndexToGramcode(i);
         };

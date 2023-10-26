@@ -18,18 +18,18 @@ macro (RunMorphGen langua)
 
     add_custom_target(
         "MorphGen_on_${langua}"
-         SOURCES ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom ${output_folder}/gramtab.tab
+         SOURCES ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom ${output_folder}/gramtab.json
     )
 
     add_custom_command(
-            OUTPUT ${output_folder}/gramtab.tab PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${input_folder}/gramtab.tab ${output_folder}/gramtab.tab
+            OUTPUT ${output_folder}/gramtab.json PRE_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${input_folder}/gramtab.json ${output_folder}/gramtab.json
             VERBATIM
     )
     add_custom_command(
         OUTPUT ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom
         COMMAND MorphGen --input project.mwz --output-folder ${output_folder} --postfix-len 5 --min-freq 3
-        DEPENDS MorphGen ${input_folder}/morphs.mrd ${input_folder}/project.mwz ${input_folder}/gramtab.tab
+        DEPENDS MorphGen ${input_folder}/morphs.mrd ${input_folder}/project.mwz ${input_folder}/gramtab.json
         COMMENT "Convert Morphology ${langua}"                 
         WORKING_DIRECTORY ${input_folder}
         VERBATIM
@@ -44,7 +44,7 @@ macro (StatDatBinRun langua Topic)
     add_custom_command(
         OUTPUT ${trg}
         COMMAND StatDatBin --morph-folder ${morph_folder} --input ${src} --language ${langua} --output ${trg}
-        DEPENDS StatDatBin ${src} "${morph_folder}/morph.bases" "${morph_folder}/gramtab.tab"
+        DEPENDS StatDatBin ${src} "${morph_folder}/morph.bases" "${morph_folder}/gramtab.json"
         COMMENT "StatDatBin"
         VERBATIM
     )
@@ -57,7 +57,7 @@ macro (WordDatBinRun langua Topic)
     add_custom_command(
         OUTPUT ${trg}
         COMMAND WordDatBin --morph-folder ${morph_folder} --input ${src} --language ${langua} --output ${trg}
-        DEPENDS WordDatBin ${src} "${morph_folder}/morph.bases" "${morph_folder}/gramtab.tab"
+        DEPENDS WordDatBin ${src} "${morph_folder}/morph.bases" "${morph_folder}/gramtab.json"
         COMMENT "WordDatBin"
         VERBATIM
     )

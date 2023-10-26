@@ -7,6 +7,12 @@
 #include "../common/utilit.h"
 #include <unordered_map>
 
+enum NamingAlphabet {
+    naDefault = 0,
+    naNational = 1,
+    naLatin = 2
+};
+
 struct CAgramtabLine {
     explicit CAgramtabLine(size_t SourceLineNo);
 
@@ -19,13 +25,20 @@ struct CAgramtabLine {
 typedef bool(*GrammemCompare)(const CAgramtabLine *l1, const CAgramtabLine *l2);
 
 class CAgramtab {
-    std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMap;
+    std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMapNatio;
+    std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMapLatin;
 
     void BuildPartOfSpeechMap();
 
 protected:
     bool m_bUseNationalConstants;
     bool m_bInited;
+    bool UseNational(NamingAlphabet na) const {
+        return (na == naDefault && m_bUseNationalConstants) || na == naNational;
+    }
+    virtual grammems_mask_t DeduceGrammems(part_of_speech_t PartOfSpeech, grammems_mask_t grammems) const {
+        return grammems;
+    };
 
 public:
     const static inline char *GramtabFileName = "gramtab.tab";
@@ -46,13 +59,13 @@ public:
         throw std::runtime_error("unimplemented GetPartOfSpeechesCount=");
     };
 
-    virtual const char *GetPartOfSpeechStr(part_of_speech_t i) const {
-        throw std::runtime_error("unimplemented GetPartOfSpeechStr");
-    }
+    virtual const char* GetPartOfSpeechStr(part_of_speech_t i, NamingAlphabet na = naDefault) const = 0;
+    
+    virtual const char* GetPartOfSpeechStrLong(part_of_speech_t i) const = 0;
 
     virtual grammem_t GetGrammemsCount() const = 0;
 
-    virtual const char *GetGrammemStr(size_t i) const = 0;
+    virtual const char *GetGrammemStr(size_t i, NamingAlphabet na=naDefault) const = 0;
 
     virtual size_t GramcodeToLineIndex(const char *s) const = 0;
 
@@ -68,9 +81,9 @@ public:
 
     virtual bool GleicheGenderNumber(const char *gram_code1, const char *gram_code2) const = 0;
 
-    virtual bool ProcessPOSAndGrammems(const char *tab_str, part_of_speech_t &PartOfSpeech, grammems_mask_t &grammems,
-                                       bool deduce_grammems = true) const;
-
+    virtual bool ProcessPOSAndGrammems(const char *tab_str, part_of_speech_t &PartOfSpeech, grammems_mask_t &grammems) const;
+    
+   
     virtual bool PartOfSpeechIsProductive(part_of_speech_t p) const = 0;
 
 
@@ -126,9 +139,8 @@ public:
     virtual grammems_mask_t GleicheGenderNumberCase(const char *common_gram_code_noun, const char *gram_code_noun,
                                                     const char *gram_code_adj) const = 0;
 
-    void Read(const char *FileName);
-
     void LoadFromRegistry();
+    std::string ReadFromFolder(std::string folder);
 
     int AreEqualPartOfSpeech(const char *grm1, const char *grm2);
 
@@ -193,7 +205,7 @@ public:
         return 0;
     };
 
-    part_of_speech_t GetPartOfSpeechByStr(const std::string &part_of_speech) const;
+    part_of_speech_t GetPartOfSpeechByStr(const std::string &part_of_speech, NamingAlphabet na = naDefault) const;
 
     void SetUseNationalConstants(bool value);
 };

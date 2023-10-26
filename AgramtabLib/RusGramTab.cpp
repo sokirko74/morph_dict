@@ -9,31 +9,32 @@
 struct TMorphConstant {
 	std::string Cyrillic;
 	std::string Latin;
+	std::string CyrillicLong;
 };
 
 const static TMorphConstant RussianPartOfSpeech[] = {
-	{_R("С"), "N"},  // 0
-	{_R("П"), "A"}, // 1
-	{_R("Г"), "V"}, // 2
-	{_R("МС"),"P"}, // 3
-	{_R("МС-П"),"PA"}, // 4
-	{_R("МС-ПРЕДК"),"P-PRED"}, // 5
-	{_R("ЧИСЛ"), "N"}, // 6
-	{_R("ЧИСЛ-П"),"NA"}, // 7
-	{_R("Н"),"ADV"}, // 8
-	{_R("ПРЕДК"), "PRED"}, //9 
-	{_R("ПРЕДЛ"), "PREP"}, // 10
-	{_R("ПОСЛ"), "POSL"}, // 11
-	{_R("СОЮЗ"), "CONJ"}, // 12
-	{_R("МЕЖД"), "INT"}, // 13
-	{_R("ВВОДН"), "INP"},// 14
-	{_R("ФРАЗ"), "COLLOC"}, // 15
-	{_R("ЧАСТ"), "PARTICLE"}, // 16
-	{_R("КР_ПРИЛ"), "ADJ_SHORT"},  // 17
-	{_R("ПРИЧАСТИЕ"), "PARTICIPLE"}, //18
-	{_R("ДЕЕПРИЧАСТИЕ"),"ADV_PARTICIPLE"}, //19
-	{_R("КР_ПРИЧАСТИЕ"),"PARTICIPLE_SHORT"}, // 20
-	{_R("ИНФИНИТИВ"), "INFINITIVE"}  //21
+	{_R("С"), "N", _R("СУЩЕСТВИТЕЛЬНОЕ")},  // 0
+	{_R("П"), "A", _R("ПРИЛАГАТЕЛЬНОЕ")}, // 1
+	{_R("Г"), "V", _R("ЛИЧНАЯ ФОРМА")}, // 2
+	{_R("МС"),"PRON", _R("МЕСТОИМЕНИЕ")}, // 3
+	{_R("МС-П"),"PA", _R("МЕСТОИМЕНИЕ-ПРИЛАГАТЕЛЬНОЕ")}, // 4
+	{_R("МС-ПРЕДК"),"P_PRED", _R("МЕСТОИМЕНИЕ-ПРЕДИКАТИВ")}, // 5
+	{_R("ЧИСЛ"), "NUM", _R("ЧИСЛИТЕЛЬНОЕ")}, // 6
+	{_R("ЧИСЛ-П"),"ORD_NUM", _R("ПОРЯДКОВОЕ ЧИСЛИТЕЛЬНОЕ")}, // 7
+	{_R("Н"),"ADV", _R("НАРЕЧИЕ")}, // 8
+	{_R("ПРЕДК"), "PRED", _R("ПРЕДИКАТИВ")}, //9 
+	{_R("ПРЕДЛ"), "PREP", _R("ПРЕДЛОГ")}, // 10
+	{_R("ПОСЛ"), "POSL", _R("ПОСЛЕЛОГ")}, // 11
+	{_R("СОЮЗ"), "CONJ", _R("СОЮЗ")}, // 12
+	{_R("МЕЖД"), "INT", _R("МЕЖДОМЕТИЕ")}, // 13
+	{_R("ВВОДН"), "INP", _R("ВВОДНОЕ СЛОВО")},// 14
+	{_R("ФРАЗ"), "COLLOC", _R("ФРАЗЕОЛОГИЗМ")}, // 15
+	{_R("ЧАСТ"), "PARTICLE", _R("ЧАСТИЦА")}, // 16
+	{_R("КР_ПРИЛ"), "ADJ_SHORT", _R("КР_ПРИЛ")},  // 17
+	{_R("ПРИЧАСТИЕ"), "PARTICIPLE", _R("ПРИЧАСТИЕ")}, //18
+	{_R("ДЕЕПРИЧАСТИЕ"),"ADV_PARTICIPLE", _R("ДЕЕПРИЧАСТИЕ")}, //19
+	{_R("КР_ПРИЧАСТИЕ"),"PARTICIPLE_SHORT", _R("КРАТКОЕ ПРИЧАСТИЕ")}, // 20
+	{_R("ИНФИНИТИВ"), "INFINITIVE", _R("ИНФИНИТИВ")}  //21
 };
 
 const static TMorphConstant Grammems[] = {
@@ -145,9 +146,9 @@ size_t CRusGramTab::GetMaxGrmCount() const
 	return rMaxGrmCount;
 }
 
-const char* CRusGramTab::GetPartOfSpeechStr(part_of_speech_t i) const
+const char* CRusGramTab::GetPartOfSpeechStr(part_of_speech_t i, NamingAlphabet na) const
 {
-	if (m_bUseNationalConstants) {
+	if (UseNational(na)) {
 		return RussianPartOfSpeech[i].Cyrillic.c_str();
 	}
 	else {
@@ -155,14 +156,19 @@ const char* CRusGramTab::GetPartOfSpeechStr(part_of_speech_t i) const
 	}
 };
 
+const char* CRusGramTab::GetPartOfSpeechStrLong(part_of_speech_t i) const
+{
+	return RussianPartOfSpeech[i].CyrillicLong.c_str();
+}
+
 grammem_t	CRusGramTab::GetGrammemsCount()  const
 {
 	return RussianGrammemsCount;
 };
 
-const char* CRusGramTab::GetGrammemStr(size_t i) const
+const char* CRusGramTab::GetGrammemStr(size_t i, NamingAlphabet na) const
 {
-	if (m_bUseNationalConstants) {
+	if (UseNational(na)) {
 		return Grammems[i].Cyrillic.c_str();
 	}
 	else {
@@ -224,12 +230,10 @@ grammems_mask_t CRusGramTab::DeduceGrammems(part_of_speech_t PartOfSpeech, gramm
 	return grammems;
 }
 
-bool CRusGramTab::ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems, bool deduce_grammems) const
+bool CRusGramTab::ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems) const
 {
 	if (!CAgramtab::ProcessPOSAndGrammems(tab_str, PartOfSpeech, grammems)) return false;
-	if (deduce_grammems) {
-		grammems = DeduceGrammems(PartOfSpeech, grammems);
-	}
+	grammems = DeduceGrammems(PartOfSpeech, grammems);
 	return true;
 };
 
