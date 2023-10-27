@@ -17,12 +17,10 @@ CAgramtab::CAgramtab()
 };
 
 
-part_of_speech_t CAgramtab::GetPartOfSpeechByStr(const std::string& part_of_speech, NamingAlphabet na) const
+part_of_speech_t CAgramtab::GetPartOfSpeechByStr(const std::string& part_of_speech  ) const
 {
-    bool use_nat = (na == naDefault && m_bUseNationalConstants) || (na == naNational);
-    auto& dict = use_nat ? m_PartOfSpeechesHashMapNatio : m_PartOfSpeechesHashMapLatin;
-    auto it = dict.find(part_of_speech);
-    if (it == dict.end()) {
+    auto it = m_PartOfSpeechesHashMap.find(part_of_speech);
+    if (it == m_PartOfSpeechesHashMap.end()) {
         return UnknownPartOfSpeech;
     }
     return it->second;
@@ -52,10 +50,10 @@ bool CAgramtab::GetGrammems(const char* gram_code, grammems_mask_t& grammems)  c
     return  true;
 };
 
-std::string   CAgramtab::GrammemsToStr(grammems_mask_t grammems) const
+std::string   CAgramtab::GrammemsToStr(grammems_mask_t grammems, NamingAlphabet na) const
 {
     char szGrammems[64 * 5];
-    grammems_to_str(grammems, szGrammems);
+    grammems_to_str(grammems, szGrammems, na);
     return szGrammems;
 }
 
@@ -87,21 +85,12 @@ bool CAgramtab::ProcessPOSAndGrammems(const char* line_in_gramtab, part_of_speec
     grammems = 0;
     while (tok())
     {
-
-        size_t Count = GetGrammemsCount();
         const char* grm = tok.val();
-
-
-        size_t  i = 0;
-        for (; i < Count; i++)
-            if (!strcmp(grm, GetGrammemStr(i)))
-            {
-                grammems |= _QM(i);
-                break;
-            };
-
-        if (i == Count)
+        auto it = m_GrammemHashMap.find(grm);
+        if (it == m_GrammemHashMap.end()) {
             return false;
+        }
+        grammems |= _QM(it->second);
     };
 
     return true;
@@ -116,10 +105,13 @@ bool  CAgramtab::ProcessPOSAndGrammemsIfCan(const char* tab_str, part_of_speech_
 void CAgramtab::BuildPartOfSpeechMap()
 {
     for (part_of_speech_t i = 0; i < GetPartOfSpeechesCount(); i++) {
-        m_PartOfSpeechesHashMapNatio.insert({ GetPartOfSpeechStr(i, naNational), i });
-        m_PartOfSpeechesHashMapLatin.insert({ GetPartOfSpeechStr(i, naLatin), i });
+        m_PartOfSpeechesHashMap.insert({ GetPartOfSpeechStr(i, naNational), i });
+        m_PartOfSpeechesHashMap.insert({ GetPartOfSpeechStr(i, naLatin), i });
     }
-
+    for (grammem_t g = 0; g < GetGrammemsCount(); ++g) {
+        m_GrammemHashMap[GetGrammemStr(g, naNational)] = g;
+        m_GrammemHashMap[GetGrammemStr(g, naLatin)] = g;
+    }
 }
 
 void CAgramtab::SetUseNationalConstants(bool value)
@@ -168,14 +160,18 @@ int CAgramtab::AreEqualPartOfSpeech(const char* grm1, const char* grm2)
 
 
 
-char* CAgramtab::grammems_to_str(grammems_mask_t grammems, char* out_buf) const
+char* CAgramtab::grammems_to_str(grammems_mask_t grammems, char* out_buf, NamingAlphabet na ) const
 {
+    //may be it is wizer to use
+    //https://lemire.me/blog/2018/02/21/iterating-over-set-bits-quickly/
+    // but it must be crossplatform
+
     out_buf[0] = 0;
     auto GrammemsCount = GetGrammemsCount();
     for (int i = GrammemsCount - 1; i >= 0; i--)
         if (_QM(i) & grammems)
         {
-            strcat(out_buf, GetGrammemStr(i));
+            strcat(out_buf, GetGrammemStr(i, na));
             strcat(out_buf, ",");
         };
     return out_buf;
@@ -293,7 +289,7 @@ std::string CAgramtab::ReadFromFolder(std::string folder) {
         if (pos_it != val.end()) {
             const std::string& pos_str = pos_it.value();
             if (!pos_str.empty()) {
-                pos = m_PartOfSpeechesHashMapLatin.at(pos_str);
+                pos = m_PartOfSpeechesHashMap.at(pos_str);
             }
         }
         grammems_mask_t grammems = 0;

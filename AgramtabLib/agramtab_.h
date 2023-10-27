@@ -30,11 +30,12 @@ struct CAgramtabLine {
 typedef bool(*GrammemCompare)(const CAgramtabLine *l1, const CAgramtabLine *l2);
 
 class CAgramtab {
-    std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMapNatio;
-    std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMapLatin;
+    std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMap;
+    std::unordered_map<std::string, grammem_t> m_GrammemHashMap;
     CPlugNounInfo m_PlugNoun;
 
     void BuildPartOfSpeechMap();
+    char* grammems_to_str(grammems_mask_t grammems, char* out_buf, NamingAlphabet na = naDefault) const;
 
 protected:
     bool m_bUseNationalConstants;
@@ -157,8 +158,6 @@ public:
     bool
     ProcessPOSAndGrammemsIfCan(const char *tab_str, part_of_speech_t *PartOfSpeech, grammems_mask_t *grammems) const;
 
-    char *grammems_to_str(grammems_mask_t grammems, char *out_buf) const;
-
     bool FindGrammems(const char *gram_codes, grammems_mask_t grammems) const;
 
     bool GetGramCodeByGrammemsAndPartofSpeechIfCan(part_of_speech_t Pos, grammems_mask_t grammems,
@@ -166,7 +165,7 @@ public:
 
     bool GetPartOfSpeechAndGrammems(const BYTE *AnCodes, part_of_speech_mask_t &Poses, grammems_mask_t &Grammems) const;
 
-    std::string GrammemsToStr(grammems_mask_t grammems) const;
+    std::string GrammemsToStr(grammems_mask_t grammems, NamingAlphabet na=naDefault) const;
 
     std::string GetTabStringByGramCode(const char *gram_code) const;
 
@@ -215,7 +214,7 @@ public:
         return 0;
     };
 
-    part_of_speech_t GetPartOfSpeechByStr(const std::string &part_of_speech, NamingAlphabet na = naDefault) const;
+    part_of_speech_t GetPartOfSpeechByStr(const std::string &part_of_speech) const;
 
     void SetUseNationalConstants(bool value);
 };
