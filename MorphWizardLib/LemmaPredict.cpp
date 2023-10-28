@@ -59,7 +59,7 @@ void TLemmaPredictor::CreateIndex() {
     }
 
     // go through all words
-    std::vector<CPredictSuffix> AllLemmas;
+    std::vector<CPredictSuffix> all_lemmas;
     for (auto& [key, value] : m_pWizard->m_LemmaToParadigm) {
 
         const CFlexiaModel& p = m_pWizard->m_FlexiaModels[value.m_FlexiaModelNo];
@@ -76,18 +76,17 @@ void TLemmaPredictor::CreateIndex() {
         S.m_PrefixSetStr = m_pWizard->get_prefix_set(value);
         S.m_Frequence = 1;
         if (S.m_SourceLemma.length() < 3) continue;
-        AllLemmas.push_back(S);
+        all_lemmas.push_back(S);
     };
 
-    sort(AllLemmas.begin(), AllLemmas.end(), IsLessByLemmaLength);
+    sort(all_lemmas.begin(), all_lemmas.end(), IsLessByLemmaLength);
 
     // going through all prefix suffixes
-    for (size_t i = 0; i < AllLemmas.size(); i++) {
-        CPredictSuffix& S = AllLemmas[i];
+    for (auto& s: all_lemmas) {
         for (size_t suff_len = MinPredictSuffixLength; suff_len <= MaxPredictSuffixLength; suff_len++) {
             predict_container_t& PredictIndex = m_PredictIndex[suff_len - MinPredictSuffixLength];
-            S.m_Suffix = GetSuffix(S.m_SourceLemma, (int)suff_len);
-            std::pair<predict_container_t::iterator, bool> bRes = PredictIndex.insert(S);
+            s.m_Suffix = GetSuffix(s.m_SourceLemma, (int)suff_len);
+            std::pair<predict_container_t::iterator, bool> bRes = PredictIndex.insert(s);
             if (!bRes.second) {
                 bRes.first->m_Frequence++;
             }

@@ -105,13 +105,11 @@ public:
     //=================  general: loading, saving, logging ======================
     void	load_wizard(std::string path, std::string user_name, bool bCreatePrediction = true, bool useNationalConstants=true);
     void	load_mrd(bool guest, bool bCreatePrediction);
-    void	log(const std::string& messg);
-    void	log(const std::string& lemm, const CFlexiaModel& p, bool is_added);
+    void	log_lemma(const std::string& lemm, const CFlexiaModel& p, bool is_added) const;
     bool	is_changed() { return m_bWasChanged; }
     void	save_mrd();
-    std::string	get_lock_file_name()   const;
-    std::string	get_log_file_name()   const;
-    void	MakeReadOnly();
+    
+    
     void	pack();
     uint16_t	GetCurrentSessionNo() const;
     size_t	del_dup_lemm();

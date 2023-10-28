@@ -1,4 +1,5 @@
 #include "wizard.h"
+
 #include "morph_dict/common/util_classes.h"
 #include "morph_dict/AgramtabLib/EngGramTab.h"
 #include "morph_dict/AgramtabLib/RusGramTab.h"
@@ -8,6 +9,11 @@
 #include <sstream>
 #include <regex>
 #include <filesystem>
+
+#include <plog/Initializers/ConsoleInitializer.h>
+#include <plog/Log.h>
+#include <plog/Initializers/RollingFileInitializer.h>
+
 
 const char* AnyCommonAncode = " ";
 
@@ -172,8 +178,6 @@ bool CParadigmInfo::IsAnyEqual(const CParadigmInfo& X) const {
         );
 }
 
-
-
 MorphoWizard::MorphoWizard(): 
     m_bLoaded(false), 
     m_Predictor(this),
@@ -187,19 +191,7 @@ MorphoWizard::MorphoWizard():
 
 MorphoWizard::~MorphoWizard() {
     if (m_pGramTab) delete m_pGramTab;
-    MakeReadOnly();
 }
-
-
-std::string MorphoWizard::get_lock_file_name() const {
-    auto p = m_MwzFolder / "wizard.lck";
-    return p.string();
-};
-
-std::string MorphoWizard::get_log_file_name() const {
-    auto p = m_MwzFolder / "log";
-    return p.string();
-};
 
 
 //MRD_FILE 	L:\MORPH.windows\SOURCE\RUS_SRC\morphs.mrd
@@ -272,9 +264,7 @@ bool MorphoWizard::StartSession(std::string user_name) {
     S.m_LastSessionSave = "no";
     m_Sessions.push_back(S);
     m_SessionNo = m_Sessions.size() - 1;
-    char msg[128];
-    sprintf(msg, "Opened by %s", user_name.c_str());
-    log(msg);
+    LOGI << "opened by " << user_name;
     return true;
 };
 
@@ -294,9 +284,59 @@ void MorphoWizard::StartLastSessionOfUser(std::string user_name) {
     StartSession(user_name);
 };
 
+class MwzLogFormatter
+{
+public:
+    static plog::util::nstring header()
+    {
+        return plog::util::nstring();
+    }
+
+    static plog::util::nstring format(const plog::Record& record)
+    {
+        tm t;
+        plog::util::localtime_s(&t, &record.getTime().time);
+
+        plog::util::nostringstream ss;
+        ss << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_hour << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_min << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_sec << PLOG_NSTR(".") << std::setfill(PLOG_NSTR('0')) << std::setw(3) << static_cast<int> (record.getTime().millitm) << PLOG_NSTR(" ");
+        ss << std::setfill(PLOG_NSTR(' ')) << std::setw(5) << std::left << severityToString(record.getSeverity()) << PLOG_NSTR(" ");
+        //ss << PLOG_NSTR("[") << record.getTid() << PLOG_NSTR("] ");
+        ss << PLOG_NSTR("[") << record.getFunc() << PLOG_NSTR("@") << record.getLine() << PLOG_NSTR("] ");
+        ss << record.getMessage() << PLOG_NSTR("\n");
+        return ss.str();
+    }
+};
+
+class MyFormatter1
+{
+public:
+    static plog::util::nstring header()
+    {
+        return plog::util::nstring();
+    }
+
+    static plog::util::nstring format(const plog::Record& record)
+    {
+        plog::util::nostringstream ss;
+        //ss << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_hour << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_min << PLOG_NSTR(":") << std::setfill(PLOG_NSTR('0')) << std::setw(2) << t.tm_sec << PLOG_NSTR(".") << std::setfill(PLOG_NSTR('0')) << std::setw(3) << static_cast<int> (record.getTime().millitm) << PLOG_NSTR(" ");
+        ss << std::setfill(PLOG_NSTR(' ')) << std::setw(5) << std::left << severityToString(record.getSeverity()) << PLOG_NSTR(" ");
+        //ss << PLOG_NSTR("[") << record.getTid() << PLOG_NSTR("] ");
+        ss << PLOG_NSTR("[") << record.getFunc() << PLOG_NSTR("@") << record.getLine() << PLOG_NSTR("] ");
+        ss << record.getMessage() << PLOG_NSTR("\n");
+        return ss.str();
+    }
+};
+
+
+static plog::ConsoleAppender<MwzLogFormatter> consoleAppender;
+void init_wizard_log(plog::Severity severity, std::string log_path) {
+    plog::init<MwzLogFormatter>(severity, log_path.c_str()).addAppender(&consoleAppender);
+}
+
 
 void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool bCreatePrediction, bool useNationalConstants) {
     m_MwzFolder = std::filesystem::absolute(mwz_path).parent_path();
+    init_wizard_log(plog::verbose,  (m_MwzFolder / "wizard.log").string());
 
     std::ifstream mwzFile(mwz_path);
     if (!mwzFile.is_open())
@@ -353,22 +393,6 @@ error_label:
 
 
 };
-
-static void CreateLockFile(const std::string& LockFileName) {
-    FILE* fp = fopen(LockFileName.c_str(), "wb");
-    if (fp != NULL) {
-        try {
-            std::string strPath = GetRegistryString(
-                "SYSTEM\\CurrentControlSet\\Control\\ComputerName\\ActiveComputerName\\ComputerName");
-            fprintf(fp, "MachineName = %s \r\n", strPath.c_str());
-            fprintf(fp, "Time = %s\n", GetCurrentDate().c_str());
-        }
-        catch (...) {
-        }
-        fclose(fp);
-    }
-}
-
 
 static size_t getCount(std::ifstream& mrdFile, const char* sectionName) {
     std::string line;
@@ -508,10 +532,7 @@ void MorphoWizard::ReadLemmas(std::ifstream& mrdFile) {
 //	Пробела внутри парадигмы нет.
 //---------------------------------------------------
 void MorphoWizard::load_mrd(bool guest, bool bCreatePrediction) {
-    m_ReadOnly = guest || (access(get_lock_file_name().c_str(), 0) != -1);
-
-    if (!m_ReadOnly)
-        CreateLockFile(get_lock_file_name());
+    m_ReadOnly = guest;
 
     auto path = m_MwzFolder / m_MrdPath;
     std::cerr << "Reading mrd-file: " << path << "\n";
@@ -520,20 +541,26 @@ void MorphoWizard::load_mrd(bool guest, bool bCreatePrediction) {
     if (!mrdFile.is_open())
         throw CExpc("Wrong mrd file : " + m_MrdPath);
 
-    fprintf(stderr, ".");
+    LOGV << "ReadFlexiaModels...";
     ReadFlexiaModels(mrdFile);
-    fprintf(stderr, ".");
+
+    LOGV << "ReadAccentModels...";
     ReadAccentModels(mrdFile);
-    fprintf(stderr, ".");
+
+    LOGV << "ReadSessions ...";
     ReadSessions(mrdFile);
-    fprintf(stderr, ".");
+
+    LOGV << "ReadPrefixSets ...";
     ReadPrefixSets(mrdFile);
-    fprintf(stderr, ".");
-    this->ReadLemmas(mrdFile);
-    fprintf(stderr, ".");
+    
+    LOGV << "ReadLemmas ...";
+    ReadLemmas(mrdFile);
+
+    
     if (bCreatePrediction)
+        LOGV << "CreatePredictIndex ...";
         m_Predictor.CreateIndex();
-    fprintf(stderr, ".\n");
+    LOGV << "load ...";
 }
 
 
@@ -575,7 +602,7 @@ void MorphoWizard::save_mrd() {
 
     m_bWasChanged = false;
 
-    log(Format("Saved by %s", GetUserName().c_str()));
+    LOGI << "Saved by " << GetUserName();
 };
 
 
@@ -982,7 +1009,7 @@ const CMorphSession& MorphoWizard::get_session(int SessionNo) const {
 void MorphoWizard::remove_lemm(lemma_iterator_t it) {
     uint16_t paradigm_num = it->second.m_FlexiaModelNo;
     CFlexiaModel& p = m_FlexiaModels[paradigm_num];
-    log(it->first, p, false);
+    log_lemma(it->first, p, false);
     m_LemmaToParadigm.erase(it);
 }
 
@@ -1325,23 +1352,10 @@ std::string MorphoWizard::GetUserName() const {
         return m_Sessions.back().m_UserName;
 };
 
-void MorphoWizard::log(const std::string& messg) {
-    if (GetUserName() == "guest")
-        return;
 
-    FILE* fp;
-    if ((fp = fopen(get_log_file_name().c_str(), "a+t")) == NULL)
-        return;
-
-    fprintf(fp, "%s>", GetCurrentDate().c_str());
-    fprintf(fp, "%s\n", messg.c_str());
-
-    fclose(fp);
-}
-
-void MorphoWizard::log(const std::string& lemm, const CFlexiaModel& p, bool is_added) {
+void MorphoWizard::log_lemma(const std::string& lemm, const CFlexiaModel& p, bool is_added) const {
     if (!m_bFullTrace) return;
-    log((is_added ? "+ " : "- ") + lemm + " " + p.ToString());
+    LOGI << (is_added ? "+" : "-")  << " " << lemm << " " << p.ToString();
 }
 
 uint16_t AddAccentModel(MorphoWizard& C, const CAccentModel& AccentModel) {
@@ -1441,7 +1455,7 @@ MorphoWizard::add_lemma(const std::string& slf, std::string common_grammems, con
 
     CParadigmInfo NewInfo(ParadigmNo, AccentModelNo, SessionNo, AuxAccent, common_gramcode.c_str(), PrefixSetNo);
     m_LemmaToParadigm.insert(std::make_pair(lemm, NewInfo));
-    log(lemm, FlexiaModel, true);
+    log_lemma(lemm, FlexiaModel, true);
     m_bWasChanged = true;
     return NewInfo;
 }
@@ -1466,20 +1480,6 @@ void MorphoWizard::delete_checked_lemms() {
 
     m_bWasChanged = true;
 };
-
-//----------------------------------------------------------------------------
-void MorphoWizard::MakeReadOnly() {
-    try {
-        if (!m_ReadOnly) {
-            m_ReadOnly = true;
-            std::string FileName = get_lock_file_name();
-            if (access(FileName.c_str(), 0) != -1)
-                remove(FileName.c_str());
-        }
-    }
-    catch (...) {
-    }
-}
 
 //----------------------------------------------------------------------------
 // del_dup_lemm deletes all equal lemmas with the same flexia and accent model
@@ -1528,7 +1528,7 @@ void MorphoWizard::pack() {
     }
 
     {
-        log("finding all used flexia and accent modleys");
+        LOGD << "finding all used flexia and accent modleys";
         std::set<uint16_t> UsedFlexiaModels;
         std::set<uint16_t> UsedAccentModels;
         std::set<uint16_t> UsedPrefixSets;
@@ -1539,7 +1539,7 @@ void MorphoWizard::pack() {
         };
 
 
-        log("creating new flexia models without unused items");
+        LOGD << "creating new flexia models without unused items";
         std::vector<CFlexiaModel> NewParadigms;
         for (size_t i = 0; i < m_FlexiaModels.size(); i++)
             if (UsedFlexiaModels.find((uint16_t)i) != UsedFlexiaModels.end()) {
@@ -1561,7 +1561,7 @@ void MorphoWizard::pack() {
             }
         m_FlexiaModels = NewParadigms;
 
-        log("creating new accent models without unused items");
+        LOGD << "creating new accent models without unused items";
         std::vector<CAccentModel> NewAccentModels;
         for (size_t k = 0; k < m_AccentModels.size(); k++)
             if (UsedAccentModels.find((uint16_t)k) != UsedAccentModels.end()) {
@@ -1570,7 +1570,7 @@ void MorphoWizard::pack() {
             }
         m_AccentModels = NewAccentModels;
 
-        log("creating new prefix sets");
+        LOGD << "creating new prefix sets";
         std::vector<std::set<std::string> > NewPrefixSets;
         for (size_t i = 0; i < m_PrefixSets.size(); i++)
             if (UsedPrefixSets.find((uint16_t)i) != UsedPrefixSets.end()) {
@@ -1582,7 +1582,7 @@ void MorphoWizard::pack() {
         if (HasMeter()) GetMeter()->SetPos((uint32_t)m_LemmaToParadigm.size() / 4);
     }
 
-    log("fixing index from lemmas to paradigms");
+    LOGD << "fixing index from lemmas to paradigms";
     LemmaMap NewLemmaToParadigm;
     for (lemma_iterator_t lemm_it = m_LemmaToParadigm.begin(); lemm_it != m_LemmaToParadigm.end(); lemm_it++) {
         std::map<int, int>::const_iterator flex_it = OldFlexiaModelsToNewFlexiaModels.find(lemm_it->second.m_FlexiaModelNo);

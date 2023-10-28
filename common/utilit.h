@@ -313,4 +313,4 @@ extern std::vector<std::string> list_path_by_file_mask(std::string filemask);
 extern std::string join_string(const std::vector<std::string>& items, const std::string& delimiter);
 extern std::vector<std::string> split_string(const std::string& s, char delim);
 
-extern void init_plog(plog::Severity severity, std::string filename);
+extern void init_plog(plog::Severity severity, std::string filename, bool overwrite=true);

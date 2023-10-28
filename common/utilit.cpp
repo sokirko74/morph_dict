@@ -2231,10 +2231,11 @@ public:
 
 static plog::ConsoleAppender<MyFormatter> consoleAppender; 
 
-void init_plog(plog::Severity severity, std::string filename) {
-	if (std::filesystem::exists(filename)) {
-		std::filesystem::remove(filename);
+void init_plog(plog::Severity severity, std::string filename, bool overwrite) {
+	if (overwrite) {
+		if (std::filesystem::exists(filename)) {
+			std::filesystem::remove(filename);
+		}
 	}
 	plog::init<MyFormatter>(severity, filename.c_str()).addAppender(&consoleAppender);
-
 }
