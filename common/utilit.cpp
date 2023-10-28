@@ -536,21 +536,6 @@ bool IsSuperEqualChar (BYTE ch1, BYTE ch2, MorphLanguageEnum langua)
 
 
 
-/* сравнивает строки с помощью предиката IsSuperEqualChar */
-// возращает true, если строки одинаковы
-bool strscmp ( const char *s1, const char *s2, size_t l, MorphLanguageEnum langua)
-{
-	for	(	;
-			(		(l > 0)
-				&&	IsSuperEqualChar((BYTE)*s1,(BYTE)*s2, langua) 
-				&&	*s1 
-				&&	*s2  
-			);
-			s1++,s2++,l--
-		);
-	//если обе строки закончились
-	return (!*s1 && !*s2);
-}
 
 // == strincmp
 int CompareWithoutRegister ( const char *s1, const char *s2, size_t l, MorphLanguageEnum langua)
@@ -2054,21 +2039,6 @@ std::string BuildRMLPath (const char* s)
     return path;
 }
 
-uint64_t pow(uint64_t x,int y)
-{
-	if(x>1&&y>100) return 0;
-	return y==0 || x==1 ? 1 : x*pow(x,y-1);
-}
-
-int CountBits(uint64_t value)
-{
-	int count = 0;
-	for (int i=0; i < 64; i++)
-	{
-		count += (value >> i) & 1;
-	}
-	return count;
-}
 
 size_t FindFloatingPoint(const char* str)
 {

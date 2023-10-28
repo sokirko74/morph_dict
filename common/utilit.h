@@ -9,20 +9,18 @@
 
 #include  "single_byte_encoding.h"
 
-#include  <assert.h>
-#include  <stdarg.h>
-#include  <ctype.h>
-#include  <string>
-#include  <algorithm>
-#include  <stdexcept>
-#include  <vector>
-#include  <iostream>
+#include <assert.h>
+#include <stdarg.h>
+#include <ctype.h>
+#include <string>
+#include <algorithm>
+#include <stdexcept>
+#include <vector>
+#include <iostream>
 #include <set>
-#include  <stack>
-#include  <map>
-#include  <time.h>
-#include  <string.h>
-#include  <unordered_set>
+#include <map>
+#include <string.h>
+#include <unordered_set>
 #include <limits>
 #include <plog/Log.h>
 
@@ -70,6 +68,9 @@ typedef enum {
 	morphDigits = 6,
 	morphFioDisclosures = 7,
 } MorphLanguageEnum;
+extern bool GetLanguageByString(std::string s, MorphLanguageEnum& Result);
+extern std::string GetStringByLanguage(MorphLanguageEnum Langua);
+
 
 template <class T1, class T2, class T3>
 struct	troika : public std::pair<T1, T2>
@@ -125,7 +126,6 @@ extern std::string   BuildRMLPath (const char* s);
 // working with std::strings
 extern char*	rtrim (char* s);
 extern bool		IsSuperEqualChar (BYTE ch1, BYTE ch2, MorphLanguageEnum langua);
-extern bool		strscmp ( const char *s1, const char *s2, size_t l, MorphLanguageEnum langua);
 extern int		CompareWithoutRegister ( const char *s1, const char *s2, size_t l, MorphLanguageEnum langua);
 extern BYTE		force_rus_char (BYTE ch);
 extern bool		force_to_rus (char* dest, const char* sour, size_t len);
@@ -137,18 +137,11 @@ extern std::string&  TrimRight (std::string& str);
 extern std::string&	Trim (std::string& str);
 extern bool		LoadFileToString(std::string FileName, std::string& Result);
 
-
-const BYTE	UnknownPartOfSpeech		= 0xff;
 const int	UnknownSyntaxElement = 0xffff;
 typedef enum {DontKillHomonyms = 0, CoverageKillHomonyms = 1} KillHomonymsEnum;
 
 typedef enum { LocThes = 0, FinThes, CompThes, OmniThes, NoneThes } EThesType;
 typedef enum { EClause = 0, EWord, EGroup, ENoneType } EUnitType;
-
-
-extern bool GetLanguageByString (std::string s, MorphLanguageEnum& Result);
-extern std::string GetStringByLanguage (MorphLanguageEnum Langua);
-// ============     Brackets =========================
 
 
 extern int isbracket  (BYTE x);
@@ -266,6 +259,8 @@ T& GerEngRusMakeUpperTemplate (T& word, MorphLanguageEnum Langua, size_t Len )
 
 
 typedef  uint8_t part_of_speech_t;
+const BYTE	UnknownPartOfSpeech = 0xff;
+
 typedef  uint8_t grammem_t;
 typedef  uint8_t graph_descr_t;
 typedef  uint32_t part_of_speech_mask_t;
@@ -276,10 +271,6 @@ typedef  uint64_t grammems_mask_t;
 
 enum RegisterEnum {AnyRegister=0, LowLow=1, UpLow=2, UpUp=3};
 
-
-extern uint64_t pow(uint64_t x,int y);
-
-extern int CountBits(uint64_t value);
 extern size_t FindFloatingPoint(const char* str);
 
 inline std::string _R(const char* buffer) {
