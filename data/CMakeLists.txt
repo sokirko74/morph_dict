@@ -11,13 +11,13 @@ endif()
 
 message("dicts_folder=${output_morph_folder}")
 
-macro (RunMorphGen langua)
+macro (Runmorph_gen langua)
     set( input_folder  ${PROJECT_SOURCE_DIR}/${langua} )
     set( output_folder  ${output_morph_folder}/${langua} )
     make_directory(${output_folder})
 
     add_custom_target(
-        "MorphGen_on_${langua}"
+        "morph_gen_on_${langua}"
          SOURCES ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom ${output_folder}/gramtab.json
     )
 
@@ -28,8 +28,8 @@ macro (RunMorphGen langua)
     )
     add_custom_command(
         OUTPUT ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom
-        COMMAND MorphGen --input project.mwz --output-folder ${output_folder} --postfix-len 5 --min-freq 3
-        DEPENDS MorphGen ${input_folder}/morphs.json ${input_folder}/project.mwz ${input_folder}/gramtab.json
+        COMMAND morph_gen --input project.mwz --output-folder ${output_folder} --postfix-len 5 --min-freq 3
+        DEPENDS morph_gen ${input_folder}/morphs.json ${input_folder}/project.mwz ${input_folder}/gramtab.json
         COMMENT "Convert Morphology ${langua}"                 
         WORKING_DIRECTORY ${input_folder}
         VERBATIM
@@ -50,26 +50,26 @@ macro (StatDatBinRun langua Topic)
     )
 endmacro()
 
-macro (WordDatBinRun langua Topic)
+macro (word_freq_binRun langua Topic)
     set (src ${PROJECT_SOURCE_DIR}/${langua}/WordData.txt)
     set (morph_folder ${output_morph_folder}/${langua})
     set (trg ${morph_folder}/${Topic}wordweight.bin)
     add_custom_command(
         OUTPUT ${trg}
-        COMMAND WordDatBin --morph-folder ${morph_folder} --input ${src} --language ${langua} --output ${trg}
-        DEPENDS WordDatBin ${src} "${morph_folder}/morph.bases" "${morph_folder}/gramtab.json"
-        COMMENT "WordDatBin"
+        COMMAND word_freq_bin --morph-folder ${morph_folder} --input ${src} --language ${langua} --output ${trg}
+        DEPENDS word_freq_bin ${src} "${morph_folder}/morph.bases" "${morph_folder}/gramtab.json"
+        COMMENT "word_freq_bin"
         VERBATIM
     )
 endmacro()
 
 
 macro (CreateAllMorphBinFiles langua)
-    RunMorphGen (${langua})
+    Runmorph_gen (${langua})
     
     foreach (Topic l c f)
         StatDatBinRun ( ${langua} ${Topic} ) 
-        WordDatBinRun ( ${langua} ${Topic} )
+        word_freq_binRun ( ${langua} ${Topic} )
     endforeach ()
 
     set( folder  ${output_morph_folder}/${langua} )

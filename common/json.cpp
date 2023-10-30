@@ -45,7 +45,7 @@ void ConvertFromUtfRecursiveT(C& r, MorphLanguageEnum langua) {
 
 	}
 	else if (r.is_string()) {
-		r = convert_from_utf8(r.get<std::string>().c_str(), langua);
+		r = convert_from_utf8(r.template get<std::string>().c_str(), langua);
 	}
 }
 
