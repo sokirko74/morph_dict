@@ -160,8 +160,6 @@ std::string CFormInfo::GetSrcNorm() const
 	assert (IsValid());
 	if (!IsValid()) return "";
 
-	//std::string result = m_pParent->m_Prefixes[m_InnerAnnot.m_PrefixNo];
-	//result += m_pParent->m_Bases[GetLemmaInfo().m_LemmaStrNo].GetString();
 	std::string result = m_pParent->m_Bases[GetLemmaInfo().m_LemmaStrNo].GetString();
 	result += GetFlexiaModel().get_first_flex();
 	return result;

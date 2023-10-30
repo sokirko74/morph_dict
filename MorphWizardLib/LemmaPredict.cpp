@@ -1,4 +1,4 @@
-#include "FormInfo.h"
+#include "wizard_base.h"
 #include "wizard.h"
 #include "LemmaPredict.h"
 

@@ -10,6 +10,7 @@ set(my_SOURCES
         single_byte_encoding.h
         util_classes.h
         utilit.h
+        json.cpp
 
 )
 

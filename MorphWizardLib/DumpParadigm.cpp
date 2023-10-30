@@ -39,9 +39,21 @@ bool CMorphSession::ReadFromString(const std::string& s) {
     return true;
 }
 
-std::string CMorphSession::ToString() const {
-    return Format("%s;%s;%s", m_UserName.c_str(), m_SessionStart.c_str(), m_LastSessionSave.c_str());
+nlohmann::json CMorphSession::GetJson() const {
+    return {
+        {"user", m_UserName},
+        {"start", m_SessionStart},
+        {"last_save", m_LastSessionSave}
+    };
 };
+
+CMorphSession& CMorphSession::FromJson(nlohmann::json inj) {
+    m_UserName = inj["user"];
+    m_SessionStart = inj["start"];
+    m_LastSessionSave = inj["last_save"];
+    return *this;
+}
+
 
 
 //=====================================================================
@@ -155,7 +167,7 @@ std::string CDumpParadigm::ToStringUtf8() const {
     if (!m_TypeGrammemsStr.empty())
         outp << TypeGrmField << " = " << m_TypeGrammemsStr << "\n";
     if (!m_Session.IsEmpty())
-        outp << SessionField << " = " << m_Session.ToString() << "\n";
+        outp << SessionField << " = " << m_Session.GetJson().dump() << "\n";
     outp << m_SlfStr;
     return convert_to_utf8(outp.str(), m_pWizard->m_Language);
 };

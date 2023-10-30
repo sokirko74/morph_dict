@@ -1,9 +1,11 @@
 #include "wizard.h"
 
+
 #include "morph_dict/common/util_classes.h"
 #include "morph_dict/AgramtabLib/EngGramTab.h"
 #include "morph_dict/AgramtabLib/RusGramTab.h"
 #include "morph_dict/AgramtabLib/GerGramTab.h"
+#include "morph_dict/common/json.h"
 
 #include <fstream>
 #include <sstream>
@@ -24,156 +26,7 @@ std::string GetCurrentDate() {
 }
 
 //==============================================================================
-const char FlexModelCommDelim[] = "q//q";
-const char WiktionaryMorphTemplateDelim[] = ";";
 
-bool CFlexiaModel::ReadFromString(std::string& s) {
-    size_t semicolon = s.find(WiktionaryMorphTemplateDelim);
-    if (semicolon != std::string::npos) {
-        m_WiktionaryMorphTemplate = s.substr(0, semicolon);
-        s.erase(0, semicolon + 1);
-    }
-    size_t comm = s.rfind(FlexModelCommDelim);
-    if (comm != std::string::npos) {
-        m_Comments = s.substr(comm + strlen(FlexModelCommDelim));
-        Trim(m_Comments);
-        s.erase(comm);
-        Trim(s);
-    }
-    else
-        m_Comments = "";
-
-    StringTokenizer Tok(s.c_str(), "%");
-    m_Flexia.clear();
-    while (Tok()) {
-        std::string record = Tok.val();
-        size_t ast = record.find('*');
-        if (ast == std::string::npos || ast == record.length() - 1) return false;
-        size_t last_ast = record.find_last_of('*');
-        std::string prefix;
-        if (last_ast != ast)
-            prefix = record.substr(last_ast + 1);
-        auto flexia_str = record.substr(0, ast);
-        auto gramcode = record.substr(ast + 1, last_ast - ast - 1);
-        CMorphForm G(gramcode, flexia_str, prefix);
-        m_Flexia.push_back(G);
-
-    };
-
-    return true;
-};
-
-std::string CFlexiaModel::ToString() const {
-    std::stringstream outp;
-    if (!m_WiktionaryMorphTemplate.empty()) {
-        outp << m_WiktionaryMorphTemplate << WiktionaryMorphTemplateDelim;
-    }
-    for (size_t i = 0; i < m_Flexia.size(); i++) {
-        outp << "%" << m_Flexia[i].m_FlexiaStr <<  "*" << m_Flexia[i].m_Gramcode;
-        if (!m_Flexia[i].m_PrefixStr.empty()) {
-            outp << "*" << m_Flexia[i].m_PrefixStr;
-        };
-    };
-    if (!m_Comments.empty())
-        outp << FlexModelCommDelim << m_Comments;
-    return outp.str();
-};
-
-std::string CFlexiaModel::get_first_flex() const {
-    assert(!m_Flexia.empty());
-    return m_Flexia[0].m_FlexiaStr;
-};
-
-std::string CFlexiaModel::get_first_code() const {
-    assert(!m_Flexia.empty());
-    return m_Flexia[0].m_Gramcode;
-}
-
-
-bool CFlexiaModel::has_ancode(const std::string& search_ancode) const {
-    for (size_t i = 0; i < m_Flexia.size(); i++) {
-        size_t match = m_Flexia[i].m_Gramcode.find(search_ancode);
-        if ((match != std::string::npos) && (match % 2 == 0))
-            return true;
-    }
-    return false;
-};
-
-bool CAccentModel::ReadFromString(const std::string& s) {
-    StringTokenizer Tok(s.c_str(), "; \r\n");
-    m_Accents.clear();
-    while (Tok()) {
-        std::string OneRecord = Tok.val();
-        if (OneRecord.empty()) return false;
-        if (!isdigit(OneRecord[0])) return false;
-        m_Accents.push_back(atoi(OneRecord.c_str()));
-    };
-    return true;
-}
-
-std::string CAccentModel::ToString() const {
-    std::string Result;
-    for (size_t i = 0; i < m_Accents.size(); i++) {
-        Result += Format("%i;", m_Accents[i]);
-    };
-    return Result;
-};
-
-//==============================================================================
-CParadigmInfo::CParadigmInfo() : CLemmaInfo() {
-    m_SessionNo = UnknownSessionNo;
-    m_AuxAccent = UnknownAccent;
-    m_bToDelete = false;
-    m_PrefixSetNo = UnknownPrefixSetNo;
-};
-
-CParadigmInfo::CParadigmInfo(uint16_t ParadigmNo, uint16_t AccentModelNo, uint16_t SessionNo, BYTE AuxAccent,
-    const char* CommonAncode, uint16_t PrefixSetNo) {
-    m_FlexiaModelNo = ParadigmNo;
-    m_bToDelete = false;
-    m_AccentModelNo = AccentModelNo;
-    m_SessionNo = SessionNo;
-    m_AuxAccent = AuxAccent;
-    strncpy(m_CommonAncode, CommonAncode, CommonAncodeSize);
-    m_PrefixSetNo = PrefixSetNo;
-};
-
-bool CParadigmInfo::operator==(const CParadigmInfo& X) const {
-    return m_FlexiaModelNo == X.m_FlexiaModelNo
-        && m_AccentModelNo == X.m_AccentModelNo
-        && m_AuxAccent == X.m_AuxAccent
-        && !strncmp(m_CommonAncode, X.m_CommonAncode, CommonAncodeSize)
-        && m_PrefixSetNo == X.m_PrefixSetNo;
-};
-
-//----------------------------------------------------------------------------
-// Nick [17/Dec/2003]
-//----------------------------------------------------------------------------
-CParadigmInfo CParadigmInfo::AnyParadigmInfo() {
-    return CParadigmInfo(AnyParadigmNo, AnyAccentModelNo, AnySessionNo,
-        AnyAccent, AnyCommonAncode, AnyPrefixSetNo);
-}
-
-//----------------------------------------------------------------------------
-bool CParadigmInfo::IsAnyEqual(const CParadigmInfo& X) const {
-    return (
-        (m_FlexiaModelNo == AnyParadigmNo ||
-            X.m_FlexiaModelNo == AnyParadigmNo ||
-            m_FlexiaModelNo == X.m_FlexiaModelNo)
-        && (m_AccentModelNo == AnyAccentModelNo ||
-            X.m_AccentModelNo == AnyAccentModelNo ||
-            m_AccentModelNo == X.m_AccentModelNo)
-        && (m_AuxAccent == AnyAccent ||
-            X.m_AuxAccent == AnyAccent ||
-            m_AuxAccent == X.m_AuxAccent)
-        && (!strncmp(m_CommonAncode, X.m_CommonAncode, CommonAncodeSize)
-            || !strncmp(m_CommonAncode, AnyCommonAncode, CommonAncodeSize)
-            || !strncmp(X.m_CommonAncode, AnyCommonAncode, CommonAncodeSize))
-        && (m_PrefixSetNo == AnyPrefixSetNo ||
-            X.m_PrefixSetNo == AnyPrefixSetNo ||
-            m_PrefixSetNo == X.m_PrefixSetNo)
-        );
-}
 
 MorphoWizard::MorphoWizard(): 
     m_bLoaded(false), 
@@ -317,7 +170,8 @@ void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool
         }
     }
     load_gramtab(useNationalConstants);
-    load_mrd(guest, bCreatePrediction);
+    load_mrd_json(guest, bCreatePrediction);
+    //load_mrd(guest, bCreatePrediction);
     StartSession(user_name);
     m_bLoaded = true;
 }
@@ -488,8 +342,10 @@ void MorphoWizard::load_mrd(bool guest, bool bCreatePrediction) {
 
     if (!mrdFile.is_open())
         throw CExpc("Wrong mrd file : " + m_MrdPath);
-
-    LOGV << "ReadFlexiaModels...";
+    
+    m_LemmaToParadigm.clear();
+    m_FlexiaModels.clear();
+    m_AccentModels.clear();
     ReadFlexiaModels(mrdFile);
 
     LOGV << "ReadAccentModels...";
@@ -511,45 +367,94 @@ void MorphoWizard::load_mrd(bool guest, bool bCreatePrediction) {
     LOGV << "load ...";
 }
 
+void MorphoWizard::load_mrd_json(bool guest, bool bCreatePrediction) {
+    m_ReadOnly = guest;
+
+    auto path = m_MwzFolder / "morphs.json";
+    std::cerr << "Reading mrd-file: " << path << "\n";
+    std::ifstream mrdFile(path);
+    if (!mrdFile.is_open())
+        throw CExpc("Wrong mrd file : " + m_MrdPath);
+    auto mrd = nlohmann::json::parse(mrdFile);
+    ConvertFromUtfRecursive(mrd, m_Language);
+    m_FlexiaModels.clear();
+    for (auto f : mrd["flexia_models"]) {
+        m_FlexiaModels.push_back(CFlexiaModel().FromJson(f));
+    }
+    m_AccentModels.clear();
+    for (auto f : mrd["accent_models"]) {
+        m_AccentModels.push_back(CAccentModel().FromJson(f));
+    }
+
+    m_Sessions.clear();
+    for (auto f : mrd["sessions"]) {
+        m_Sessions.push_back(CMorphSession().FromJson(f));
+    }
+
+    m_PrefixSets.clear();
+    for (auto f : mrd["prefix_sets"]) {
+        std::set<std::string> prefix_set;
+        for (auto p : f) {
+            prefix_set.insert(std::string(p));
+        }
+        m_PrefixSets.push_back(prefix_set);
+    }
+
+    for (auto f : mrd["lemmas"]) {
+        CParadigmInfo p;
+        p.FromJson(f);
+        m_LemmaToParadigm.insert(std::make_pair(p.m_Lemma, p));
+    }   
+    LOGV << "loading done";
+}
+
+
+
+nlohmann::json MorphoWizard::GetSessionsJson() const {
+    auto r = nlohmann::json::array();
+    for (auto s : m_Sessions) {
+        r.push_back(s.GetJson());
+    }
+    return r;
+}
+
+
+nlohmann::json MorphoWizard::GetPrefixSetsJson() const {
+    auto r = nlohmann::json::array();
+    for (auto s : m_PrefixSets) {
+        r.push_back(s);
+    }
+    return r;
+}
+
+nlohmann::json MorphoWizard::GetLemmsJson() const {
+    auto lemms = nlohmann::json::array();
+    for (auto& [lemma, lemm_info] : m_LemmaToParadigm) {
+        lemms.push_back(lemm_info.GetJson(lemma));
+    }
+    return lemms;
+}
+
 
 void MorphoWizard::save_mrd() {
     assert(m_bLoaded);
-    auto path = m_MwzFolder / m_MrdPath;
+    //auto path = m_MwzFolder / m_MrdPath;
+    auto path = m_MwzFolder / "morphs.json";
     EndSession();
     std::ofstream outp(path, std::ios::binary);
     if (!outp.is_open()) {
         throw CExpc("Error while saving to file. It may be corrupted");
     }
-    WriteFlexiaModels(outp);
-    WriteAccentModels(outp);
-
-    outp << m_Sessions.size() << "\n";
-    for (auto s : m_Sessions)
-        outp << str_to_utf8(s.ToString()) << "\n";
-
-    outp << m_PrefixSets.size() << "\n";
-    for (size_t i = 0; i < m_PrefixSets.size(); i++) {
-        outp << str_to_utf8(get_prefix_set_str((uint16_t)i)) << "\n";
-    }
-
-    outp << m_LemmaToParadigm.size() << "\n";
-    for (lemma_iterator_t b = m_LemmaToParadigm.begin(); b != m_LemmaToParadigm.end(); ++b) {
-        const CFlexiaModel& p = m_FlexiaModels[b->second.m_FlexiaModelNo];
-        size_t flex_size = p.get_first_flex().size();
-        size_t lemm_size = b->first.size();
-        std::string base = b->first.substr(0, lemm_size - flex_size);
-        if (base.empty()) base = "#";
-        std::string s1 = (b->second.m_CommonAncode[0] == 0) ? "-" : b->second.GetCommonAncodeIfCan();
-        std::string s2 = (b->second.m_PrefixSetNo == UnknownPrefixSetNo) ? "-" : Format("%i", b->second.m_PrefixSetNo);
-        outp << str_to_utf8(base) << " " << b->second.m_FlexiaModelNo << " " <<
-            b->second.m_AccentModelNo << " " << b->second.m_SessionNo << " " <<
-            str_to_utf8(s1) << " " << str_to_utf8(s2) << "\n";
-
-    }
+    nlohmann::ordered_json mrd;
+    mrd["flexia_models"] = GetFlexiaModelsJson();
+    mrd["accent_models"] = GetAccentModelsJson();
+    mrd["sessions"] = GetSessionsJson();
+    mrd["prefix_sets"] = GetPrefixSetsJson();
+    mrd["lemmas"] = GetLemmsJson();
+    ConvertToUtfRecursive(mrd, m_Language);
+    outp << mrd.dump(1);
     outp.close();
-
     m_bWasChanged = false;
-
     LOGI << "Saved by " << GetUserName();
 };
 
@@ -1303,7 +1208,7 @@ std::string MorphoWizard::GetUserName() const {
 
 void MorphoWizard::log_lemma(const std::string& lemm, const CFlexiaModel& p, bool is_added) const {
     if (!m_bFullTrace) return;
-    LOGI << (is_added ? "+" : "-")  << " " << lemm << " " << p.ToString();
+    LOGI << (is_added ? "+" : "-")  << " " << lemm << " " << p.ToJson().dump();
 }
 
 uint16_t AddAccentModel(MorphoWizard& C, const CAccentModel& AccentModel) {

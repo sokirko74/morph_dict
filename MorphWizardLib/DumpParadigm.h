@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "../common/json.h"
 
 class MorphoWizard;
 
@@ -13,7 +14,8 @@ struct CMorphSession
 
 	bool operator  == (const  CMorphSession& X) const;
 	bool		ReadFromString(const std::string& s);
-	std::string		ToString() const;
+	nlohmann::json GetJson() const;
+	CMorphSession& FromJson(nlohmann::json inj);
 	void		SetEmpty();
 	bool		IsEmpty() const;
 };

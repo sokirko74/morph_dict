@@ -2,19 +2,8 @@
 #include "../contrib/nlohmann/json.hpp"
 #include "utilit.h"
 
-inline void ConvertToUtfRecursive(nlohmann::json& r, MorphLanguageEnum langua) {
-	if (r.is_array()) {
-		for (auto& a : r) {
-			ConvertToUtfRecursive(a, langua);
-		}
-	}
-	else if (r.is_object()) {
-		for (auto& a : r.items()) {
-			ConvertToUtfRecursive(a.value(), langua);
-		}
+extern nlohmann::json& ConvertToUtfRecursive(nlohmann::json& r, MorphLanguageEnum langua);
+extern nlohmann::ordered_json& ConvertToUtfRecursive(nlohmann::ordered_json& r, MorphLanguageEnum langua);
 
-	}
-	else if (r.is_string()) {
-		r = convert_to_utf8(r, langua);
-	}
-}
+extern nlohmann::json& ConvertFromUtfRecursive(nlohmann::json& r, MorphLanguageEnum langua);
+extern nlohmann::ordered_json& ConvertFromUtfRecursive(nlohmann::ordered_json& r, MorphLanguageEnum langua);

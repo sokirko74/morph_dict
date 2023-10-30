@@ -153,8 +153,25 @@ void CMorphDict::Load(std::string GrammarFileName)
 	{
 		throw CExpc(Format("Cannot open %s", PrecompiledFile.c_str()));
 	};
-	ReadFlexiaModels(annotFile);
-	ReadAccentModels(annotFile);
+	
+	{
+		std::string l;
+		std::getline(annotFile, l);
+		m_FlexiaModels.clear();
+		auto js = ConvertFromUtfRecursive(nlohmann::json::parse(l), m_Language);
+		for (auto j : js) {
+			m_FlexiaModels.push_back(CFlexiaModel().FromJson(j));
+		}
+	}
+	{
+		std::string l;
+		std::getline(annotFile, l);
+		m_AccentModels.clear();
+		for (auto m : nlohmann::json::parse(l)) {
+			m_AccentModels.push_back(CAccentModel().FromJson(m));
+		}
+	}
+
 
 	{
 		size_t count = getCount(annotFile, "prefix sets");
@@ -197,10 +214,10 @@ void CMorphDict::Save(std::string GrammarFileName) const
 	{
 		throw CExpc(Format("Cannot write to %s", PrecompiledFile.c_str()));
 	};
-	WriteFlexiaModels(outp);
-	WriteAccentModels(outp);
-	assert(!m_Prefixes.empty() && m_Prefixes[0].empty());
+	outp << ConvertToUtfRecursive(GetFlexiaModelsJson(), m_Language).dump() << "\n";
+	outp << GetAccentModelsJson() << "\n";
 
+	assert(!m_Prefixes.empty() && m_Prefixes[0].empty());
 	// do not write the first empty prefix, instead add it manually each time during loading
 	outp << m_Prefixes.size() - 1 << "\n";
 	for (size_t i = 1; i < m_Prefixes.size(); i++) {

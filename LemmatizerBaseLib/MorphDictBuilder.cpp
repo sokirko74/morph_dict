@@ -100,7 +100,7 @@ void  CMorphDictBuilder::GenerateUnitedFlexModels(const MorphoWizard& Wizard)
 
 		if ( p.m_Flexia.size() >=  MaxNumberFormsInOneParadigm)
 		{
-			throw CExpc ("Error: flexia %s contains more than %i forms. !\n", p.ToString().c_str(), MaxNumberFormsInOneParadigm);
+			throw CExpc ("Error: flexia %s contains more than %i forms. !\n", p.ToJson().dump().c_str(), MaxNumberFormsInOneParadigm);
 		};
 
 		for (size_t i=0; i <p.m_Flexia.size(); i++)
@@ -117,19 +117,19 @@ void  CMorphDictBuilder::GenerateUnitedFlexModels(const MorphoWizard& Wizard)
 	};
 };
 
+// generate unique prefixes over all prefix sets
 void  CMorphDictBuilder::GeneratePrefixes(const MorphoWizard& Wizard)
 {
 	printf ("GeneratePrefixes\n");
 	m_Prefixes.clear();
 	// add the empty prefix
 	m_Prefixes.push_back("");
-	for (size_t i=0; i< Wizard.m_PrefixSets.size(); i++)
+	for (auto prefix_set: Wizard.m_PrefixSets)
 	{
 		m_PrefixSets.push_back(DwordVector());
 		
-		for (std::set<std::string>::const_iterator it =  Wizard.m_PrefixSets[i].begin();  it != Wizard.m_PrefixSets[i].end(); it++)
+		for (auto prefix : prefix_set)
 		{
-			std::string prefix = *it;
 			StringVector::iterator it_c = find(m_Prefixes.begin(), m_Prefixes.end(), prefix);
 			if (it_c == m_Prefixes.end())
 				it_c = m_Prefixes.insert(m_Prefixes.end(), prefix);
@@ -137,7 +137,7 @@ void  CMorphDictBuilder::GeneratePrefixes(const MorphoWizard& Wizard)
 		};
 		if (m_PrefixSets.back().empty())
 		{
-			throw CExpc("PrefixSet %i  has no prefixes\n", i); 
+			throw CExpc("empty prefix set found"); 
 		};
 
 	};

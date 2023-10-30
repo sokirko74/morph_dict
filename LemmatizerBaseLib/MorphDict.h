@@ -5,7 +5,7 @@
 #pragma once 
 
 #include "MorphAutomat.h"
-#include "../MorphWizardLib/FormInfo.h"
+#include "../MorphWizardLib/wizard_base.h"
 
 
 struct CLemmaInfoAndLemma 

@@ -1,0 +1,51 @@
+{
+ "flexia_models": [
+  {
+   "endings": [
+    {
+     "flexia": "",
+     "gramcode": "яя"
+    }
+   ]
+  }
+ ],
+ "accent_models": [
+  [
+   255
+  ]
+ ],
+ "sessions": [
+  {
+   "last_save": "16:30, 09 November 2004",
+   "start": "16:15, 09 November 2004",
+   "user": "alex"
+  },
+  {
+   "last_save": "15:33, 30 October 2023",
+   "start": "15:33, 30 October 2023",
+   "user": "guest"
+  },
+  {
+   "last_save": "15:44, 30 October 2023",
+   "start": "15:44, 30 October 2023",
+   "user": "guest"
+  }
+ ],
+ "prefix_sets": [],
+ "lemmas": [
+  {
+   "a": 0,
+   "f": 0,
+   "l": "ЗОКИРКА_А_В",
+   "s": 0,
+   "t": "Ун"
+  },
+  {
+   "a": 0,
+   "f": 0,
+   "l": "СОКИРКО_А_В",
+   "s": 0,
+   "t": "Ун"
+  }
+ ]
+}
