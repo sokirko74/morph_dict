@@ -29,7 +29,7 @@ macro (RunMorphGen langua)
     add_custom_command(
         OUTPUT ${output_folder}/morph.bases ${output_folder}/morph.annot ${output_folder}/morph.forms_autom
         COMMAND MorphGen --input project.mwz --output-folder ${output_folder} --postfix-len 5 --min-freq 3
-        DEPENDS MorphGen ${input_folder}/morphs.mrd ${input_folder}/project.mwz ${input_folder}/gramtab.json
+        DEPENDS MorphGen ${input_folder}/morphs.json ${input_folder}/project.mwz ${input_folder}/gramtab.json
         COMMENT "Convert Morphology ${langua}"                 
         WORKING_DIRECTORY ${input_folder}
         VERBATIM

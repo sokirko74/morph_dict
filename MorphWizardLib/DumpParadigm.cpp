@@ -19,26 +19,6 @@ bool CMorphSession::IsEmpty() const {
     return m_UserName.empty();
 };
 
-bool CMorphSession::ReadFromString(const std::string& s) {
-    StringTokenizer Tok(s.c_str(), ";\r\n");
-    if (!Tok()) {
-        SetEmpty();
-        return false;
-    };
-    m_UserName = Tok.val();
-    if (!Tok()) {
-        SetEmpty();
-        return false;
-    };
-    m_SessionStart = Tok.val();
-    if (!Tok()) {
-        SetEmpty();
-        return false;
-    };
-    m_LastSessionSave = Tok.val();
-    return true;
-}
-
 nlohmann::json CMorphSession::GetJson() const {
     return {
         {"user", m_UserName},
@@ -139,13 +119,10 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
                 bError = true;
             }
             else {
-                std::string SessionStr = s.substr(ind + 1);
-                Trim(SessionStr);
-                if (!m_Session.ReadFromString(SessionStr)) {
-                    Errors += Format("cannot parse %s field at line %i", SessionField, line_no);
-                    bError = true;
-
-                };
+                std::string s = s.substr(ind + 1);
+                Trim(s);
+                auto js = nlohmann::json::parse(s);
+                m_Session.FromJson(s);
             };
             continue;
         };

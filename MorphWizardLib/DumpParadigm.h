@@ -13,7 +13,6 @@ struct CMorphSession
 	std::string		m_LastSessionSave;
 
 	bool operator  == (const  CMorphSession& X) const;
-	bool		ReadFromString(const std::string& s);
 	nlohmann::json GetJson() const;
 	CMorphSession& FromJson(nlohmann::json inj);
 	void		SetEmpty();

@@ -39,11 +39,11 @@ class MorphoWizard : public CMorphWizardBase
     MorphWizardMeter* m_pMeter;	// Nick 30.11.2003
 
     void load_gramtab(bool useNationalConstants);
-    void ReadSessions(std::ifstream& mrdFile);
-    void ReadLemmas(std::ifstream& mrdFile);
     nlohmann::json GetPrefixSetsJson() const;
     nlohmann::json GetSessionsJson() const;
     nlohmann::json GetLemmsJson() const;
+    void	load_mrd_json(bool guest, bool bCreatePrediction);
+
 public:
     struct AncodeLess
     {
@@ -82,8 +82,6 @@ public:
 
     //=================  general: loading, saving, logging ======================
     void	load_wizard(std::string path, std::string user_name, bool bCreatePrediction = true, bool useNationalConstants=true);
-    void	load_mrd(bool guest, bool bCreatePrediction);
-    void	load_mrd_json(bool guest, bool bCreatePrediction);
     void	log_lemma(const std::string& lemm, const CFlexiaModel& p, bool is_added) const;
     bool	is_changed() { return m_bWasChanged; }
     void	save_mrd();
@@ -167,7 +165,6 @@ private:
     void	SetAccent(uint16_t AccentModelNo, BYTE AuxAccent, int FormNo, std::string& form) const;
     std::string	get_prefix_set_str(uint16_t PrefixSetNo) const;
     void	ReadOnePrefixSet(std::string PrefixSet, std::set<std::string>& Result) const;
-    void	ReadPrefixSets(std::ifstream& mrdFile);
     uint16_t	AddPrefixSet(std::string PrefixSetStr);
 
 

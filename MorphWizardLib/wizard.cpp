@@ -44,7 +44,7 @@ MorphoWizard::~MorphoWizard() {
 }
 
 
-//MRD_FILE 	L:\MORPH.windows\SOURCE\RUS_SRC\morphs.mrd
+//MRD_FILE 	L:\MORPH.windows\SOURCE\RUS_SRC\morphs.json
 //LANG	        RUSSIAN
 //USERS       user1, user2, user3
 
@@ -171,7 +171,6 @@ void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool
     }
     load_gramtab(useNationalConstants);
     load_mrd_json(guest, bCreatePrediction);
-    //load_mrd(guest, bCreatePrediction);
     StartSession(user_name);
     m_bLoaded = true;
 }
@@ -204,173 +203,26 @@ static size_t getCount(std::ifstream& mrdFile, const char* sectionName) {
     return atoi(line.c_str());
 }
 
-void MorphoWizard::ReadSessions(std::ifstream& mrdFile) {
-    m_Sessions.clear();
 
-    size_t count = getCount(mrdFile, "sessions");
-
-    for (size_t num = 0; num < count; num++) {
-        std::string line;
-        if (!read_utf8_line(mrdFile, line)) {
-            throw CExpc("Cannot read enough sessions ");
+void MorphoWizard::ReadOnePrefixSet(std::string in, std::set<std::string>& out) const {
+    RmlMakeUpper(in, m_Language);
+    out.clear();
+    for (auto p : split_string(in, ' ')) {
+        Trim(p);
+        if (!p.empty()) {
+            if (!CheckLanguage(p, m_Language)) {
+                throw CExpc ("bad language in prefix %s", p.c_str());
+            }
+            out.insert(p);
         }
-
-        CMorphSession M;
-        if (!M.ReadFromString(line))
-            throw CExpc(Format("Cannot parse session %s", line.c_str()).c_str());
-
-        m_Sessions.push_back(M);
-
-    };
-
-
-};
-
-void MorphoWizard::ReadOnePrefixSet(std::string PrefixSetStr, std::set<std::string>& Result) const {
-    RmlMakeUpper(PrefixSetStr, m_Language);
-    Trim(PrefixSetStr);
-    for (size_t i = 0; i < PrefixSetStr.length(); i++)
-        if (!is_upper_alpha((BYTE)PrefixSetStr[i], m_Language)
-            && (BYTE)PrefixSetStr[i] != ','
-            && (BYTE)PrefixSetStr[i] != ' '
-            )
-            throw CExpc("Cannot parse the prefix std::set");
-
-
-    StringTokenizer tok(PrefixSetStr.c_str(), ", \t\r\n");
-    Result.clear();
-    while (tok()) {
-        Result.insert(tok.val());
-    };
-
-};
-
-void MorphoWizard::ReadPrefixSets(std::ifstream& mrdFile) {
-    m_PrefixSets.clear();
-
-    size_t count = getCount(mrdFile, "prefix sets");
-
-    for (size_t num = 0; num < count; num++) {
-        std::string line;
-        if (!read_utf8_line(mrdFile, line)) {
-            throw CExpc("Cannot read enough prefix sets");
-        }
-
-        std::set<std::string> PrefixSet;
-        ReadOnePrefixSet(line, PrefixSet);
-        if (PrefixSet.empty())
-            throw CExpc("No prefixes found in prefix sets section");
-
-        m_PrefixSets.push_back(PrefixSet);
-    };
-};
-
-
-void MorphoWizard::ReadLemmas(std::ifstream& mrdFile) {
-    m_LemmaToParadigm.clear();
-
-    size_t count = getCount(mrdFile, "lemmas");
-
-    for (size_t num = 0; num < count; num++) {
-        int ParadigmNo, AccentModelNo, SessionNo, AuxAccent = UnknownAccent;
-        uint16_t PrefixSetNo = UnknownPrefixSetNo;
-        std::string lemm, CommonAncode, PrefixSetNoStr;
-        std::string line;
-
-        if (!read_utf8_line(mrdFile, line)) {
-            throw CExpc("Cannot read enough lemmas");
-        }
-        std::stringstream ss(line);
-        if (!(ss >> lemm >> ParadigmNo >> AccentModelNo >> SessionNo >> CommonAncode >> PrefixSetNoStr)) {
-            throw CExpc(Format("Cannot parse lemmas: line %zu", num));
-        }
-
-        if (CommonAncode == "-")
-            CommonAncode = "";
-
-        if (PrefixSetNoStr != "-")
-            PrefixSetNo = atoi(PrefixSetNoStr.c_str());
-
-
-        if (lemm == "#") lemm.erase();
-
-        lemm += m_FlexiaModels[ParadigmNo].get_first_flex();
-
-        m_LemmaToParadigm.insert(std::make_pair(lemm, CParadigmInfo(ParadigmNo, AccentModelNo, SessionNo, AuxAccent,
-            CommonAncode.c_str(), PrefixSetNo)));
-
     }
-}
+};
 
-
-
-//	Загружает *.mrd file.
-//---------------------------------------------------
-//	Описание формата *.mrd.
-
-//	file: paradigm_number
-//		paradigm |
-//		...	 } paradigm_number times
-//		paradigm |
-//	      base_number
-//		base PNUM |
-//		...	  } base_number times
-//		base PNUM |
-//	paradigm: DICT_TYPE DEPR form ...
-//	base: неизменяемая часть слова, или # если неизменяемая часть пустая
-//	DICT_TYPE: тип словаря, одна буква
-//	DEPR: одна буква (не используется, всегда '#')
-//	form: % FLEX * ancode ...
-//
-//	PNUM - номер парадигиы, начиная с 0
-//	
-//	FLEX: окончание.
-//
-//	Первое окончание - окончание нормальной формы.
-//	Остальные окончания отсортированы по алфавиту.
-//	Внутри одной формы анкоды отсортированы по алфавиту
-//	(сначала маленькие буквы, потом большие)
-
-//	Пробела внутри парадигмы нет.
-//---------------------------------------------------
-void MorphoWizard::load_mrd(bool guest, bool bCreatePrediction) {
-    m_ReadOnly = guest;
-
-    auto path = m_MwzFolder / m_MrdPath;
-    std::cerr << "Reading mrd-file: " << path << "\n";
-    std::ifstream mrdFile(path);
-
-    if (!mrdFile.is_open())
-        throw CExpc("Wrong mrd file : " + m_MrdPath);
-    
-    m_LemmaToParadigm.clear();
-    m_FlexiaModels.clear();
-    m_AccentModels.clear();
-    ReadFlexiaModels(mrdFile);
-
-    LOGV << "ReadAccentModels...";
-    ReadAccentModels(mrdFile);
-
-    LOGV << "ReadSessions ...";
-    ReadSessions(mrdFile);
-
-    LOGV << "ReadPrefixSets ...";
-    ReadPrefixSets(mrdFile);
-    
-    LOGV << "ReadLemmas ...";
-    ReadLemmas(mrdFile);
-
-    
-    if (bCreatePrediction)
-        LOGV << "CreatePredictIndex ...";
-        m_Predictor.CreateIndex();
-    LOGV << "load ...";
-}
 
 void MorphoWizard::load_mrd_json(bool guest, bool bCreatePrediction) {
     m_ReadOnly = guest;
 
-    auto path = m_MwzFolder / "morphs.json";
+    auto path = m_MwzFolder / m_MrdPath;
     std::cerr << "Reading mrd-file: " << path << "\n";
     std::ifstream mrdFile(path);
     if (!mrdFile.is_open())
@@ -438,8 +290,7 @@ nlohmann::json MorphoWizard::GetLemmsJson() const {
 
 void MorphoWizard::save_mrd() {
     assert(m_bLoaded);
-    //auto path = m_MwzFolder / m_MrdPath;
-    auto path = m_MwzFolder / "morphs.json";
+    auto path = m_MwzFolder / m_MrdPath;
     EndSession();
     std::ofstream outp(path, std::ios::binary);
     if (!outp.is_open()) {
@@ -1280,10 +1131,6 @@ uint16_t MorphoWizard::AddPrefixSet(std::string PrefixSetStr) {
     return Result;
 }
 
-//----------------------------------------------------------------------------
-// Nick Ketsaris [4/Dec/2003]
-//	return: CParadigmInfo
-//----------------------------------------------------------------------------
 CParadigmInfo
 MorphoWizard::add_lemma(const std::string& slf, std::string common_grammems, const std::string& prefixes, int& line_no_err,
     uint16_t SessionNo) {
