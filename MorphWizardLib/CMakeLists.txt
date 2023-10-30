@@ -26,4 +26,4 @@ target_link_libraries(MorphWizardLib
     AgramtabLib
 )
 
-add_subdirectory(scripts/read_mrd)
+#add_subdirectory(scripts/read_mrd)
