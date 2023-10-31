@@ -115,8 +115,8 @@ public:
 	
 	bool IsStrongClauseRoot(const part_of_speech_mask_t poses) const;
 	bool is_month (const char* lemma) const;
-	bool is_small_number (const char* lemma) const;
-	bool IsMorphNoun (part_of_speech_mask_t poses)  const;
+
+    bool IsMorphNoun (part_of_speech_mask_t poses)  const;
 	bool is_morph_adj (part_of_speech_mask_t poses) const;
 	bool is_morph_participle (part_of_speech_mask_t poses) const;
 	bool is_morph_pronoun (part_of_speech_mask_t poses) const;

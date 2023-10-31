@@ -12,7 +12,6 @@
 
 CAgramtab::CAgramtab()
 {
-    m_bInited = false;
     m_bUseNationalConstants = true;
 };
 
@@ -148,16 +147,6 @@ CAgramtab :: ~CAgramtab()
 
 
 };
-
-int CAgramtab::AreEqualPartOfSpeech(const char* grm1, const char* grm2)
-{
-    if ((grm1 == 0) && (grm2 == 0)) return 1;
-    if ((grm1 == 0) && (grm2 != 0)) return 0;
-    if ((grm2 == 0) && (grm1 != 0)) return 0;
-    if (((unsigned char)grm1[0] == '?') || ((unsigned char)grm2[0] == '?')) return 0;
-    return GetLine(GramcodeToLineIndex(grm1))->m_PartOfSpeech == GetLine(GramcodeToLineIndex(grm2))->m_PartOfSpeech;
-}
-
 
 
 char* CAgramtab::grammems_to_str(grammems_mask_t grammems, char* out_buf, NamingAlphabet na ) const
@@ -314,9 +303,12 @@ std::string CAgramtab::ReadFromFolder(std::string folder) {
     assert(!m_PlugNoun.m_GramCode.empty());
     m_PlugNoun.m_Lemma  = convert_from_utf8(gramtab["gramcodes"][gramcode_utf8]["l"].template get<std::string>().c_str(), m_Language);
     assert(!m_PlugNoun.m_Lemma.empty());
-    
-    m_bInited = true;
-
+    m_InanimIndeclNounGramCode = convert_from_utf8(gramtab.value("inanim_indecl_noun", "").c_str(), m_Language);
+    m_MasAbbrNounGramCode = convert_from_utf8(gramtab.value("mas_abbr_noun", "").c_str(), m_Language);
+    if (m_Language == morphRussian) {
+        assert (!m_InanimIndeclNounGramCode.empty());
+        assert (!m_MasAbbrNounGramCode.empty());
+    }
     return path.string();
 }
 
@@ -324,17 +316,7 @@ void CAgramtab::LoadFromRegistry()
 {
     auto key = Format("Software\\Dialing\\Lemmatizer\\%s\\DictPath", GetStringByLanguage(m_Language).c_str());
     ReadFromFolder(::GetRegistryString(key));
-};
-
-part_of_speech_t CAgramtab::GetFirstPartOfSpeech(const part_of_speech_mask_t poses) const
-{
-    part_of_speech_t Count = GetPartOfSpeechesCount();
-    for (part_of_speech_t i = 0; i < Count; i++)
-        if ((poses & (1 << i)) != 0)
-            return i;
-
-    return Count;
-};
+};;
 
 std::string	CAgramtab::GetAllPossibleAncodes(part_of_speech_t pos, grammems_mask_t grammems)const
 {
@@ -352,7 +334,7 @@ std::string	CAgramtab::GetAllPossibleAncodes(part_of_speech_t pos, grammems_mask
 };
 
 //Generate GramCodes for grammems with CompareFunc
-std::string	CAgramtab::GetGramCodes(part_of_speech_t pos, grammems_mask_t grammems, GrammemCompare CompareFunc)const
+std::string	CAgramtab::GetAllGramCodes(part_of_speech_t pos, grammems_mask_t grammems, GrammemCompare CompareFunc)const
 {
     std::string Result;
     CAgramtabLine L0(0);

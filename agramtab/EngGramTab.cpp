@@ -95,11 +95,6 @@ bool CEngGramTab::IsStrongClauseRoot(const part_of_speech_mask_t poses)  const
 };
 
 
-bool CEngGramTab::is_small_number (const char* lemma) const  
-{
-   return false;
-}
-
 bool CEngGramTab::is_month (const char* lemma) const
 {
 	return false;

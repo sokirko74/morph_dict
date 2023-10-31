@@ -39,7 +39,10 @@ class CAgramtab {
 
 protected:
     bool m_bUseNationalConstants;
-    bool m_bInited;
+    std::string m_InanimIndeclNounGramCode;
+    std::string m_MasAbbrNounGramCode;
+
+
     bool UseNational(NamingAlphabet na) const {
         return (na == naDefault && m_bUseNationalConstants) || na == naNational;
     }
@@ -109,8 +112,6 @@ public:
 
     virtual bool is_month(const char *lemma) const = 0;
 
-    virtual bool is_small_number(const char *lemma) const = 0;
-
     virtual bool IsMorphNoun(part_of_speech_mask_t poses) const = 0;
 
     virtual bool is_morph_adj(part_of_speech_mask_t poses) const = 0;
@@ -151,9 +152,8 @@ public:
                                                     const char *gram_code_adj) const = 0;
 
     void LoadFromRegistry();
-    std::string ReadFromFolder(std::string folder);
 
-    int AreEqualPartOfSpeech(const char *grm1, const char *grm2);
+    std::string ReadFromFolder(std::string folder);
 
     bool
     ProcessPOSAndGrammemsIfCan(const char *tab_str, part_of_speech_t *PartOfSpeech, grammems_mask_t *grammems) const;
@@ -175,15 +175,11 @@ public:
 
     size_t GetSourceLineNo(const char *gram_code) const;
 
-    grammems_mask_t GetAllGrammemsThatContains(const char *gram_code) const;
-
     bool GetGrammems(const char *gram_code, grammems_mask_t &grammems) const;
-
-    part_of_speech_t GetFirstPartOfSpeech(const part_of_speech_mask_t poses) const;
 
     std::string GetAllPossibleAncodes(part_of_speech_t pos, grammems_mask_t grammems) const;
 
-    std::string GetGramCodes(part_of_speech_t pos, grammems_mask_t grammems, GrammemCompare CompareFunc) const;
+    std::string GetAllGramCodes(part_of_speech_t pos, grammems_mask_t grammems, GrammemCompare CompareFunc) const;
 
     grammems_mask_t Gleiche(GrammemCompare CompareFunc, const char *gram_codes1, const char *gram_codes2) const;
 
@@ -217,5 +213,14 @@ public:
     part_of_speech_t GetPartOfSpeechByStr(const std::string &part_of_speech) const;
 
     void SetUseNationalConstants(bool value);
+
+    const std::string& GetInanimIndeclNoumGramCode() const  {
+        return m_InanimIndeclNounGramCode;
+    }
+
+    const std::string& GetMasAbbrNounGramCode() const {
+        return m_MasAbbrNounGramCode;
+    };
+
 };
 

@@ -225,7 +225,7 @@ grammems_mask_t CRusGramTab::DeduceGrammems(part_of_speech_t PartOfSpeech, gramm
 	if (PartOfSpeech != PREDK)
 		if ((_QM(rIndeclinable) & grammems) && !(_QM(rSingular) & grammems))
 			grammems |= _QM(rPlural) | _QM(rSingular);
-	
+
 	return grammems;
 }
 
@@ -532,15 +532,6 @@ bool CRusGramTab::is_month(const char* lemma) const
 
 const static std::string SmallNumbers[] = { _R("ДВА"),_R("ТРИ"),_R("ЧЕТЫРЕ"),_R("ОБА"),_R("ПОЛТОРА") };
 
-bool CRusGramTab::is_small_number(const char* lemma) const
-{
-	if (!lemma) return false;
-	for (size_t i = 0; i < 5; i++)
-		if (SmallNumbers[i].compare(lemma) == 0)
-			return true;
-	return false;
-}
-
 
 bool CRusGramTab::IsMorphNoun(part_of_speech_mask_t poses)  const
 {
@@ -755,12 +746,6 @@ bool GenderNumber0(const CAgramtabLine* l1, const CAgramtabLine* l2) //with abse
 {
 	return ((rAllGenders & l1->m_Grammems & l2->m_Grammems) > 0 || !(rAllGenders & l1->m_Grammems) || !(rAllGenders & l2->m_Grammems)) &&
 		((rAllNumbers & l1->m_Grammems & l2->m_Grammems) > 0 || !(rAllNumbers & l1->m_Grammems) || !(rAllNumbers & l2->m_Grammems));
-};
-
-bool CaseNumber0(const CAgramtabLine* l1, const CAgramtabLine* l2) //with absent grammems check
-{
-	return ((rAllCases & l1->m_Grammems & l2->m_Grammems) > 0 || !(rAllCases & l1->m_Grammems) || !(rAllCases & l2->m_Grammems)) &&
-		((rAllNumbers & l1->m_Grammems & l2->m_Grammems) > 0 || !(rAllNumbers & l1->m_Grammems) || !(rAllNumbers & l2->m_Grammems)); ;
 };
 
 bool CRusGramTab::PartOfSpeechIsProductive(part_of_speech_t p) const {

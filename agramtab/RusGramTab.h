@@ -196,8 +196,6 @@ public:
 
     bool is_month(const char *lemma) const override;
 
-    bool is_small_number(const char *lemma) const override;
-
     bool IsMorphNoun(part_of_speech_mask_t poses) const override;
 
     bool is_morph_adj(part_of_speech_mask_t poses) const override;
@@ -250,5 +248,6 @@ extern bool CaseGender(const CAgramtabLine *l1, const CAgramtabLine *l2);
 extern bool CaseNumberGender(const CAgramtabLine *l1, const CAgramtabLine *l2);
 
 extern bool CaseNumberGender0(const CAgramtabLine *l1, const CAgramtabLine *l2); //with absent grammems check
+
 extern bool GenderNumber0(const CAgramtabLine *l1, const CAgramtabLine *l2); //with absent grammems check
 

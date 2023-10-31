@@ -220,12 +220,6 @@ bool CGerGramTab::IsStrongClauseRoot(const part_of_speech_mask_t poses) const
 };
 
 
-
-bool CGerGramTab::is_small_number (const char* lemma) const  
-{
-   return false;
-}
-
 bool CGerGramTab::is_month (const char* lemma) const
 {
 	return false;
