@@ -753,6 +753,11 @@ bool GrammemsInclusion(const CAgramtabLine* l1, const CAgramtabLine* l2) //with 
     return (l1->m_Grammems & l2->m_Grammems) == l2->m_Grammems ;
 };
 
+bool GrammemsEqu(const CAgramtabLine* l1, const CAgramtabLine* l2) //with absent grammems check
+{
+    return (l1->m_Grammems == l2->m_Grammems);
+};
+
 bool CRusGramTab::PartOfSpeechIsProductive(part_of_speech_t p) const {
 	return p == NOUN || p == ADJ_FULL || p == VERB || p == ADV || p == INFINITIVE;
 }
