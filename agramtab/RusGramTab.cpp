@@ -748,6 +748,11 @@ bool GenderNumber0(const CAgramtabLine* l1, const CAgramtabLine* l2) //with abse
 		((rAllNumbers & l1->m_Grammems & l2->m_Grammems) > 0 || !(rAllNumbers & l1->m_Grammems) || !(rAllNumbers & l2->m_Grammems));
 };
 
+bool GrammemsInclusion(const CAgramtabLine* l1, const CAgramtabLine* l2) //with absent grammems check
+{
+    return (l1->m_Grammems & l2->m_Grammems) == l2->m_Grammems ;
+};
+
 bool CRusGramTab::PartOfSpeechIsProductive(part_of_speech_t p) const {
 	return p == NOUN || p == ADJ_FULL || p == VERB || p == ADV || p == INFINITIVE;
 }

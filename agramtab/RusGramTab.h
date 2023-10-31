@@ -251,3 +251,5 @@ extern bool CaseNumberGender0(const CAgramtabLine *l1, const CAgramtabLine *l2);
 
 extern bool GenderNumber0(const CAgramtabLine *l1, const CAgramtabLine *l2); //with absent grammems check
 
+extern bool GrammemsInclusion(const CAgramtabLine *l1, const CAgramtabLine *l2);
+
