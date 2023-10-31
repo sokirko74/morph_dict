@@ -255,5 +255,7 @@ extern bool GrammemsInclusion(const CAgramtabLine *l1, const CAgramtabLine *l2);
 
 extern bool GrammemsEqu(const CAgramtabLine *l1, const CAgramtabLine *l2);
 
+extern bool AnyGender(const CAgramtabLine* l1, const CAgramtabLine* );
+
 
 

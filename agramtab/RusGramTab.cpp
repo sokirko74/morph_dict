@@ -723,6 +723,7 @@ bool CaseNumber(const CAgramtabLine* l1, const CAgramtabLine* l2)
 	return ((rAllCases & l1->m_Grammems & l2->m_Grammems) > 0) &&
 		((rAllNumbers & l1->m_Grammems & l2->m_Grammems) > 0);
 };
+
 bool CaseGender(const CAgramtabLine* l1, const CAgramtabLine* l2)
 {
 	return ((rAllCases & l1->m_Grammems & l2->m_Grammems) > 0) &&
@@ -761,5 +762,10 @@ bool GrammemsEqu(const CAgramtabLine* l1, const CAgramtabLine* l2) //with absent
 bool CRusGramTab::PartOfSpeechIsProductive(part_of_speech_t p) const {
 	return p == NOUN || p == ADJ_FULL || p == VERB || p == ADV || p == INFINITIVE;
 }
+
+bool AnyGender(const CAgramtabLine* l1, const CAgramtabLine* )
+{
+    return  ((rAllGenders & l1->m_Grammems ) > 0);
+};
 
 
