@@ -49,7 +49,7 @@ const static TMorphConstant Grammems[] = {
 	{_R("мр"), "mas"},
 	{_R("жр"), "fem"},
 	{_R("ср"), "neu"},
-	{_R("мр-жр"), "mas-fem"},
+	{_R("unused"), "unused"},
 	{_R("нст"), "pres"},
 	{_R("буд"), "fut"},
 	{_R("прш"), "past"},
@@ -214,11 +214,6 @@ grammems_mask_t CRusGramTab::DeduceGrammems(part_of_speech_t PartOfSpeech, gramm
 		)
 		grammems |= rAllGenders | rAllNumbers;
 
-
-	// слова общего рода ('сирота') могут  использованы как 
-	// слова м.р., так и как слова ж.р.
-	if (_QM(rMascFem) & grammems)
-		grammems |= _QM(rMasculinum) | _QM(rFeminum);
 
 	// слово 'пальто' не изменяется по числам, поэтому может
 	// быть использовано в обоих числах

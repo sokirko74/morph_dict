@@ -52,7 +52,7 @@ enum RussianGrammemsEnum {
     rMasculinum = 9,
     rFeminum = 10,
     rNeutrum = 11,
-    rMascFem = 12,
+    //rMascFem = 12,
     rAllGenders = ((1 << rMasculinum) | (1 << rFeminum) | (1 << rNeutrum)),
 
 

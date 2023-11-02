@@ -725,12 +725,6 @@ std::string GetRegistryString (std::string RegistryPath)
 	
 };
 
-std::string GetRegistryStringFromLocalIniFile (std::string RegistryPath)
-{
-	std::string  Result = GetStringInnerFromTheFile(RegistryPath, ".", "$RML");
-	return Result;
-};
-
 bool CanGetRegistryString (std::string RegistryPath)  
 {
 	try {
@@ -2000,15 +1994,6 @@ std::string ConvertASCIIToHtmlSymbols(const std::string& txt)
 }
 
 
-bool  MakeDir(const std::string& txt)
-{
-	#ifdef WIN32
-		return _mkdir(txt.c_str()) != -1;
-	#else
-		return mkdir(txt.c_str(), 0777) != -1;
-	#endif
-};
-
 
 size_t HashValue(const char *pc) 
 {
@@ -2242,5 +2227,6 @@ void init_plog(plog::Severity severity, std::string filename, bool overwrite, Mo
 			std::filesystem::remove(filename);
 		}
 	}
+    log_language = langua;
 	plog::init<MyFormatter>(severity, filename.c_str()).addAppender(&consoleAppender);
 }

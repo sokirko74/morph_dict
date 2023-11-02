@@ -111,11 +111,9 @@ extern std::string	GetPathByFile (std::string FileName);
 extern bool		IsEmptyLine ( const char *t);
 extern bool		IsHtmlFile (const std::string& FileName);
 extern std::string	CreateTempFileName();
-extern bool		MakeDir(const std::string& txt);
 
 // working with registry 
 extern std::string	GetRegistryString (std::string RegistryPath);
-extern std::string	GetRegistryStringFromLocalIniFile (std::string RegistryPath);
 extern bool		CanGetRegistryString (std::string RegistryPath);
 extern bool		IsRmlRegistered(std::string& Error);
 extern struct tm  RmlGetCurrentTime ();
