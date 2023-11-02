@@ -180,11 +180,9 @@ public:
 
     grammems_mask_t Gleiche(GrammemCompare CompareFunc, const char *gram_codes1, const char *gram_codes2) const;
 
-    std::string GleicheAncode1(GrammemCompare CompareFunc, const char *gram_codes1, const char *gram_codes2) const;
-
     std::string GleicheAncode1(GrammemCompare CompareFunc, std::string gram_codes1, std::string gram_codes2) const;
 
-    std::string GleicheAncode1(GrammemCompare CompareFunc, std::string GramCodes1, std::string GramCodes2,
+    std::string GleicheAncode3(GrammemCompare CompareFunc, const std::string& GramCodes1, const std::string& GramCodes2,
                                std::string &GramCodes1pair) const;
 
     std::string UniqueGramCodes(std::string gram_codes) const;
@@ -220,4 +218,3 @@ public:
     };
 
 };
-

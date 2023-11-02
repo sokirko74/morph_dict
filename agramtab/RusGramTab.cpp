@@ -724,8 +724,12 @@ bool CRusGramTab::is_morph_article(part_of_speech_mask_t poses)  const
 bool CRusGramTab::FilterNounNumeral(std::string& gcNoun, const std::string& gcNum, grammems_mask_t& grammems) const
 {
 	if (gcNoun.length() == 2 || !(grammems & rAllCases)) return false;
-	GleicheAncode1(CaseNumberGender0, gcNum,
-		FilterGramCodes(gcNum, grammems & rAllCases | ~rAllCases, 0), gcNoun);
+
+	GleicheAncode3(CaseNumberGender0,
+            gcNum,
+		    FilterGramCodes(gcNum, grammems & rAllCases | ~rAllCases, 0),
+            gcNoun);
+
 	return true;
 }
 
@@ -739,7 +743,10 @@ std::string RussianCaseNumberGender(const CAgramtab* pGramTab, const std::string
 
 grammems_mask_t CRusGramTab::ChangeGleicheAncode1(GrammemCompare CompareFunc, const std::string& wordGramCodes, std::string& groupGramCodes, const grammems_mask_t wordGrammems) const
 {
-	groupGramCodes = GleicheAncode1(CompareFunc, FilterGramCodes(wordGramCodes, ~_QM(rIndeclinable), 0), groupGramCodes);
+	groupGramCodes = GleicheAncode1(
+            CompareFunc,
+            FilterGramCodes(wordGramCodes, ~_QM(rIndeclinable), 0),
+            groupGramCodes);
 	if (groupGramCodes == "") { return 0; }
 	const grammems_mask_t gramFilter = rAllCases | rAllGenders | rAllTimes | rAllPersons | rAllAnimative;
 	return 	wordGrammems & ~(gramFilter) | GetAllGrammems(groupGramCodes.c_str());

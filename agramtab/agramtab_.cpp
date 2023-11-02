@@ -368,65 +368,50 @@ grammems_mask_t CAgramtab::Gleiche(GrammemCompare CompareFunc, const char* gram_
     return grammems;
 };
 
-//  uses gleiche to compare ancodes from gram_codes1 with  ancodes gram_codes2
-//  returns all ancodes from gram_codes1, which satisfy CompareFunc
-std::string CAgramtab::GleicheAncode1(GrammemCompare CompareFunc, const char* gram_codes1, const char* gram_codes2) const
-{
-    std::string EmptyString;
-    return GleicheAncode1(CompareFunc, std::string(gram_codes1), std::string(gram_codes2), EmptyString);
-}
 
 std::string CAgramtab::GleicheAncode1(GrammemCompare CompareFunc, std::string gram_codes1, std::string gram_codes2) const
 {
     std::string EmptyString;
-    return GleicheAncode1(CompareFunc, gram_codes1, gram_codes2, EmptyString);
+    return GleicheAncode3(CompareFunc, gram_codes1, gram_codes2, EmptyString);
 }
+
+bool EqualAncodes (const CAgramtabLine* l1, const CAgramtabLine* l2)
+{
+    return l1 == l2;
+};
+
 
 //changes GramCodes1pair according to satisfied GramCodes1 
 //(if gramcode number N is good(bad) in GramCodes1 it must be good(bad) in GramCodes1pair)
-std::string CAgramtab::GleicheAncode1(GrammemCompare CompareFunc, std::string GramCodes1, std::string GramCodes2, std::string& GramCodes1pair) const
+std::string CAgramtab::GleicheAncode3(GrammemCompare CompareFunc, const std::string& gram_codes1, const std::string& gram_codes2, std::string& GramCodes1pair) const
 {
     std::string Result;
     std::string pair;
-    const char* gram_codes1 = GramCodes1.c_str();
-    const char* gram_codes2 = GramCodes2.c_str();
-    if (!gram_codes1) return "";
-    if (!gram_codes2) return "";
-    if (!strcmp(gram_codes1, "??")) return gram_codes2;
-    if (!strcmp(gram_codes2, "??")) return gram_codes2;
-    size_t len1 = strlen(gram_codes1);
-    size_t len2 = strlen(gram_codes2);
-    bool has_pair = GramCodes1pair.length() == len1;
-    for (size_t l = 0; l < len1; l += 2)
-        if (CompareFunc)
+    if (gram_codes1.empty() || gram_codes2.empty()) return "";
+    if (gram_codes1 == "??") return gram_codes2;
+    if (gram_codes2 == "??") return gram_codes2;
+    bool has_pair = GramCodes1pair.length() == gram_codes1.length();
+    if (!CompareFunc) {
+        CompareFunc = EqualAncodes;
+    }
+    for (size_t l = 0; l < gram_codes1.length(); l += 2) {
+        const CAgramtabLine* l1 = GetLine(GramcodeToLineIndex(gram_codes1.c_str() + l));
+        for (size_t m = 0; m < gram_codes2.length(); m += 2)
         {
-            const CAgramtabLine* l1 = GetLine(GramcodeToLineIndex(gram_codes1 + l));
-            for (size_t m = 0; m < len2; m += 2)
+            const CAgramtabLine* l2 = GetLine(GramcodeToLineIndex(gram_codes2.c_str() + m));
+            if (CompareFunc(l1, l2))
             {
-                const CAgramtabLine* l2 = GetLine(GramcodeToLineIndex(gram_codes2 + m));
-                if (CompareFunc(l1, l2))
-                {
-                    //printf ("%s[%i]=%c\n",gram_codes1,l,gram_codes1[l]);
-                    Result.append(gram_codes1 + l, 2);
-                    if (has_pair) pair.append(GramCodes1pair.substr(l, 2));
-                    //Result += gram_codes1[l+1];
-                    break;
-                };
-            };
-        }
-        else
-        {
-            for (size_t m = 0; m < len2; m += 2)
-            {
-                if (GramcodeToLineIndex(gram_codes1 + l) == GramcodeToLineIndex(gram_codes2 + m))
-                {
-                    Result.append(gram_codes1 + l, 2);
-                    if (has_pair) pair.append(GramCodes1pair.substr(l, 2));
-                    break;
-                };
+                Result.append(gram_codes1.c_str() + l, 2);
+                if (has_pair) {
+                    pair.append(GramCodes1pair.substr(l, 2));
+                }
+                break;
             };
         };
-    if (has_pair) GramCodes1pair = pair;
+    };
+    if (has_pair) {
+        GramCodes1pair = pair;
+    }
     return Result;
 };
 
