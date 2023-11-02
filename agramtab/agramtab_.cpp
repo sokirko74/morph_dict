@@ -288,7 +288,7 @@ std::string CAgramtab::ReadFromFolder(std::string folder) {
         }
 
         CAgramtabLine* pAgramtabLine = new CAgramtabLine(line_no);
-        pAgramtabLine->m_Grammems = DeduceGrammems(pos, grammems);
+        pAgramtabLine->m_Grammems = grammems;
         pAgramtabLine->m_PartOfSpeech = pos;
         size_t gram_index = GramcodeToLineIndex(gramcode.c_str());
         if (GetLine(gram_index)) {
@@ -305,18 +305,13 @@ std::string CAgramtab::ReadFromFolder(std::string folder) {
     assert(!m_PlugNoun.m_Lemma.empty());
     m_InanimIndeclNounGramCode = convert_from_utf8(gramtab.value("inanim_indecl_noun", "").c_str(), m_Language);
     m_MasAbbrNounGramCode = convert_from_utf8(gramtab.value("mas_abbr_noun", "").c_str(), m_Language);
-    if (m_Language == morphRussian) {
-        assert (!m_InanimIndeclNounGramCode.empty());
-        assert (!m_MasAbbrNounGramCode.empty());
-    }
     return path.string();
 }
 
-void CAgramtab::LoadFromRegistry()
-{
+std::string CAgramtab::GetDefaultPath() const {
     auto key = Format("Software\\Dialing\\Lemmatizer\\%s\\DictPath", GetStringByLanguage(m_Language).c_str());
-    ReadFromFolder(::GetRegistryString(key));
-};;
+    return ::GetRegistryString(key);
+}
 
 std::string	CAgramtab::GetAllPossibleAncodes(part_of_speech_t pos, grammems_mask_t grammems)const
 {

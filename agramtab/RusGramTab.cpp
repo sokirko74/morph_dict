@@ -129,11 +129,66 @@ CRusGramTab :: ~CRusGramTab()
 	}
 
 }
-const char* CRusGramTab::GetRegistryString() const
+
+grammems_mask_t DeduceGrammems(part_of_speech_t PartOfSpeech, grammems_mask_t grammems) {
+    // неизменяемые слова как будто принадлежат всем падежам
+    if ((_QM(rIndeclinable) & grammems)
+        && (PartOfSpeech != PREDK)
+            )
+        grammems |= rAllCases;
+
+    if ((_QM(rIndeclinable) & grammems)
+        && (PartOfSpeech == PRONOUN_P)
+            )
+        grammems |= rAllGenders | rAllNumbers;
+
+
+    // слово 'пальто' не изменяется по числам, поэтому может
+    // быть использовано в обоих числах
+    if (PartOfSpeech != PREDK)
+        if ((_QM(rIndeclinable) & grammems) && !(_QM(rSingular) & grammems))
+            grammems |= _QM(rPlural) | _QM(rSingular);
+
+    return grammems;
+}
+
+unsigned int count_of_bits(grammems_mask_t n)
 {
-	return "Software\\Dialing\\Lemmatizer\\Russian\\Rgramtab";
+    unsigned int count = 0;
+    while (n) {
+        count += n & 1;
+        n >>= 1;
+    }
+    return count;
+}
+
+
+void CRusGramTab::LoadFromRegistry()
+{
+    ReadFromFolder(GetDefaultPath());
+    m_ProductiveNounGramCodes = "";
+    for (uint16_t i = 0; i < GetMaxGrmCount(); i++) {
+        auto *l = GetLine(i);
+        if (l == nullptr) continue;
+        l->m_Grammems = DeduceGrammems(l->m_PartOfSpeech, l->m_Grammems);
+        if ((l->m_PartOfSpeech == NOUN) && (count_of_bits(l->m_Grammems) == 3)) {
+            if ((l->m_Grammems & rAllGenders) && (l->m_Grammems & rAllCases) && (l->m_Grammems & rAllNumbers)) {
+                if ((l->m_Grammems & _QM(rVocativ)) == 0) {
+                    std::string ancode = LineIndexToGramcode(i);
+                    m_ProductiveNounGramCodes += ancode;
+                }
+            }
+        }
+    }
+    assert (!m_InanimIndeclNounGramCode.empty());
+    assert (!m_MasAbbrNounGramCode.empty());
+    assert (m_ProductiveNounGramCodes.length() == 72); //72 = 6 cases * 2 numbers * 3 genders * 2 chars
+
 };
 
+const std::string& CRusGramTab::GetProductiveNounGramCodes() const {
+    return m_ProductiveNounGramCodes;
+}
 
 part_of_speech_t	CRusGramTab::GetPartOfSpeechesCount() const
 {
@@ -201,28 +256,6 @@ std::string CRusGramTab::LineIndexToGramcode(uint16_t i) const
 	return  res;
 };
 
-
-grammems_mask_t CRusGramTab::DeduceGrammems(part_of_speech_t PartOfSpeech, grammems_mask_t grammems) const {
-	// неизменяемые слова как будто принадлежат всем падежам
-	if ((_QM(rIndeclinable) & grammems)
-		&& (PartOfSpeech != PREDK)
-		)
-		grammems |= rAllCases;
-
-	if ((_QM(rIndeclinable) & grammems)
-		&& (PartOfSpeech == PRONOUN_P)
-		)
-		grammems |= rAllGenders | rAllNumbers;
-
-
-	// слово 'пальто' не изменяется по числам, поэтому может
-	// быть использовано в обоих числах
-	if (PartOfSpeech != PREDK)
-		if ((_QM(rIndeclinable) & grammems) && !(_QM(rSingular) & grammems))
-			grammems |= _QM(rPlural) | _QM(rSingular);
-
-	return grammems;
-}
 
 bool CRusGramTab::ProcessPOSAndGrammems(const char* tab_str, part_of_speech_t& PartOfSpeech, grammems_mask_t& grammems) const
 {

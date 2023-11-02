@@ -157,6 +157,8 @@ public:
 	CGerGramTab();
 	~CGerGramTab();
 
+    void LoadFromRegistry() override;
+
 	part_of_speech_t GetPartOfSpeechesCount() const;
 	const char* GetPartOfSpeechStr(part_of_speech_t i, NamingAlphabet na = naDefault) const;
 	const char* GetPartOfSpeechStrLong(part_of_speech_t i) const override;

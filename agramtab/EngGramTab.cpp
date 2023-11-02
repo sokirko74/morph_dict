@@ -53,6 +53,11 @@ CEngGramTab :: ~CEngGramTab()
 		};
 };
 
+void CEngGramTab::LoadFromRegistry()
+{
+    ReadFromFolder(GetDefaultPath());
+};
+
 part_of_speech_t CEngGramTab::GetPartOfSpeechesCount() const { 
 	return ENGLISH_PART_OF_SPEECH_COUNT;
 };

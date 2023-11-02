@@ -46,9 +46,8 @@ protected:
     bool UseNational(NamingAlphabet na) const {
         return (na == naDefault && m_bUseNationalConstants) || na == naNational;
     }
-    virtual grammems_mask_t DeduceGrammems(part_of_speech_t PartOfSpeech, grammems_mask_t grammems) const {
-        return grammems;
-    };
+    std::string GetDefaultPath() const;
+
 
 public:
     
@@ -84,8 +83,6 @@ public:
     virtual size_t GramcodeToLineIndex(const char *s) const = 0;
 
     virtual std::string LineIndexToGramcode(uint16_t i) const = 0;
-
-    virtual const char *GetRegistryString() const = 0;
 
     virtual long GetClauseTypeByName(const char *TypeName) const = 0;
 
@@ -151,7 +148,7 @@ public:
     virtual grammems_mask_t GleicheGenderNumberCase(const char *common_gram_code_noun, const char *gram_code_noun,
                                                     const char *gram_code_adj) const = 0;
 
-    void LoadFromRegistry();
+    virtual void LoadFromRegistry() = 0;
 
     std::string ReadFromFolder(std::string folder);
 

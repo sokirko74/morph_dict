@@ -138,16 +138,14 @@ class CRusGramTab : public CAgramtab {
     const static size_t rStartUp = 0xC0E0; //Аа
     const static size_t rEndUp = 0x10000;  //яя
     const static size_t rMaxGrmCount = rEndUp - rStartUp; // // 16159  (16 Кб)
-protected:
-
-    grammems_mask_t DeduceGrammems(part_of_speech_t PartOfSpeech, grammems_mask_t grammems) const override;
+    std::string m_ProductiveNounGramCodes;
 
 public:
     CAgramtabLine *Lines[rMaxGrmCount];
 
     CRusGramTab();
     ~CRusGramTab() override;
-
+    void LoadFromRegistry() override;
 
     part_of_speech_t GetPartOfSpeechesCount() const override;
 
@@ -170,8 +168,6 @@ public:
     std::string LineIndexToGramcode(uint16_t i) const override;
 
     bool ProcessPOSAndGrammems(const char *tab_str, part_of_speech_t &PartOfSpeech, grammems_mask_t &grammems) const override;
-
-    const char *GetRegistryString() const override;
 
     bool GleicheCase(const char *gram_code_noun, const char *gram_code_adj) const override;
 
@@ -235,6 +231,7 @@ public:
                          const grammems_mask_t wordGrammems) const override;
 
     bool PartOfSpeechIsProductive(part_of_speech_t p) const override;
+    const std::string& GetProductiveNounGramCodes() const;
 };
 
 extern bool GenderNumberCaseRussian(const CAgramtabLine *l1, const CAgramtabLine *l2);

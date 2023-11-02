@@ -78,6 +78,8 @@ public:
 	CAgramtabLine*  Lines[eMaxGrmCount];
 	CEngGramTab();
 	~CEngGramTab();
+
+    void LoadFromRegistry() override;
 	
 	part_of_speech_t GetPartOfSpeechesCount() const;
 	const char* GetPartOfSpeechStr(part_of_speech_t i, NamingAlphabet na = naDefault) const;

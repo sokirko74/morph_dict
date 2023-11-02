@@ -111,6 +111,11 @@ CGerGramTab :: ~CGerGramTab()
 			delete GetLine(i);
 }
 
+void CGerGramTab::LoadFromRegistry()
+{
+    ReadFromFolder(GetDefaultPath());
+};
+
 part_of_speech_t CGerGramTab::GetPartOfSpeechesCount() const { 
 	return GERMAN_PART_OF_SPEECH_COUNT;
 };
