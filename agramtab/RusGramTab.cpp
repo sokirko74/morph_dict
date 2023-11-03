@@ -729,15 +729,28 @@ bool CRusGramTab::IsStandardParamAbbr(const char* WordStrUpper) const
 	return false;
 };
 
+std::string CRusGramTab::FilterGramCodes1(const std::string& gram_codes, grammems_mask_t good_grammems, grammems_mask_t bad_grammems) const
+{
+    if (gram_codes == "??") {
+        return gram_codes;
+    }
+    std::string result;
+    for (size_t l = 0; l < gram_codes.length(); l += 2)
+    {
+        auto g = GetLine(GramcodeToLineIndex(gram_codes.c_str() + l))->m_Grammems;
+        if ( (g & good_grammems) && !(g & bad_grammems)) {
+            result.append(gram_codes.c_str() + l, 2);
+        }
+    }
+    return result;
+}
+
+
 bool CRusGramTab::FilterNounNumeral(std::string& gcNoun, const std::string& gcNum, grammems_mask_t& grammems) const
 {
 	if (gcNoun.length() == 2 || !(grammems & rAllCases)) return false;
-
-	GleicheAncode3(CaseNumberGender0,
-            gcNum,
-		    FilterGramCodes(gcNum, grammems & rAllCases | ~rAllCases, 0),
-            gcNoun);
-
+    auto c2 = FilterGramCodes1(gcNum, grammems & rAllCases, 0);
+	GleicheAncode3(CaseNumberGender0, gcNum, c2, gcNoun);
 	return true;
 }
 
@@ -751,10 +764,8 @@ std::string RussianCaseNumberGender(const CAgramtab* pGramTab, const std::string
 
 grammems_mask_t CRusGramTab::ChangeGleicheAncode1(GrammemCompare CompareFunc, const std::string& wordGramCodes, std::string& groupGramCodes, const grammems_mask_t wordGrammems) const
 {
-	groupGramCodes = GleicheAncode1(
-            CompareFunc,
-            FilterGramCodes(wordGramCodes, ~_QM(rIndeclinable), 0),
-            groupGramCodes);
+    auto c2 = FilterGramCodes1(wordGramCodes, GetMaxQWORD(),  _QM(rIndeclinable));
+	groupGramCodes = GleicheAncode1(CompareFunc,  c2,  groupGramCodes);
 	if (groupGramCodes == "") { return 0; }
 	const grammems_mask_t gramFilter = rAllCases | rAllGenders | rAllTimes | rAllPersons | rAllAnimative;
 	return 	wordGrammems & ~(gramFilter) | GetAllGrammems(groupGramCodes.c_str());
@@ -770,13 +781,6 @@ bool CaseNumber(const CAgramtabLine* l1, const CAgramtabLine* l2)
 bool CaseGender(const CAgramtabLine* l1, const CAgramtabLine* l2)
 {
 	return ((rAllCases & l1->m_Grammems & l2->m_Grammems) > 0) &&
-		((rAllGenders & l1->m_Grammems & l2->m_Grammems) > 0);
-};
-
-bool CaseNumberGender(const CAgramtabLine* l1, const CAgramtabLine* l2)
-{
-	return ((rAllCases & l1->m_Grammems & l2->m_Grammems) > 0) &&
-		((rAllNumbers & l1->m_Grammems & l2->m_Grammems) > 0) &&
 		((rAllGenders & l1->m_Grammems & l2->m_Grammems) > 0);
 };
 

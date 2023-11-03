@@ -241,6 +241,9 @@ public:
     bool PartOfSpeechIsProductive(part_of_speech_t p) const override;
 
     const CRusPopularGramCodes& GramCodes() const {return m_PopularGramCodes;};
+
+    std::string FilterGramCodes1(const std::string& gram_codes, grammems_mask_t positive, grammems_mask_t negative) const;
+
 };
 
 extern bool GenderNumberCaseRussian(const CAgramtabLine *l1, const CAgramtabLine *l2);
@@ -250,8 +253,6 @@ extern bool FiniteFormCoordRussian(const CAgramtabLine *l1, const CAgramtabLine 
 extern bool CaseNumber(const CAgramtabLine *l1, const CAgramtabLine *l2);
 
 extern bool CaseGender(const CAgramtabLine *l1, const CAgramtabLine *l2);
-
-extern bool CaseNumberGender(const CAgramtabLine *l1, const CAgramtabLine *l2);
 
 extern bool CaseNumberGender0(const CAgramtabLine *l1, const CAgramtabLine *l2); //with absent grammems check
 

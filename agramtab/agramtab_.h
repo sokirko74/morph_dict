@@ -186,9 +186,6 @@ public:
 
     std::string UniqueGramCodes(std::string gram_codes) const;
 
-    std::string
-    FilterGramCodes(const std::string &gram_codes, grammems_mask_t grammems1, grammems_mask_t grammems2) const;
-
     std::string FilterGramCodes(grammems_mask_t breaks, std::string gram_codes, grammems_mask_t g1) const;
 
     bool CheckGramCode(const char *gram_code) const;

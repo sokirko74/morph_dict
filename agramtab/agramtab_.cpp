@@ -427,21 +427,6 @@ std::string CAgramtab::UniqueGramCodes(std::string gram_codes) const
     return Result;
 }
 
-std::string CAgramtab::FilterGramCodes(const std::string& gram_codes, grammems_mask_t grammems1, grammems_mask_t grammems2) const
-{
-    std::string result;
-    if (gram_codes == "??") {
-        return gram_codes;
-    }
-    for (size_t l = 0; l < gram_codes.length(); l += 2)
-    {
-        grammems_mask_t ancode_grammems = GetLine(GramcodeToLineIndex(gram_codes.c_str() + l))->m_Grammems;
-        if (!(ancode_grammems & ~grammems1) || !(ancode_grammems & ~grammems2))
-            result.append(gram_codes.c_str() + l, 2);
-    }
-    return result;
-}
-
 std::string CAgramtab::FilterGramCodes(grammems_mask_t breaks, std::string gram_codes, grammems_mask_t g1) const
 {
     std::string Result;
