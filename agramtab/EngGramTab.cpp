@@ -202,12 +202,7 @@ bool CEngGramTab::GleicheCaseNumber(const char* gram_code1, const char* gram_cod
 grammems_mask_t CEngGramTab::GleicheGenderNumberCase(const char* common_gram_code_noun, const char* gram_code_noun, const char* gram_code_adj) const 
 {
 	return 0;
-};
-
-bool CEngGramTab::is_morph_article(part_of_speech_mask_t poses)  const 
-{
-	return false;
-};
+};;
 
 bool CEngGramTab::PartOfSpeechIsProductive(part_of_speech_t p) const {
 	return p == eNOUN || p == eADJ || p == eVERB || p == eADV;

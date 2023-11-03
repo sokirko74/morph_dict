@@ -249,14 +249,14 @@ grammems_mask_t CAgramtab::GetAllGrammems(const char* gram_code) const
     return grammems;
 }
 
-std::string CAgramtab::ReadFromFolder(std::string folder) {
+nlohmann::json CAgramtab::ReadFromFolder(std::string folder) {
     BuildPartOfSpeechMap();
 
-    auto path = std::filesystem::path(folder) / "gramtab.json";
+    m_InputJsonPath = (std::filesystem::path(folder) / "gramtab.json").string();
 
-    std::ifstream inp(path);
+    std::ifstream inp(m_InputJsonPath);
     if (!inp.good()) {
-        throw CExpc("Cannot read gramtab for language %s path=%s", GetStringByLanguage(m_Language).c_str(), path.string().c_str());
+        throw CExpc("Cannot read gramtab for language %s path=%s", GetStringByLanguage(m_Language).c_str(), m_InputJsonPath.c_str());
     }
     nlohmann::json gramtab = nlohmann::json::parse(inp);
     inp.close();
@@ -292,7 +292,7 @@ std::string CAgramtab::ReadFromFolder(std::string folder) {
         pAgramtabLine->m_PartOfSpeech = pos;
         size_t gram_index = GramcodeToLineIndex(gramcode.c_str());
         if (GetLine(gram_index)) {
-            throw CExpc(Format("line %s in  %s contains a dublicate gramcode", path, key.c_str()));
+            throw CExpc(Format("line %s in  %s contains a dublicate gramcode",key.c_str(), m_InputJsonPath));
         }
         GetLine(gram_index) = pAgramtabLine;
         line_no++;
@@ -303,9 +303,11 @@ std::string CAgramtab::ReadFromFolder(std::string folder) {
     assert(!m_PlugNoun.m_GramCode.empty());
     m_PlugNoun.m_Lemma  = convert_from_utf8(gramtab["gramcodes"][gramcode_utf8]["l"].template get<std::string>().c_str(), m_Language);
     assert(!m_PlugNoun.m_Lemma.empty());
-    m_InanimIndeclNounGramCode = convert_from_utf8(gramtab.value("inanim_indecl_noun", "").c_str(), m_Language);
-    m_MasAbbrNounGramCode = convert_from_utf8(gramtab.value("mas_abbr_noun", "").c_str(), m_Language);
-    return path.string();
+    return gramtab;
+}
+
+std::string CAgramtab::GetGramtabPath() const {
+    return m_InputJsonPath;
 }
 
 std::string CAgramtab::GetDefaultPath() const {
@@ -403,6 +405,7 @@ std::string CAgramtab::GleicheAncode3(GrammemCompare CompareFunc, const std::str
             {
                 Result.append(gram_codes1.c_str() + l, 2);
                 if (has_pair) {
+                    LOGV << "aaaaaaa";
                     pair.append(GramCodes1pair.substr(l, 2));
                 }
                 break;

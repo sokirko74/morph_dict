@@ -130,9 +130,8 @@ public:
 	bool is_morph_predk(part_of_speech_mask_t poses) const;
 	bool is_morph_adv(part_of_speech_mask_t poses) const;
 	bool is_morph_personal_pronoun (part_of_speech_mask_t poses, grammems_mask_t grammems) const;
-	bool is_morph_article(part_of_speech_mask_t poses) const;
 
-	bool IsSimpleParticle(const char* lemma, part_of_speech_mask_t poses) const;
+    bool IsSimpleParticle(const char* lemma, part_of_speech_mask_t poses) const;
 	bool IsSynNoun(part_of_speech_mask_t poses, const char* Lemma) const;
 	bool IsStandardParamAbbr (const char* WordStrUpper) const;
 	bool GleicheCase(const char* gram_code_noun, const char* gram_code_adj) const;

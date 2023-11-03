@@ -68,7 +68,8 @@ void MorphoWizard::load_gramtab(bool useNationalConstants) {
         throw CExpc("Unknown language to load gramtab: " + GetStringByLanguage(m_Language));
     };
 
-    m_GramtabPath = pGramTab->ReadFromFolder(m_MwzFolder.string());
+    pGramTab->ReadFromFolder(m_MwzFolder.string());
+    m_GramtabPath = pGramTab->GetGramtabPath();
     pGramTab->SetUseNationalConstants(useNationalConstants);
 
     m_pGramTab = pGramTab;

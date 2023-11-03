@@ -355,12 +355,7 @@ bool GenderNumberCaseGerman (const CAgramtabLine* noun_l, const CAgramtabLine* a
 grammems_mask_t CGerGramTab::GleicheGenderNumberCase(const char* common_gram_code_noun,const char* gram_code_noun, const char* gram_code_adj) const 
 {
 	return  Gleiche(GenderNumberCaseGerman, gram_code_noun, gram_code_adj);
-};
-
-bool CGerGramTab::is_morph_article(part_of_speech_mask_t poses)  const 
-{
-	return  ( poses & (1 <<gART  )) != 0;
-};
+};;
 
 
 bool WeakGleiche (const CAgramtabLine* noun, const CAgramtabLine* adj) 

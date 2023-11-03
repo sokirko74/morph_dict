@@ -165,30 +165,44 @@ unsigned int count_of_bits(grammems_mask_t n)
 
 void CRusGramTab::LoadFromRegistry()
 {
-    ReadFromFolder(GetDefaultPath());
-    m_ProductiveNounGramCodes = "";
+    auto gramtab = ReadFromFolder(GetDefaultPath());
+
+    std::string s = gramtab.at("inanim_indecl_noun");
+    m_PopularGramCodes.m_InanimIndeclNoun = convert_from_utf8(s.c_str(), m_Language);
+
+    s = gramtab.at("mas_abbr_noun");
+    m_PopularGramCodes.m_MasAbbrNoun = convert_from_utf8(s.c_str(), m_Language);
+
+    m_PopularGramCodes.m_ProductiveNoun = "";
+    m_PopularGramCodes.m_ProductiveSingNoun = "";
     for (uint16_t i = 0; i < GetMaxGrmCount(); i++) {
         auto *l = GetLine(i);
         if (l == nullptr) continue;
         l->m_Grammems = DeduceGrammems(l->m_PartOfSpeech, l->m_Grammems);
+
         if ((l->m_PartOfSpeech == NOUN) && (count_of_bits(l->m_Grammems) == 3)) {
-            if ((l->m_Grammems & rAllGenders) && (l->m_Grammems & rAllCases) && (l->m_Grammems & rAllNumbers)) {
-                if ((l->m_Grammems & _QM(rVocativ)) == 0) {
-                    std::string ancode = LineIndexToGramcode(i);
-                    m_ProductiveNounGramCodes += ancode;
+            if ((l->m_Grammems & _QM(rVocativ)) == 0) {
+                if ((l->m_Grammems & rAllGenders) && (l->m_Grammems & rAllCases)) {
+                    if (l->m_Grammems & rAllNumbers) {
+                        std::string ancode = LineIndexToGramcode(i);
+                        m_PopularGramCodes.m_ProductiveNoun += ancode;
+                    }
+                    if (l->m_Grammems & _QM(rSingular)) {
+                        std::string ancode = LineIndexToGramcode(i);
+                        m_PopularGramCodes.m_ProductiveSingNoun += ancode;
+                    }
                 }
             }
         }
     }
-    assert (!m_InanimIndeclNounGramCode.empty());
-    assert (!m_MasAbbrNounGramCode.empty());
-    assert (m_ProductiveNounGramCodes.length() == 72); //72 = 6 cases * 2 numbers * 3 genders * 2 chars
+    assert (m_PopularGramCodes.m_ProductiveNoun.length() == 72); //72 = 6 cases * 2 numbers * 3 genders * 2 chars
+    assert (m_PopularGramCodes.m_ProductiveSingNoun.length() == 36); // 72 / 2
+
+    m_PopularGramCodes.m_GenderNumeral = GetAllGramCodes(NUMERAL, 0, AnyGender);
+    assert (m_PopularGramCodes.m_GenderNumeral.length() == 18 * 2);
 
 };
 
-const std::string& CRusGramTab::GetProductiveNounGramCodes() const {
-    return m_ProductiveNounGramCodes;
-}
 
 part_of_speech_t	CRusGramTab::GetPartOfSpeechesCount() const
 {
@@ -713,12 +727,6 @@ bool CRusGramTab::IsStandardParamAbbr(const char* WordStrUpper) const
 			return true;
 
 	return false;
-}
-
-
-bool CRusGramTab::is_morph_article(part_of_speech_mask_t poses)  const
-{
-	return  false;
 };
 
 bool CRusGramTab::FilterNounNumeral(std::string& gcNoun, const std::string& gcNum, grammems_mask_t& grammems) const
@@ -802,5 +810,4 @@ bool AnyGender(const CAgramtabLine* l1, const CAgramtabLine* )
 {
     return  ((rAllGenders & l1->m_Grammems ) > 0);
 };
-
 

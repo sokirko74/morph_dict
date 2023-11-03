@@ -134,11 +134,21 @@ enum RussianClauseTypeEnum  {
 };
 
 
+struct CRusPopularGramCodes {
+    std::string m_ProductiveNoun;
+    std::string m_ProductiveSingNoun;
+    std::string m_InanimIndeclNoun;
+    std::string m_MasAbbrNoun;
+    std::string m_GenderNumeral;
+};
+
+
 class CRusGramTab : public CAgramtab {
     const static size_t rStartUp = 0xC0E0; //Аа
     const static size_t rEndUp = 0x10000;  //яя
     const static size_t rMaxGrmCount = rEndUp - rStartUp; // // 16159  (16 Кб)
-    std::string m_ProductiveNounGramCodes;
+
+    CRusPopularGramCodes m_PopularGramCodes;
 
 public:
     CAgramtabLine *Lines[rMaxGrmCount];
@@ -214,8 +224,6 @@ public:
 
     bool is_morph_adv(part_of_speech_mask_t poses) const override;
 
-    bool is_morph_article(part_of_speech_mask_t poses) const override;
-
     bool is_morph_personal_pronoun(part_of_speech_mask_t poses, grammems_mask_t grammems) const override;
 
     bool IsSimpleParticle(const char *lemma, part_of_speech_mask_t poses) const override;
@@ -231,7 +239,8 @@ public:
                          const grammems_mask_t wordGrammems) const override;
 
     bool PartOfSpeechIsProductive(part_of_speech_t p) const override;
-    const std::string& GetProductiveNounGramCodes() const;
+
+    const CRusPopularGramCodes& GramCodes() const {return m_PopularGramCodes;};
 };
 
 extern bool GenderNumberCaseRussian(const CAgramtabLine *l1, const CAgramtabLine *l2);

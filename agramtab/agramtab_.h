@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../common/utilit.h"
+#include "../common/json.h"
 #include <unordered_map>
 
 enum NamingAlphabet {
@@ -33,15 +34,13 @@ class CAgramtab {
     std::unordered_map<std::string, part_of_speech_t> m_PartOfSpeechesHashMap;
     std::unordered_map<std::string, grammem_t> m_GrammemHashMap;
     CPlugNounInfo m_PlugNoun;
+    std::string m_InputJsonPath;
 
     void BuildPartOfSpeechMap();
     char* grammems_to_str(grammems_mask_t grammems, char* out_buf, NamingAlphabet na = naDefault) const;
 
 protected:
     bool m_bUseNationalConstants;
-    std::string m_InanimIndeclNounGramCode;
-    std::string m_MasAbbrNounGramCode;
-
 
     bool UseNational(NamingAlphabet na) const {
         return (na == naDefault && m_bUseNationalConstants) || na == naNational;
@@ -57,6 +56,12 @@ public:
 
     virtual ~CAgramtab();
 
+
+    virtual void LoadFromRegistry() = 0;
+
+    nlohmann::json ReadFromFolder(std::string folder);
+
+    std::string GetGramtabPath() const;
 
     virtual CAgramtabLine *&GetLine(size_t LineNo) = 0;
 
@@ -133,8 +138,6 @@ public:
 
     virtual bool is_morph_personal_pronoun(part_of_speech_mask_t poses, grammems_mask_t grammems) const = 0;
 
-    virtual bool is_morph_article(part_of_speech_mask_t poses) const = 0;
-
     virtual bool IsSimpleParticle(const char *lemma, part_of_speech_mask_t poses) const = 0;
 
     virtual bool IsSynNoun(part_of_speech_mask_t poses, const char *Lemma) const = 0;
@@ -147,10 +150,6 @@ public:
 
     virtual grammems_mask_t GleicheGenderNumberCase(const char *common_gram_code_noun, const char *gram_code_noun,
                                                     const char *gram_code_adj) const = 0;
-
-    virtual void LoadFromRegistry() = 0;
-
-    std::string ReadFromFolder(std::string folder);
 
     bool
     ProcessPOSAndGrammemsIfCan(const char *tab_str, part_of_speech_t *PartOfSpeech, grammems_mask_t *grammems) const;
@@ -208,13 +207,5 @@ public:
     part_of_speech_t GetPartOfSpeechByStr(const std::string &part_of_speech) const;
 
     void SetUseNationalConstants(bool value);
-
-    const std::string& GetInanimIndeclNoumGramCode() const  {
-        return m_InanimIndeclNounGramCode;
-    }
-
-    const std::string& GetMasAbbrNounGramCode() const {
-        return m_MasAbbrNounGramCode;
-    };
 
 };
