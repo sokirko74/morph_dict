@@ -243,6 +243,7 @@ public:
     const CRusPopularGramCodes& GramCodes() const {return m_PopularGramCodes;};
 
     std::string FilterGramCodes1(const std::string& gram_codes, grammems_mask_t positive, grammems_mask_t negative) const;
+    std::string FindGramCodesContaining(const std::string& gram_codes, grammems_mask_t grammems) const;
 
 };
 

@@ -745,6 +745,22 @@ std::string CRusGramTab::FilterGramCodes1(const std::string& gram_codes, grammem
     return result;
 }
 
+std::string CRusGramTab::FindGramCodesContaining(const std::string& gram_codes, grammems_mask_t grammems) const
+{
+    if (gram_codes == "??") {
+        return gram_codes;
+    }
+    std::string result;
+    for (size_t l = 0; l < gram_codes.length(); l += 2)
+    {
+        auto g = GetLine(GramcodeToLineIndex(gram_codes.c_str() + l))->m_Grammems;
+        if ( (g & grammems) == grammems) {
+            result.append(gram_codes.c_str() + l, 2);
+        }
+    }
+    return result;
+}
+
 
 bool CRusGramTab::FilterNounNumeral(std::string& gcNoun, const std::string& gcNum, grammems_mask_t& grammems) const
 {

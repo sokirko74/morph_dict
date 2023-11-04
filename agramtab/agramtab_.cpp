@@ -427,29 +427,6 @@ std::string CAgramtab::UniqueGramCodes(std::string gram_codes) const
     return Result;
 }
 
-std::string CAgramtab::FilterGramCodes(grammems_mask_t breaks, std::string gram_codes, grammems_mask_t g1) const
-{
-    std::string Result;
-    grammems_mask_t BR[] = { rAllCases, rAllNumbers, rAllGenders, rAllAnimative, rAllPersons, rAllTimes };
-    const char* gram_codes1 = gram_codes.c_str();
-    if (!strcmp(gram_codes1, "??")) return gram_codes1;
-    size_t len1 = strlen(gram_codes1);
-    for (size_t l = 0; l < len1; l += 2)
-    {
-        const CAgramtabLine* l1 = GetLine(GramcodeToLineIndex(gram_codes1 + l));
-        bool R = true;
-        for (int i = 0; i < (sizeof BR) / (sizeof BR[0]) && R; i++)
-        {
-            grammems_mask_t g2 = l1->m_Grammems;
-            if (breaks & BR[i])
-                R &= ((BR[i] & g1 & g2) > 0 || !(BR[i] & g1) || !(BR[i] & g2));
-        }
-        if (R)
-            Result.append(gram_codes1 + l, 2);
-    }
-    return Result;
-}
-
 std::string CommonAncodeAssignFunction(const CAgramtab* pGramTab, const std::string& s1, const std::string& s2)
 {
     std::string Result;
