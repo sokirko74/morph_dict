@@ -766,7 +766,10 @@ bool CRusGramTab::FilterNounNumeral(std::string& gcNoun, const std::string& gcNu
 {
 	if (gcNoun.length() == 2 || !(grammems & rAllCases)) return false;
     auto c2 = FilterGramCodes1(gcNum, grammems & rAllCases, 0);
-	GleicheAncode3(CaseNumberGender0, gcNum, c2, gcNoun);
+    //auto gcNoun1 = gcNoun;
+	//GleicheAncode3(CaseNumberGender0, gcNum, c2, gcNoun);
+    auto gcNoun2 = GleicheAncode1(CaseNumberGender0, gcNoun, c2);
+    gcNoun = gcNoun2;
 	return true;
 }
 
