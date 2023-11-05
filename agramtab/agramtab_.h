@@ -181,9 +181,6 @@ public:
 
     std::string GleicheAncode1(GrammemCompare CompareFunc, std::string gram_codes1, std::string gram_codes2) const;
 
-    std::string GleicheAncode3(GrammemCompare CompareFunc, const std::string& GramCodes1, const std::string& GramCodes2,
-                               std::string &GramCodes1pair) const;
-
     std::string UniqueGramCodes(std::string gram_codes) const;
 
         bool CheckGramCode(const char *gram_code) const;
@@ -203,4 +200,7 @@ public:
 
     void SetUseNationalConstants(bool value);
 
-};
+    part_of_speech_t GetFirstPartOfSpeech(const char* codes) const;
+
+
+    };

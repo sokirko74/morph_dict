@@ -77,29 +77,6 @@ void CMorphanHolder::LoadLemmatizer(MorphLanguageEnum langua, std::string custom
 		m_CurrentLanguage = langua;
 }
 
-DwordVector CMorphanHolder::GetParadigmIdsByNormAndAncode(std::string &str, const std::string &code) const
-{
-	std::vector<CFormInfo> ParadigmCollection;
-	DwordVector res;
-	if (!m_pLemmatizer->CreateParadigmCollection(true, str, true, false, ParadigmCollection ))
-		throw CExpc(Format("Cannot lemmatize %s", str.c_str()));
-
-	for(int i = 0; i < ParadigmCollection.size(); i++)
-	{
-		const CFormInfo& Paradigm = ParadigmCollection[i];
-		if(!Paradigm.m_bFound) continue;
-		std::string ancode = Paradigm.GetAncode(0);
-		for (long j=0;  j < code.size(); j+=2)
-			for (long k=0;  k < ancode.size(); k+=2)
-				if(ancode.substr(k, 2) == code.substr(j, 2))
-				{
-					res.push_back(Paradigm.GetParadigmId());
-					goto next_paradigm;
-				}
-next_paradigm:;
-	}
-	return res;
-}
 
 DwordVector CMorphanHolder::GetLemmaIds(std::string lemma) const
 {

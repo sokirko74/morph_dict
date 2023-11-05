@@ -141,6 +141,10 @@ bool CAgramtab::GetPartOfSpeechAndGrammems(const BYTE* AnCodes, uint32_t& Poses,
     return true;
 }
 
+part_of_speech_t CAgramtab::GetFirstPartOfSpeech(const char* codes) const {
+    return GetLine(GramcodeToLineIndex(codes))->m_PartOfSpeech;
+}
+
 
 CAgramtab :: ~CAgramtab()
 {
@@ -210,7 +214,7 @@ part_of_speech_t CAgramtab::GetPartOfSpeech(const char* gram_code) const
 
     const CAgramtabLine* L = GetLine(GramcodeToLineIndex(gram_code));
 
-    if (L == NULL)
+    if (L == 0)
         return UnknownPartOfSpeech;
 
     return L->m_PartOfSpeech;
@@ -218,13 +222,13 @@ part_of_speech_t CAgramtab::GetPartOfSpeech(const char* gram_code) const
 
 size_t CAgramtab::GetSourceLineNo(const char* gram_code) const
 {
-    if (gram_code == 0) return 0;
+    if (gram_code == nullptr) return 0;
 
     if (!strcmp(gram_code, "??")) return 0;
 
     const CAgramtabLine* L = GetLine(GramcodeToLineIndex(gram_code));
 
-    if (L == NULL)
+    if (L == nullptr)
         return 0;
 
     return L->m_SourceLineNo;
@@ -233,7 +237,7 @@ size_t CAgramtab::GetSourceLineNo(const char* gram_code) const
 
 grammems_mask_t CAgramtab::GetAllGrammems(const char* gram_code) const
 {
-    if (gram_code == 0) return 0;
+    if (gram_code == nullptr) return 0;
     if (!strcmp(gram_code, "??")) return 0;
 
     size_t len = strlen(gram_code);
@@ -370,29 +374,18 @@ grammems_mask_t CAgramtab::Gleiche(GrammemCompare CompareFunc, const char* gram_
     return grammems;
 };
 
-
-std::string CAgramtab::GleicheAncode1(GrammemCompare CompareFunc, std::string gram_codes1, std::string gram_codes2) const
-{
-    std::string EmptyString;
-    return GleicheAncode3(CompareFunc, gram_codes1, gram_codes2, EmptyString);
-}
-
 bool EqualAncodes (const CAgramtabLine* l1, const CAgramtabLine* l2)
 {
     return l1 == l2;
 };
 
 
-//changes GramCodes1pair according to satisfied GramCodes1 
-//(if gramcode number N is good(bad) in GramCodes1 it must be good(bad) in GramCodes1pair)
-std::string CAgramtab::GleicheAncode3(GrammemCompare CompareFunc, const std::string& gram_codes1, const std::string& gram_codes2, std::string& GramCodes1pair) const
+std::string CAgramtab::GleicheAncode1(GrammemCompare CompareFunc, std::string gram_codes1, std::string gram_codes2) const
 {
-    std::string Result;
-    std::string pair;
+    std::string result;
     if (gram_codes1.empty() || gram_codes2.empty()) return "";
     if (gram_codes1 == "??") return gram_codes2;
     if (gram_codes2 == "??") return gram_codes2;
-    bool has_pair = GramCodes1pair.length() == gram_codes1.length();
     if (!CompareFunc) {
         CompareFunc = EqualAncodes;
     }
@@ -403,20 +396,14 @@ std::string CAgramtab::GleicheAncode3(GrammemCompare CompareFunc, const std::str
             const CAgramtabLine* l2 = GetLine(GramcodeToLineIndex(gram_codes2.c_str() + m));
             if (CompareFunc(l1, l2))
             {
-                Result.append(gram_codes1.c_str() + l, 2);
-                if (has_pair) {
-                    LOGV << "aaaaaaa";
-                    pair.append(GramCodes1pair.substr(l, 2));
-                }
+                result.append(gram_codes1.c_str() + l, 2);
                 break;
             };
         };
     };
-    if (has_pair) {
-        GramCodes1pair = pair;
-    }
-    return Result;
-};
+    return result;
+}
+
 
 std::string CAgramtab::UniqueGramCodes(std::string gram_codes) const
 {
@@ -461,5 +448,3 @@ std::string  CAgramtab::GetTabStringByGramCode(const char* gram_code) const
     std::string POSstr = (POS == UnknownPartOfSpeech) ? "*" : GetPartOfSpeechStr(POS);
     return POSstr + std::string(" ") + buffer;
 }
-
-
