@@ -89,8 +89,6 @@ const static std::string  GermanClauseTypes[] =
 	"INFINITIVSATZ"
 };
 
-extern std::string CommonAncodeAssignFunction(const CAgramtab* pGramTab, const std::string& s1, const std::string& s2);
-
 CGerGramTab :: CGerGramTab()
 {
 	assert(sizeof(GermanGrammems) / sizeof(std::string) == GermanGrammemsCount);
@@ -372,6 +370,28 @@ std::string WeakDeclAssignFunction2(const CAgramtab* pGramTab,  const std::strin
 	return pGramTab->GleicheAncode1(WeakGleiche, noun.c_str(), det.c_str());
 };
 
+
+std::string CommonAncodeAssignFunction(const CAgramtab* pGramTab, const std::string& s1, const std::string& s2)
+{
+    std::string Result;
+    size_t len1 = s1.length();
+    size_t len2 = s2.length();
+    for (size_t i = 0; i < len1; i += 2)
+        for (size_t k = 0; k < len2; k += 2)
+        {
+            if ((s1[i] == s2[k])
+                && (s1[i + 1] == s2[k + 1])
+                    )
+            {
+                Result += s1[i];
+                Result += s1[i + 1];
+                break;
+            };
+
+        };
+
+    return Result.c_str();
+}
 
 std::string WeakDeclAssignFunction3(const CAgramtab* pGramTab,  const std::string& det, const std::string& adj, const std::string& noun )
 {

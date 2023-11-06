@@ -1,9 +1,9 @@
 {
-  "plug_noun_gram_code": "яя",
-  "inanim_indecl_noun": "Фа",
-  "mas_abbr_noun": "ао",
+  "plug_noun_gram_code": "zz",
+  "inanim_indecl_noun": "MM",
+  "mas_abbr_noun": "Lv",
   "gramcodes": {
-    "Ун": {
+    "Lu": {
       "p": "",
       "g": [
         "imperf",
@@ -12,7 +12,7 @@
       "f": 0,
       "l": "ДЕЛАТЬ"
     },
-    "Уо": {
+    "Lv": {
       "p": "",
       "g": [
         "imperf",
@@ -21,14 +21,14 @@
       "f": 0,
       "l": "БЕЖАТЬ"
     },
-    "Фа": {
+    "MM": {
       "p": "",
       "g": [
         "inanim"
       ],
       "f": 0
     },
-    "яя": {
+    "zz": {
       "p": "N",
       "g": [
         "mas",

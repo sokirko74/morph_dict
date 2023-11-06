@@ -144,9 +144,9 @@ struct CRusPopularGramCodes {
 
 
 class CRusGramTab : public CAgramtab {
-    const static size_t rStartUp = 0xC0E0; //Аа
-    const static size_t rEndUp = 0x10000;  //яя
-    const static size_t rMaxGrmCount = rEndUp - rStartUp; // // 16159  (16 Кб)
+    const static size_t rStartUp = 0x4141; //AA
+    const static size_t rEndUp = 0x7A7B;  //zz + 1
+    const static size_t rMaxGrmCount = rEndUp - rStartUp; // (14 kb)
 
     CRusPopularGramCodes m_PopularGramCodes;
 

@@ -140,21 +140,6 @@ bool CLemmatizer::LemmatizeWord(std::string& InputWordStr, const bool cap, const
 	return bResult;
 }
 
-void CLemmatizer::AssignWeightIfNeed(std::vector<CAutomAnnotationInner>& FindResults) const
-{
-
-	for (size_t i = 0; i < FindResults.size(); i++)
-	{
-		CAutomAnnotationInner& A = FindResults[i];
-		if (m_bUseStatistic)
-			A.m_nWeight = m_Statistic.get_HomoWeight(A.GetParadigmId(), A.m_ItemNo);
-		else
-			A.m_nWeight = 0;
-	}
-
-}
-
-
 bool CLemmatizer::GetAllAncodesAndLemmasQuick(std::string& InputWordStr, bool capital, char* OutBuffer, size_t MaxBufferSize, bool bUsePrediction) const
 {
 	FilterSrc(InputWordStr);
@@ -271,6 +256,57 @@ void CreateDecartProduction (const std::vector<CFormInfo>& results1, const std::
 
 };
 
+void CLemmatizer::predict_hyphen_word(std::string& wordform, bool capital, std::vector<CFormInfo>& Result) const {
+    size_t hyph = wordform.find("-");
+    if (hyph == std::string::npos)  {
+        return;
+    }
+
+    std::vector<CFormInfo> results1, results2;
+    bool gennum = false;
+    // try to lemmatize each parts without predictions
+    std::string first_part = wordform.substr(0, hyph);
+    std::string second_part = wordform.substr(gennum ? hyph : hyph+1);
+    CreateParadigmCollection(false, first_part, capital, false, results1 );
+
+    /*
+     if the first part is equal to the second part  or the second part is an unimportant: Russian postfix
+     then we should use only the first part
+    */
+    if	(			(first_part == second_part)
+                       ||		IsHyphenPostfix(second_part)
+            )
+        Result = results1;
+
+    else
+    if (IsHyphenPrefix(first_part))
+    {
+        CreateParadigmCollection(false, second_part, capital,  false, results2 );
+        if (IsFound(results2))
+        {
+            Result = results2;
+            for (int i=0; i < Result.size(); i++)
+            {
+                Result[i].SetUserPrefix(first_part+"-");
+                Result[i].SetUserUnknown();
+
+            }
+        }
+    }
+    else
+    {
+        CreateParadigmCollection(false,second_part, false, false, results2 );
+        if (IsFound(results1) && IsFound(results2) && first_part.length()>2  && second_part.length()>2)
+        {
+            // if both words were found in the dictionary
+            // then we should create a decart production
+            CreateDecartProduction(results1, results2, Result);
+            for (auto& r: Result)
+                r.SetUserUnknown();
+        }
+    }
+}
+
 bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& InputWordStr, bool capital, bool bUsePrediction, std::vector<CFormInfo>& Result) const
 {
     Result.clear();
@@ -278,13 +314,16 @@ bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& InputWordStr
 	std::vector<CAutomAnnotationInner>	found;
 	bool bFound = LemmatizeWord(InputWordStr, capital, bUsePrediction, found, true);
 		
-	AssignWeightIfNeed(found);
-
-	for (const auto& a: found)
+	for (auto& a: found)
 	{
 		// if bNorm, then  ignore words which are not lemma
 		if (bNorm && (a.m_ItemNo!=0)) continue;
-		
+
+		if (m_bUseStatistic)
+			a.m_nWeight = m_Statistic.get_HomoWeight(a.GetParadigmId(), a.m_ItemNo);
+		else
+			a.m_nWeight = 0;
+
 		CFormInfo P;
 		P.Create(this, a, InputWordStr, bFound);
 		Result.push_back(P);
@@ -295,61 +334,8 @@ bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& InputWordStr
 		// if the word was not found in the dictionary 
 		// and the word contains a hyphen 
 		// then we should try to predict each parts of the hyphened word separately
-        std::vector<CFormInfo> results1, results2;
-
-		size_t hyph = InputWordStr.find("-");
-		if (hyph != std::string::npos)
-		{
-			bool gennum = false;
-			// try to lemmatize each parts without predictions
-			std::string first_part = InputWordStr.substr(0, hyph);
-			std::string second_part = InputWordStr.substr(gennum ? hyph : hyph+1);
-			CreateParadigmCollection(false, first_part, capital, false, results1 );
-
-			/*
-			 if the first part is equal to the second part  or the second part is an unimportant: Russian postfix
-			 then we should use only the first part 
-			*/
-			if	(			(first_part == second_part)
-					||		IsHyphenPostfix(second_part)
-				)
-				Result = results1;
-
-            else
-            if (IsHyphenPrefix(first_part))
-            {
-                CreateParadigmCollection(false, second_part, capital,  false, results2 );
-                if (IsFound(results2))
-                {
-                    Result = results2;
-                    for (int i=0; i < Result.size(); i++)
-                    {
-                        Result[i].SetUserPrefix(first_part+"-");
-                        Result[i].SetUserUnknown();
-                        
-                    }
-
-                }
-
-            }
-			else
-			{
-				CreateParadigmCollection(false,second_part, false, false, results2 );
-                if (IsFound(results1) && IsFound(results2) && first_part.length()>2  && second_part.length()>2)
-                {
-					// if both words were found in the dictionary
-					// then we should create a decart production
-					CreateDecartProduction(results1, results2, Result);
-                    for (int i=0; i < Result.size(); i++)
-                        Result[i].SetUserUnknown();
-                    
-                    
-                }
-			}
-		};
+        predict_hyphen_word(InputWordStr, capital, Result);
 	};
-
-
 	return true;
 }
 

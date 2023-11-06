@@ -141,15 +141,8 @@ bool CAgramtab::GetPartOfSpeechAndGrammems(const BYTE* AnCodes, uint32_t& Poses,
     return true;
 }
 
-part_of_speech_t CAgramtab::GetFirstPartOfSpeech(const char* codes) const {
-    return GetLine(GramcodeToLineIndex(codes))->m_PartOfSpeech;
-}
-
-
 CAgramtab :: ~CAgramtab()
 {
-
-
 };
 
 
@@ -412,28 +405,6 @@ std::string CAgramtab::UniqueGramCodes(std::string gram_codes) const
         if (Result.find(gram_codes.substr(m, 2)) == std::string::npos)
             Result.append(gram_codes.substr(m, 2));
     return Result;
-}
-
-std::string CommonAncodeAssignFunction(const CAgramtab* pGramTab, const std::string& s1, const std::string& s2)
-{
-    std::string Result;
-    size_t len1 = s1.length();
-    size_t len2 = s2.length();
-    for (size_t i = 0; i < len1; i += 2)
-        for (size_t k = 0; k < len2; k += 2)
-        {
-            if ((s1[i] == s2[k])
-                && (s1[i + 1] == s2[k + 1])
-                )
-            {
-                Result += s1[i];
-                Result += s1[i + 1];
-                break;
-            };
-
-        };
-
-    return Result.c_str();
 }
 
 std::string  CAgramtab::GetTabStringByGramCode(const char* gram_code) const

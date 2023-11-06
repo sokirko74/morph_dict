@@ -21,6 +21,7 @@ typedef enum {
 
 class CLemmatizer : public CMorphDict {
     bool m_bEnablePrediction;
+    void predict_hyphen_word(std::string& wordform, bool capital, std::vector<CFormInfo>& Result) const;
 protected:
     // Postfixes-particles, that do not change the meaning 
     std::set<std::string> m_HyphenPostfixes;
@@ -38,8 +39,6 @@ protected:
 
     bool LemmatizeWord(std::string &InputWordStr, const bool cap, const bool predict,
                        std::vector<CAutomAnnotationInner> &results, bool bGetLemmaInfos) const;
-
-    void AssignWeightIfNeed(std::vector<CAutomAnnotationInner> &FindResults) const;
 
     // prediction by suffix
     bool

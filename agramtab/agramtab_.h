@@ -200,7 +200,5 @@ public:
 
     void SetUseNationalConstants(bool value);
 
-    part_of_speech_t GetFirstPartOfSpeech(const char* codes) const;
 
-
-    };
+};
