@@ -389,7 +389,7 @@ std::string MakePath (const std::string path, const std::string fileName) {
 };
 
 
-std::string GetPathByFile (std::string FileName)
+std::string GetParentPath (std::string FileName)
 { 
   size_t i = FileName.rfind("\\");	  
   size_t j = FileName.rfind("/");	  
