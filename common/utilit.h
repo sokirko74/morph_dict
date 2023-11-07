@@ -106,7 +106,6 @@ extern void		ErrorMessage (const std::string& Titul, const std::string& Message)
 extern void		ErrorMessage (const std::string& Message);
 extern std::string	MakeFName ( const std::string& InpitFileName,  const std::string& Ext);
 extern std::string   MakePath(const std::string path, const std::string fileName);
-extern bool     MakePathAndCheck(const std::string path, const std::string fileName, std::string& fullPath);
 extern std::string	GetPathByFile (std::string FileName);
 extern bool		IsEmptyLine ( const char *t);
 extern bool		IsHtmlFile (const std::string& FileName);

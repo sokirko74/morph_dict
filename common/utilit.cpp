@@ -388,10 +388,6 @@ std::string MakePath (const std::string path, const std::string fileName) {
 	return result + fileName;	  
 };
 
-bool MakePathAndCheck(const std::string path, const std::string fileName, std::string& fullPath) {
-	fullPath = MakePath(path, fileName);
-	return FileExists(fullPath.c_str());
-}
 
 std::string GetPathByFile (std::string FileName)
 { 
