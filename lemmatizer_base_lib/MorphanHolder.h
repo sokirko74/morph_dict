@@ -29,7 +29,7 @@ public:
 	std::string PrintMorphInfoUtf8(std::string Form, bool printIds, bool printForms, bool sortParadigms) const;
 	std::string LemmatizeJson(std::string WordForm, bool withParadigms, bool prettyJson=false, bool sortForms=false) const;
 	bool IsInDictionary(std::string WordForm) const;
-	std::vector<CFuzzyResult> CorrectMisspelledWord(std::string WordForm) const;
+	std::vector<CFuzzyResult> CorrectMisspelledWordUtf8(std::string word_utf8) const;
 	bool GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>& Paradigms) const;
 };
 

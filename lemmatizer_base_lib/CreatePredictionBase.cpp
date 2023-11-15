@@ -212,7 +212,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 		if (base + paradigm.get_first_flex() == plug_noun)
 		{
 			PlugLemmaInfoNo = (int)lin;
-			output_opts["PlugNounGramCode"] = convert_to_utf8(paradigm.get_first_code(), m_Language);
+			output_opts["PlugNounGramCode"] = paradigm.get_first_code();
 			continue;
 		};
 
@@ -253,8 +253,8 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 
 	// adding crtitical noun
 	{
-		std::string s = R.GetCriticalNounLetterPack();
-		CPredictWord(0, PlugLemmaInfoNo, 0, 0).AddToAutomat(R, s);
+		std::string s8 = R.GetCriticalNounLetterPack();
+		CPredictWord(0, PlugLemmaInfoNo, 0, 0).AddToAutomat(R, s8);
 		// 0 is noun
 	};
 

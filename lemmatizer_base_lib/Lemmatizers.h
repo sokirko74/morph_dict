@@ -22,6 +22,12 @@ typedef enum {
 class CLemmatizer : public CMorphDict {
     bool m_bEnablePrediction;
     void predict_hyphen_word(std::string& wordform, bool capital, std::vector<CFormInfo>& Result) const;
+
+    bool LemmatizeWord(std::string& InputWordStr, const bool cap, const bool predict,
+        std::vector<CAutomAnnotationInner>& results, bool bGetLemmaInfos) const;
+    void PredictByDataBase(std::string InputWordStr, std::vector<CAutomAnnotationInner>& results, bool is_cap) const;
+
+
 protected:
     // Postfixes-particles, that do not change the meaning 
     std::set<std::string> m_HyphenPostfixes;
@@ -37,14 +43,10 @@ protected:
     
     void ReadOptions(std::string FileName);
 
-    bool LemmatizeWord(std::string &InputWordStr, const bool cap, const bool predict,
-                       std::vector<CAutomAnnotationInner> &results, bool bGetLemmaInfos) const;
-
     // prediction by suffix
     bool
     CheckAbbreviation(std::string InputWordStr, std::vector<CAutomAnnotationInner> &FindResults, bool is_cap) const;
     CAutomAnnotationInner ConvertPredictTupleToAnnot(const CPredictTuple &input) const;
-    void PredictByDataBase(std::string InputWordStr, std::vector<CAutomAnnotationInner> &results, bool is_cap) const;
     bool IsPrefix(const std::string &Prefix) const;
 
 
@@ -71,7 +73,7 @@ public:
                                      bool bUsePrediction) const;
     bool CreateParadigmFromID(uint32_t id, CFormInfo &Result) const;
     bool IsInDictionary(std::string &word, const bool cap) const;
-    std::vector<CFuzzyResult> _CorrectMisspelledWord(std::string InputWordStr,  size_t maxStrDistance=2) const;
+    std::vector<CFuzzyResult> CorrectMisspelledWord1(std::string InputWordStr,  size_t maxStrDistance=2) const;
 };
 
 

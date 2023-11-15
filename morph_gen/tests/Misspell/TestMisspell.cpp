@@ -2,10 +2,9 @@
 #include <fstream>
 #include <streambuf>
 
-void Misspell(CMorphanHolder& holder, std::string word, std::string canon) {
-    word = convert_from_utf8(word.c_str(), holder.m_CurrentLanguage);
+void Misspell(CMorphanHolder& holder, std::string word_utf8, std::string canon) {
 
-    auto res = holder.CorrectMisspelledWord(word);
+    auto res = holder.CorrectMisspelledWordUtf8(word_utf8);
     if (canon == "" && res.empty()) {
         return;
     }

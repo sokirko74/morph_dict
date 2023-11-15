@@ -21,10 +21,10 @@ class CFormInfo
 	const CLemmaInfoAndLemma& GetLemmaInfo() const;
 	const CFlexiaModel& GetFlexiaModel() const;
 	bool  IsValid() const;
+	std::string						m_InputWordBase;
 
 public:
 	const CLemmatizer*			m_pParent;
-	std::string						m_InputWordBase;
 	bool						m_bFound;
 
 	

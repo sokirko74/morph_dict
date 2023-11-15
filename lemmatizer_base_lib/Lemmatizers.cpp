@@ -71,17 +71,16 @@ bool CLemmatizer::IsPrefix(const std::string& Prefix) const
 
 };
 
-//   CLemmatizer::LemmatizeWord should return true if 
+//   function should return true if 
 // the word was found in the dictionary, if it was predicted, then it returns false
-bool CLemmatizer::LemmatizeWord(std::string& InputWordStr, const bool cap, const bool predict, std::vector<CAutomAnnotationInner>& results, bool bGetLemmaInfos) const
+bool CLemmatizer::LemmatizeWord(std::string& word_str, const bool cap, const bool predict, std::vector<CAutomAnnotationInner>& results, bool bGetLemmaInfos) const
 {
-	
-	RmlMakeUpper (InputWordStr, GetLanguage());
+	RmlMakeUpper (word_str, GetLanguage());
 
 	size_t WordOffset = 0;
 	
 
-	m_pFormAutomat->GetInnerMorphInfos(InputWordStr, 0, results);
+	m_pFormAutomat->GetInnerMorphInfos(word_str, 0, results);
 
 	bool bResult = !results.empty();
 
@@ -89,17 +88,17 @@ bool CLemmatizer::LemmatizeWord(std::string& InputWordStr, const bool cap, const
 	{
 		if (predict)
 		{
-			PredictBySuffix(InputWordStr, WordOffset, 4, results); // the length of the minal suffix is 4 
+			PredictBySuffix(word_str, WordOffset, 4, results); // the length of the minal suffix is 4 
 
 
-			if (InputWordStr[WordOffset-1] != '-') //  and there is no hyphen
+			if (word_str[WordOffset-1] != '-') //  and there is no hyphen
 			{
-				size_t  KnownPostfixLen = InputWordStr.length()-WordOffset;
+				size_t  KnownPostfixLen = word_str.length() - WordOffset;
 				size_t  UnknownPrefixLen = WordOffset;
 				if (KnownPostfixLen < 6)// if  the known part is too short
 					//if	(UnknownPrefixLen > 5)// no prediction if unknown prefix is more than 5
 					{
-						if (!IsPrefix(InputWordStr.substr(0, UnknownPrefixLen)))
+						if (!IsPrefix(word_str.substr(0, UnknownPrefixLen)))
 							results.clear();
 					};
 			};
@@ -118,19 +117,19 @@ bool CLemmatizer::LemmatizeWord(std::string& InputWordStr, const bool cap, const
 	if (!results.empty())
 	{
 		if (bGetLemmaInfos)
-			GetLemmaInfos(InputWordStr, WordOffset, results);
+			GetLemmaInfos(word_str, WordOffset, results);
 	}
 	else
 		if (predict)
 		{
-			PredictByDataBase(InputWordStr, results,cap);
+			PredictByDataBase(word_str, results,cap);
 			for (int i=(int)results.size()-1; i>=0; i--)
 			{
 					const CAutomAnnotationInner& A = results[i];
 					const CLemmaInfo& I = m_LemmaInfos[A.m_LemmaInfoNo].m_LemmaInfo;
 					const CFlexiaModel& M = m_FlexiaModels[A.m_ModelNo];
 					const CMorphForm& F = M.m_Flexia[A.m_ItemNo];
-					if ( F.m_FlexiaStr.length() >= InputWordStr.length() )
+					if ( F.m_FlexiaStr.length() >= word_str.length() )
 					{
 						results.erase(results.begin() + i);
 					}
@@ -140,13 +139,14 @@ bool CLemmatizer::LemmatizeWord(std::string& InputWordStr, const bool cap, const
 	return bResult;
 }
 
-bool CLemmatizer::GetAllAncodesAndLemmasQuick(std::string& InputWordStr, bool capital, char* OutBuffer, size_t MaxBufferSize, bool bUsePrediction) const
+bool CLemmatizer::GetAllAncodesAndLemmasQuick(std::string& word_str, bool capital, char* OutBuffer, size_t MaxBufferSize, bool bUsePrediction) const
 {
-	FilterSrc(InputWordStr);
+	// word_str is in single-byte encoding
+	FilterSrc(word_str);
 
 	std::vector<CAutomAnnotationInner>	FindResults;
 
-	bool bFound = LemmatizeWord(InputWordStr, capital, bUsePrediction, FindResults, false);
+	bool bFound = LemmatizeWord(word_str, capital, bUsePrediction, FindResults, false);
 
 	size_t Count = FindResults.size();
 	size_t  OutLen = 0;
@@ -158,16 +158,16 @@ bool CLemmatizer::GetAllAncodesAndLemmasQuick(std::string& InputWordStr, bool ca
 		size_t PrefixLen = F.m_PrefixStr.length();
 		size_t BaseStart  = 0;
 		if	(		bFound 
-				||	!strncmp(InputWordStr.c_str(), F.m_PrefixStr.c_str(), PrefixLen)
+				||	!strncmp(word_str.c_str(), F.m_PrefixStr.c_str(), PrefixLen)
 			)
 			BaseStart = PrefixLen;
-		int BaseLen  = (int)InputWordStr.length() - (int)F.m_FlexiaStr.length() - (int)BaseStart;
-		if (BaseLen < 0) BaseLen = (int)InputWordStr.length();
+		int BaseLen  = (int)word_str.length() - (int)F.m_FlexiaStr.length() - (int)BaseStart;
+		if (BaseLen < 0) BaseLen = (int)word_str.length();
 		size_t GramCodeLen = M.m_Flexia[A.m_ItemNo].m_Gramcode.length();
 		size_t FlexiaLength = M.m_Flexia[0].m_FlexiaStr.length();
 		if (BaseLen+FlexiaLength+3+GramCodeLen > MaxBufferSize-OutLen) return false; 
 
-		strncpy(OutBuffer+OutLen, InputWordStr.c_str()+BaseStart, BaseLen);
+		strncpy(OutBuffer+OutLen, word_str.c_str()+BaseStart, BaseLen);
 		OutLen += BaseLen;
 
 		strncpy(OutBuffer+OutLen, M.m_Flexia[0].m_FlexiaStr.c_str(), FlexiaLength);
@@ -307,12 +307,12 @@ void CLemmatizer::predict_hyphen_word(std::string& wordform, bool capital, std::
     }
 }
 
-bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& InputWordStr, bool capital, bool bUsePrediction, std::vector<CFormInfo>& Result) const
+bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& word_str, bool capital, bool bUsePrediction, std::vector<CFormInfo>& Result) const
 {
     Result.clear();
-	FilterSrc(InputWordStr);
+	FilterSrc(word_str);
 	std::vector<CAutomAnnotationInner>	found;
-	bool bFound = LemmatizeWord(InputWordStr, capital, bUsePrediction, found, true);
+	bool bFound = LemmatizeWord(word_str, capital, bUsePrediction, found, true);
 		
 	for (auto& a: found)
 	{
@@ -325,7 +325,7 @@ bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& InputWordStr
 			a.m_nWeight = 0;
 
 		CFormInfo P;
-		P.Create(this, a, InputWordStr, bFound);
+		P.Create(this, a, word_str, bFound);
 		Result.push_back(P);
 	}
 
@@ -334,7 +334,7 @@ bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& InputWordStr
 		// if the word was not found in the dictionary 
 		// and the word contains a hyphen 
 		// then we should try to predict each parts of the hyphened word separately
-        predict_hyphen_word(InputWordStr, capital, Result);
+        predict_hyphen_word(word_str, capital, Result);
 	};
 	return true;
 }
@@ -437,16 +437,16 @@ void CLemmatizer::PredictByDataBase(std::string InputWordStr,  std::vector<CAuto
 
 }
 
-bool CLemmatizer::IsInDictionary(std::string &word, const bool cap) const {
+bool CLemmatizer::IsInDictionary(std::string& word_s8, const bool cap) const {
     std::vector<CAutomAnnotationInner> results;
-	FilterSrc(word);
-    return LemmatizeWord(word, cap, false, results, false);
+	FilterSrc(word_s8);
+    return LemmatizeWord(word_s8, cap, false, results, false);
 }
 
-std::vector<CFuzzyResult> CLemmatizer::_CorrectMisspelledWord(std::string word, size_t maxStrDistance) const
+std::vector<CFuzzyResult> CLemmatizer::CorrectMisspelledWord1(std::string word_s8, size_t maxStrDistance) const
 {
-	RmlMakeUpper(word, GetLanguage());
-	auto res = m_pFormAutomat->FuzzySearch(word, maxStrDistance);
+	RmlMakeUpper(word_s8, GetLanguage());
+	auto res = m_pFormAutomat->FuzzySearch(word_s8, maxStrDistance);
 	for (int i = 0; i < res.size(); ++i) {
 		if (res[0] < res[i]) {
 			res.erase(res.begin() + i, res.end());

@@ -1835,14 +1835,15 @@ bool is_pseudo_graph(BYTE x)
 CExpc::CExpc(const std::string& Cause) 
 {
     m_strCause = Cause;
-	m_ErrorCode = 0;
+	m_ErrorCode = -1;
 };
 
-CExpc::CExpc(int ErrorCode, const std::string& Cause) 
+
+/*CExpc::CExpc(int ErrorCode, const std::string& Cause)
 {
     m_strCause = Cause;
 	m_ErrorCode = ErrorCode;
-};
+};*/
 
 
 

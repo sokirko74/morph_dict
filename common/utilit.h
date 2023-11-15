@@ -87,7 +87,7 @@ class CExpc
 	std::string	m_strCause;
 	int		m_ErrorCode;
 
-    CExpc(int ErrorCode, const std::string& Cause);
+   // CExpc(int ErrorCode, const std::string& Cause);
 	CExpc(const std::string& Cause);
 	CExpc(const CExpc& from);
     CExpc(const char* format, ... );
@@ -278,6 +278,14 @@ inline std::string _R(const std::string& s) {
 	return _R(s.c_str());
 }
 
+inline std::string _R0(const char* buffer) {
+	return buffer;
+}
+
+inline std::string _R0(const std::string& s) {
+	return s;
+}
+
 inline std::string _E(const char* buffer) {
 	return convert_from_utf8(buffer, morphEnglish);
 }
@@ -311,3 +319,9 @@ extern std::string join_string(const std::vector<std::string>& items, const std:
 extern std::vector<std::string> split_string(const std::string& s, char delim);
 
 extern void init_plog(plog::Severity severity, std::string filename, bool overwrite=true, MorphLanguageEnum langua=morphUnknown);
+
+template<class _II, class _Ty> inline
+bool _find(_II It, const _Ty& _V)
+{
+	return !(find(It.begin(), It.end(), _V) == It.end());
+}

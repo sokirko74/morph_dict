@@ -19,4 +19,3 @@ target_link_libraries(AgramtabLib
 )
 
 add_subdirectory (tests/CheckGramTab)
-add_subdirectory (scripts/gramtab_to_en)

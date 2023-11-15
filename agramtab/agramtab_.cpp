@@ -269,7 +269,7 @@ nlohmann::json CAgramtab::ReadFromFolder(std::string folder) {
     size_t line_no = 0;
     auto all_gramcodes = gramtab["gramcodes"].items();
     for (auto& [key, val] : all_gramcodes) {
-        std::string gramcode = convert_from_utf8(key.c_str(), m_Language);
+        std::string gramcode = key;
         part_of_speech_t pos = UnknownPartOfSpeech;
         const auto pos_it = val.find("p");
         if (pos_it != val.end()) {
@@ -295,10 +295,10 @@ nlohmann::json CAgramtab::ReadFromFolder(std::string folder) {
         line_no++;
     }
    
-    std::string gramcode_utf8 = gramtab["plug_noun_gram_code"].template get<std::string>();
-    m_PlugNoun.m_GramCode = convert_from_utf8(gramcode_utf8.c_str(), m_Language);
+    std::string gramcode = gramtab["plug_noun_gram_code"].template get<std::string>();
+    m_PlugNoun.m_GramCode = gramcode;
     assert(!m_PlugNoun.m_GramCode.empty());
-    m_PlugNoun.m_Lemma  = convert_from_utf8(gramtab["gramcodes"][gramcode_utf8]["l"].template get<std::string>().c_str(), m_Language);
+    m_PlugNoun.m_Lemma  = convert_from_utf8(gramtab["gramcodes"][gramcode]["l"].template get<std::string>().c_str(), m_Language);
     assert(!m_PlugNoun.m_Lemma.empty());
     return gramtab;
 }

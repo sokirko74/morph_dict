@@ -201,6 +201,7 @@ bool CMorphanHolder::GetParadigmCollection(std::string WordForm, std::vector<CFo
 	try
 	{
 		if (m_pLemmatizer == nullptr) return false;
+
 		m_pLemmatizer->CreateParadigmCollection(false,
                                                   WordForm,
                                                   IsUpper((unsigned char)WordForm[0],
@@ -223,49 +224,49 @@ bool CMorphanHolder::IsInDictionary(std::string WordForm) const {
 
 const int ParagigmGroupsCount = 45;
 const std::string ParagigmGroups[ParagigmGroupsCount] = {
-        _R("П ед,мр"),
-        _R("П ед,жр"),
-        _R("П ед,ср"),
-        _R("П мн"),
-        _R("П сравн"),
-        _R("С ед"),
-        _R("С мн"),
-        _R("Г нст"),
-        _R("Г прш"),
-        _R("Г буд"),
-        _R("Г пвл"),
-        _R("ПРИЧАСТИЕ нст,мр,стр"),
-        _R("ПРИЧАСТИЕ нст,жр,стр"),
-        _R("ПРИЧАСТИЕ нст,ср,стр"),
-        _R("ПРИЧАСТИЕ нст,мн,стр"),
-        _R("ПРИЧАСТИЕ прш,мр,стр"),
-        _R("ПРИЧАСТИЕ прш,жр,стр"),
-        _R("ПРИЧАСТИЕ прш,ср,стр"),
-        _R("ПРИЧАСТИЕ прш,мн,стр"),
-        _R("ПРИЧАСТИЕ нст,мр,дст"),
-        _R("ПРИЧАСТИЕ нст,жр,дст"),
-        _R("ПРИЧАСТИЕ нст,ср,дст"),
-        _R("ПРИЧАСТИЕ нст,мн,дст"),
-        _R("ПРИЧАСТИЕ прш,мр,дст"),
-        _R("ПРИЧАСТИЕ прш,жр,дст"),
-        _R("ПРИЧАСТИЕ прш,ср,дст"),
-        _R("ПРИЧАСТИЕ прш,мн,дст"),
-        _R("ЧИСЛ мр"),
-        _R("ЧИСЛ жр"),
-        _R("ЧИСЛ ср"),
-        _R("ЧИСЛ-П ед,мр"),
-        _R("ЧИСЛ-П ед,жр"),
-        _R("ЧИСЛ-П ед,ср"),
-        _R("ЧИСЛ-П мн"),
-        _R("МС-П ед,мр"),
-        _R("МС-П ед,жр"),
-        _R("МС-П ед,ср"),
-        _R("МС-П мн"),
-        _R("МС ед"),
-        _R("МС мн"),
-        _R("МС ед,мр"),
-        _R("МС ед,жр"),
-        _R("МС ед,ср"),
+        "П ед,мр",
+        "П ед,жр",
+        "П ед,ср",
+        "П мн",
+        "П сравн",
+        "С ед",
+        "С мн",
+        "Г нст",
+        "Г прш",
+        "Г буд",
+        "Г пвл",
+        "ПРИЧАСТИЕ нст,мр,стр",
+        "ПРИЧАСТИЕ нст,жр,стр",
+        "ПРИЧАСТИЕ нст,ср,стр",
+        "ПРИЧАСТИЕ нст,мн,стр",
+        "ПРИЧАСТИЕ прш,мр,стр",
+        "ПРИЧАСТИЕ прш,жр,стр",
+        "ПРИЧАСТИЕ прш,ср,стр",
+        "ПРИЧАСТИЕ прш,мн,стр",
+        "ПРИЧАСТИЕ нст,мр,дст",
+        "ПРИЧАСТИЕ нст,жр,дст",
+        "ПРИЧАСТИЕ нст,ср,дст",
+        "ПРИЧАСТИЕ нст,мн,дст",
+        "ПРИЧАСТИЕ прш,мр,дст",
+        "ПРИЧАСТИЕ прш,жр,дст",
+        "ПРИЧАСТИЕ прш,ср,дст",
+        "ПРИЧАСТИЕ прш,мн,дст",
+        "ЧИСЛ мр",
+        "ЧИСЛ жр",
+        "ЧИСЛ ср",
+        "ЧИСЛ-П ед,мр",
+        "ЧИСЛ-П ед,жр",
+        "ЧИСЛ-П ед,ср",
+        "ЧИСЛ-П мн",
+        "МС-П ед,мр",
+        "МС-П ед,жр",
+        "МС-П ед,ср",
+        "МС-П мн",
+        "МС ед",
+        "МС мн",
+        "МС ед,мр",
+        "МС ед,жр",
+        "МС ед,ср",
         "VBE sg",
         "VBE pl"
 };
@@ -519,13 +520,14 @@ std::string CMorphanHolder::LemmatizeJson(std::string WordForm, bool withParadig
     return result.dump(prettyJson ? 1 : -1);
 }
 
-std::vector<CFuzzyResult> CMorphanHolder::CorrectMisspelledWord(std::string word) const {
+std::vector<CFuzzyResult> CMorphanHolder::CorrectMisspelledWordUtf8(std::string word_utf8) const {
     std::vector<CFuzzyResult> r;
-    if (IsInDictionary(word)) {
-        r.push_back({word, 0});
+    auto word_s8 = convert_from_utf8(word_utf8.c_str(), m_CurrentLanguage);
+    if (IsInDictionary(word_s8)) {
+        r.push_back({ word_utf8, 0});
     }
     else {
-        r = m_pLemmatizer->_CorrectMisspelledWord(word);
+        r = m_pLemmatizer->CorrectMisspelledWord1(word_s8);
     }
     for (auto& a: r) {
         a.CorrectedString = convert_to_utf8(a.CorrectedString, m_CurrentLanguage);

@@ -99,31 +99,30 @@ int main(int argc, const char **argv) {
         };
 
         std::cerr << "Input a word..\n";
-        std::string s;
-        while (getline(args.GetInputStream(), s)) {
-            Trim(s);
-            if (s.empty()) break;
+        std::string word;
+        while (getline(args.GetInputStream(), word)) {
+            Trim(word);
+            if (word.empty()) break;
 		    if (bEchoInput) {
-			    args.GetOutputStream() << s << "\t";
+			    args.GetOutputStream() << word  << "\t";
 		    }
-		    s = convert_from_utf8(s.c_str(), language);
-            Trim(s);
+            auto word_s8 = convert_from_utf8(word.c_str(), language);
 		    std::string result;
             if (args.Exists("misspell")) {
-                if (Holder.IsInDictionary(s)) {
+                if (Holder.IsInDictionary(word_s8)) {
                     result = "in dictionary\n";
                 }
                 else {
-                    for (auto a: Holder.CorrectMisspelledWord(s)) {
+                    for (auto a: Holder.CorrectMisspelledWordUtf8(word)) {
                         result += Format(" corrected = %s distance= %i;", a.CorrectedString.c_str(), a.StringDistance);
                     }
                 }
             }
             else if (args.Exists("morphan")) {
-                result = Holder.LemmatizeJson(s.c_str(), printForms, true, true);
+                result = Holder.LemmatizeJson(word_s8.c_str(), printForms, true, true);
             }
             else {
-                result = Holder.PrintMorphInfoUtf8(s, printIds, printForms, sortParadigms);
+                result = Holder.PrintMorphInfoUtf8(word_s8, printIds, printForms, sortParadigms);
                 
             }
             args.GetOutputStream() << result << "\n";
@@ -131,7 +130,7 @@ int main(int argc, const char **argv) {
     }
     catch (CExpc c) {
         std::cerr << c.m_strCause << "\n";
-        exit(1);
+        return 1;
     }
 
     return 0;
