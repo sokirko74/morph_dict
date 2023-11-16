@@ -32,6 +32,13 @@ nlohmann::json CMorphWizardBase::GetFlexiaModelsJson() const {
     return m;
 };
 
+void  CMorphWizardBase::SerializeFlexiaModelsToAnnotFile(std::ostream& outp) const {
+    outp << m_FlexiaModels.size() << "\n";
+    for (auto f : m_FlexiaModels) {
+        outp << f.ToString();
+    }
+};
+
 
 
 nlohmann::json  CMorphWizardBase::GetAccentModelsJson() const {
@@ -42,3 +49,12 @@ nlohmann::json  CMorphWizardBase::GetAccentModelsJson() const {
     return m;
 };
 
+void  CMorphWizardBase::SerializeAccentModelsToAnnotFile(std::ostream& outp) const {
+    outp << m_AccentModels.size() << "\n";
+    for (auto& a : m_AccentModels) {
+        for (auto i : a.m_Accents) {
+            outp << (int)i << " ";
+        }
+        outp << "\n";
+    }
+};

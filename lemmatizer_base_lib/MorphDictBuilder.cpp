@@ -240,6 +240,7 @@ void  CMorphDictBuilder::CreateAutomat(const MorphoWizard& Wizard)
 	GetFormBuilder()->ConvertBuildRelationsToRelations();
 };
 
+
 void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russian_jo, int postfix_len, int min_freq, std::string output_folder) {
 	nlohmann::json opts;
 	opts["AllowRussianJo"] = allow_russian_jo;

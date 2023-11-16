@@ -12,7 +12,8 @@ struct CAccentModel
 		return m_Accents == X.m_Accents;
 
 	};
-	std::string		ToString() const;
+	//std::string		ToString() const;
 	CAccentModel& FromJson(nlohmann::json inj);
+	CAccentModel& FromString(const std::string& s);
 };
 

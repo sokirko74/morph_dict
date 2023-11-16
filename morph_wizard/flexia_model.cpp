@@ -18,6 +18,10 @@ CMorphForm::CMorphForm(nlohmann::json j) {
     m_PrefixStr = j.value("prefix", "");
 }
 
+CMorphForm::CMorphForm(const std::string& s) {
+    FromString(s);
+}
+
 nlohmann::json CMorphForm::ToJson() const {
     nlohmann::json j;
     j["flexia"] = m_FlexiaStr;
@@ -34,6 +38,20 @@ bool CMorphForm::operator == (const CMorphForm& X) const
         && m_FlexiaStr == X.m_FlexiaStr
         && m_PrefixStr == X.m_PrefixStr;
 };
+
+std::string CMorphForm::ToString() const {
+    return Format("%s\t%s\t%s", m_Gramcode.c_str(), m_FlexiaStr.c_str(), m_PrefixStr.c_str());
+}
+
+CMorphForm& CMorphForm::FromString(const std::string& s) {
+    // speed is important for debugging in RML, lemmatizer is used very frequently 
+    int i1 = s.find('\t');
+    m_Gramcode = s.substr(0, i1);
+    int i2 = s.rfind('\t');
+    m_FlexiaStr = s.substr(i1 + 1, i2 - i1 - 1);
+    m_PrefixStr = s.substr(i2 + 1);
+    return *this;
+}
 
 
 
@@ -86,3 +104,26 @@ CFlexiaModel& CFlexiaModel::FromJson(nlohmann::json inj) {
     m_WiktionaryMorphTemplate = inj.value("wiki", "");
     return *this;
 }
+
+std::string CFlexiaModel::ToString() const {
+    std::ostringstream sp;
+    for (const auto& p : m_Flexia) {
+        sp << p.ToString() << ";";
+    }
+    sp << "\n";
+    return sp.str();
+}
+
+CFlexiaModel& CFlexiaModel::FromString(const std::string& s) {
+    m_Flexia.clear();
+    size_t prev = 0;
+    size_t i = s.find(';');
+    while (i != s.npos) {
+        CMorphForm form(s.substr(prev, i - prev));
+        m_Flexia.emplace_back(form);
+        prev = i + 1;
+        i = s.find(';', prev);
+    }
+    return *this;
+}
+

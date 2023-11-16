@@ -7,11 +7,26 @@
      "gramcode": "zz"
     }
    ]
+  },
+  {
+   "endings": [
+    {
+     "flexia": "О",
+     "gramcode": "zz"
+    },
+    {
+     "flexia": "ОМ",
+     "gramcode": "zz"
+    }
+   ]
   }
  ],
  "accent_models": [
   [
    255
+  ],
+  [
+   255, 255
   ]
  ],
  "sessions": [
@@ -48,6 +63,13 @@
    "a": 0,
    "f": 0,
    "l": "ДУМА",
+   "s": 0,
+   "t": "Lv"
+  },
+  {
+   "a": 1,
+   "f": 1,
+   "l": "СЛОВО",
    "s": 0,
    "t": "Lv"
   },

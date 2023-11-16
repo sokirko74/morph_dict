@@ -21,4 +21,7 @@ public:
 
 	nlohmann::json GetFlexiaModelsJson() const;
 	nlohmann::json GetAccentModelsJson() const;
+
+	void  SerializeFlexiaModelsToAnnotFile(std::ostream& outp) const;
+	void  SerializeAccentModelsToAnnotFile(std::ostream& outp) const;
 };
