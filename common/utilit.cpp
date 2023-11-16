@@ -449,20 +449,6 @@ std::string	CreateTempFileName()
 #endif
 
 
-bool IsEmptyLine ( const char *t)
-{
-	if (*t==0) return true;
-
-	while (*t != '\r')
-	{
-		if ( (BYTE) t[0]>' ') 
-			return false;
-
-		t++;
-	}
-
-	return true;
-}
 
 char* rtrim (char* s)
 {
@@ -754,7 +740,7 @@ bool	IsRmlRegistered(std::string& Error)
 	}
 	catch (CExpc c)
 	{
-			Error = c.m_strCause;
+			Error = c.what();
 			return false;
 	}
 	catch (...)
@@ -1835,15 +1821,7 @@ bool is_pseudo_graph(BYTE x)
 CExpc::CExpc(const std::string& Cause) 
 {
     m_strCause = Cause;
-	m_ErrorCode = -1;
 };
-
-
-/*CExpc::CExpc(int ErrorCode, const std::string& Cause)
-{
-    m_strCause = Cause;
-	m_ErrorCode = ErrorCode;
-};*/
 
 
 
@@ -1857,21 +1835,13 @@ CExpc::CExpc(const char* format, ... )
 	vsnprintf( SmallBuffer, SmallBufferSize, format, arglst);
 	va_end( arglst );
     m_strCause = SmallBuffer;
-    m_ErrorCode = 0;
-
-    
 }
 
-CExpc::CExpc(const CExpc& from)
-{
-	*this = from;
-};
-CExpc& CExpc::operator= (const CExpc& from)
-{
-	m_strCause = from.m_strCause;
-    m_ErrorCode = from.m_ErrorCode;
-	return *this;
+char const* CExpc::what() const {
+	return m_strCause.c_str();
 }
+
+
 
 // ====================   StringTokenizer =======================
 

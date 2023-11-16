@@ -81,18 +81,15 @@ struct	troika : public std::pair<T1, T2>
 
 typedef uint64_t file_off_t;
 
-class CExpc
+class CExpc : public std::exception
 {
- public:
 	std::string	m_strCause;
-	int		m_ErrorCode;
-
-   // CExpc(int ErrorCode, const std::string& Cause);
-	CExpc(const std::string& Cause);
-	CExpc(const CExpc& from);
-    CExpc(const char* format, ... );
-	CExpc& operator= (const CExpc& from);
+public:
+	CExpc(const std::string& cause);
+	CExpc(const char* format, ...);
+	virtual char const* what() const override;
 };
+	
 
 
 // working with files
@@ -107,7 +104,6 @@ extern void		ErrorMessage (const std::string& Message);
 extern std::string	MakeFName ( const std::string& InpitFileName,  const std::string& Ext);
 extern std::string   MakePath(const std::string path, const std::string fileName);
 extern std::string	GetParentPath (std::string FileName);
-extern bool		IsEmptyLine ( const char *t);
 extern bool		IsHtmlFile (const std::string& FileName);
 extern std::string	CreateTempFileName();
 

@@ -1565,14 +1565,9 @@ bool MorphoWizard::attach_form_prefixes_to_bases() {
 
 
 //----------------------------------------------------------------------------
-// СЌС‚Р° С„СѓРЅРєС†РёСЏ РїСЂРёРІРѕРґРёС‚ СЂСѓСЃСЃРєСѓСЋ РјРѕСЂС„РѕР»РѕРіРёСЋ Рє РІРёРґСѓ, РєРѕС‚РѕСЂС‹Р№ РѕРЅР° РґРѕР»Р¶РЅР°  РёРјРµС‚СЊ РІ Р”РёР°Р»РёРЅРіРµ:
-// 1. СѓРґР°Р»РµРЅРёРµ "С‘"
-// 2. ...
-//----------------------------------------------------------------------------
-bool MorphoWizard::prepare_for_RML() {
-    if (m_Language != morphRussian) return true;
+void MorphoWizard::convert_je_to_jo() {
+    if (m_Language != morphRussian) return;
 
-    // РїРµСЂРµРІРѕРґ "С‘"  РІ "Рµ"
     for (int ModelNo = 0; ModelNo < m_FlexiaModels.size(); ModelNo++)
         for (size_t k = 0; k < m_FlexiaModels[ModelNo].m_Flexia.size(); k++) {
             ConvertJO2Je(m_FlexiaModels[ModelNo].m_Flexia[k].m_PrefixStr);
@@ -1591,58 +1586,8 @@ bool MorphoWizard::prepare_for_RML() {
         };
         lemm_it = next_lemm_it;
     };
-
-    // checking
-    for (lemma_iterator_t lemm_it = m_LemmaToParadigm.begin(); lemm_it != m_LemmaToParadigm.end(); lemm_it++) {
-        std::string Lemma = lemm_it->first;
-        ConvertJO2Je(Lemma);
-        if (Lemma != lemm_it->first)
-            return false;
-    };
-    return true;
 }
 
-bool MorphoWizard::prepare_for_RML2() {
-    if (m_Language != morphRussian) return true;
-
-
-    int sz = (int)m_FlexiaModels.size();
-    std::map<int, int> joFlex;
-    typedef std::pair<int, int> Int_Pair;
-    for (int ModelNo = 0; ModelNo < sz; ModelNo++) {
-        bool hasjo = false;
-        for (size_t k = 0; k < m_FlexiaModels[ModelNo].m_Flexia.size(); k++)
-            if (HasJO(m_FlexiaModels[ModelNo].m_Flexia[k].m_PrefixStr +
-                m_FlexiaModels[ModelNo].m_Flexia[k].m_FlexiaStr)) {
-                if (!hasjo) {
-                    m_FlexiaModels.push_back(m_FlexiaModels[ModelNo]);
-                    joFlex.insert(Int_Pair(ModelNo, (int)m_FlexiaModels.size() - 1));
-                }
-                hasjo = true;
-                ConvertJO2Je(m_FlexiaModels[ModelNo].m_Flexia[k].m_PrefixStr); 
-                ConvertJO2Je(m_FlexiaModels[ModelNo].m_Flexia[k].m_FlexiaStr);
-            };
-
-    }
-    LemmaMap nojo;
-    for (lemma_iterator_t lemm_it = m_LemmaToParadigm.begin(); lemm_it != m_LemmaToParadigm.end();) {
-        std::string Lemma(lemm_it->first.length(), ' ');
-        copy(lemm_it->first.begin(), lemm_it->first.end(), Lemma.begin());
-        ConvertJO2Je(Lemma);
-        lemma_iterator_t next_lemm_it = lemm_it;
-        next_lemm_it++;
-        CParadigmInfo P = lemm_it->second;
-        if (Lemma != lemm_it->first || joFlex.find(P.m_FlexiaModelNo) != joFlex.end()) {
-            //m_LemmaToParadigm.erase(lemm_it);
-            nojo.insert(std::make_pair(Lemma, P)); // no jo
-        };
-        if (joFlex.find(P.m_FlexiaModelNo) != joFlex.end())
-            lemm_it->second.m_FlexiaModelNo = joFlex.find(P.m_FlexiaModelNo)->second;
-        lemm_it = next_lemm_it;
-    };
-    m_LemmaToParadigm.insert(nojo.begin(), nojo.end());
-    return true;
-}
 
 //----------------------------------------------------------------------------
 bool MorphoWizard::HasUnknownAccents(lemma_iterator_t it) const {

@@ -32,7 +32,7 @@ bool Check(CAgramtab* gramtab)
 		return true;
 	}
 	catch (CExpc e) {
-		std::cerr << e.m_strCause << "\n";
+		std::cerr << e.what() << "\n";
 		return false;
 	}
 

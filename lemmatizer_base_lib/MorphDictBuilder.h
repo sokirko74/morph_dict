@@ -24,20 +24,21 @@ class CMorphDictBuilder : public CMorphDict
 	void				ClearRegister();
 	bool				CheckFlexiaGramInfo(const MorphoWizard& Wizard) const;
 	void				GeneratePrefixes(const MorphoWizard& Wizard);
-		//  debug functions 
 	bool				CheckRegister() const;
+
 	CMorphAutomatBuilder* GetFormBuilder() { return (CMorphAutomatBuilder*)m_pFormAutomat; };
-
-
-
-public:
-	CMorphDictBuilder(MorphLanguageEnum Language);
-	~CMorphDictBuilder();
-
 	void	CreateAutomat(const MorphoWizard& Wizard);
 	void	GenerateLemmas(const MorphoWizard& Wizard);
 	void	GenerateUnitedFlexModels(const MorphoWizard& Wizard);
 	bool	GenPredictIdx(const MorphoWizard& wizard, int PostfixLength, int MinFreq, std::string path, nlohmann::json& output_opts);
+
+
+public:
+	CMorphDictBuilder();
+	~CMorphDictBuilder();
+
+	void BuildLemmatizer(std::string mwz_path, bool allow_russian_jo, int postfix_len, int min_freq, std::string output_folder);
+
 };
 
 

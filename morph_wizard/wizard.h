@@ -141,8 +141,7 @@ public:
     bool	check_common_grammems(std::string common_grammems) const;
     bool	check_prefixes(std::string prefixes) const;
     bool	attach_form_prefixes_to_bases();
-    bool	prepare_for_RML();
-    bool	prepare_for_RML2();
+    void	convert_je_to_jo();
 
     bool				HasMeter() const { return  !!m_pMeter; }
     MorphWizardMeter* GetMeter() { return  m_pMeter; }

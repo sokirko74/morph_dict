@@ -140,7 +140,7 @@ std::string CMorphanHolder::PrintMorphInfoUtf8(std::string Form, bool printIds, 
 		const CFormInfo& F = Paradigms[i];
 		Result += F.m_bFound ? "+ " : "- ";
 
-		Result += F.GetWordForm(0) + " ";
+		Result += convert_to_utf8(F.GetWordForm(0), m_CurrentLanguage) + " ";
 
 		{
 			std::string GramCodes = F.GetSrcAncode();
@@ -170,7 +170,7 @@ std::string CMorphanHolder::PrintMorphInfoUtf8(std::string Form, bool printIds, 
 			for (int k = 0; k < F.GetCount(); k++) {
 				if (k > 0)
 					Result += ",";
-				Result += Paradigms[i].GetWordForm(k);
+				Result += convert_to_utf8(Paradigms[i].GetWordForm(k), m_CurrentLanguage);
 			};
 		};
 		Results.push_back(Result);
@@ -179,13 +179,13 @@ std::string CMorphanHolder::PrintMorphInfoUtf8(std::string Form, bool printIds, 
 	if (sortParadigms) {
 		std::sort(Results.begin(), Results.end());
 	};
-	std::string Result;
+	std::string result;
 	for (int i = 0; i < Results.size(); i++) {
 		if (i > 0)
-			Result += "\t";
-		Result += Results[i] + "\n";
+			result += "\t";
+		result += Results[i] + "\n";
 	}
-	return convert_to_utf8(Result, m_CurrentLanguage);
+	return result;
 };
 
 inline  bool IsUpper(int x, MorphLanguageEnum Langua)

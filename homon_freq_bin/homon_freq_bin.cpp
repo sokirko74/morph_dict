@@ -211,7 +211,7 @@ int main(int argc, const char** argv) {
             return 0;
     }
     catch (CExpc e) {
-        LOGE << "exception occurred:" << e.m_strCause;
+        LOGE << "exception occurred:" << e.what();
     }
     catch (std::exception e) {
         LOGE << "exception occurred:" << e.what();
