@@ -60,7 +60,6 @@ int main(int argc, char** argv) {
 	}
 	// important - query flags (and --exit) rely on the user doing this
 	if (context.shouldExit()) {
-		// propagate the result of the tests
 		return res;
 	}
 }
