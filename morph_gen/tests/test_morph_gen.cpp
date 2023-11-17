@@ -50,6 +50,9 @@ TEST_CASE("lemmatize_Russian_word") {
 	CHECK(f.GetAncode(0) == "zz");
 	auto w1 = convert_to_utf8(f.GetWordForm(1), morphRussian);
 	CHECK(w1 == "СЛОВОМ");
+	CHECK(f.GetAccentedVowel(0) == 4);
+	CHECK(f.GetAccentedVowel(1) == 2);
+
 
 }
 

@@ -321,3 +321,7 @@ bool _find(_II It, const _Ty& _V)
 {
 	return !(find(It.begin(), It.end(), _V) == It.end());
 }
+
+extern std::string& MakeUpperUtf8(std::string& s_utf8);
+extern std::string& MakeLowerUtf8(std::string& s_utf8);
+extern size_t CountLettersInUtf8(std::string& s_utf8);

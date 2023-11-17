@@ -11,6 +11,7 @@ set(my_SOURCES
         util_classes.h
         utilit.h
         json.cpp
+	utf8.cpp
 
 )
 

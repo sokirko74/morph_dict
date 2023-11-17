@@ -22,12 +22,13 @@ CAccentModel& CAccentModel::FromJson(nlohmann::json inj) {
 CAccentModel& CAccentModel::FromString(const std::string& s) {
     m_Accents.clear();
     size_t prev = 0;
-    size_t i = s.find(' ');
+    const char delim = ' ';
+    size_t i = s.find(delim);
     while (i != s.npos) {
         BYTE b = atoi(s.substr(prev, i - prev).c_str());
         m_Accents.push_back(b);
         prev = i + 1;
-        i = s.find(';', prev);
+        i = s.find(delim, prev);
     }
     return *this;
 

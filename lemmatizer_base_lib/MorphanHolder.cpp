@@ -3,6 +3,7 @@
 // ==========  Copyright by Alexey Sokirko
 
 #include "morph_dict/common/json.h"
+#include "morph_dict/morph_wizard/paradigm_consts.h"
 #include "MorphanHolder.h"
 
 CMorphanHolder::CMorphanHolder()
@@ -135,45 +136,45 @@ std::string CMorphanHolder::PrintMorphInfoUtf8(std::string Form, bool printIds, 
 	m_pLemmatizer->CreateParadigmCollection(false, Form, bCapital, true, Paradigms);
 
 	std::vector<std::string> Results;
-	for (int i = 0; i < Paradigms.size(); i++) {
-		std::string Result;
-		const CFormInfo& F = Paradigms[i];
-		Result += F.m_bFound ? "+ " : "- ";
-
-		Result += convert_to_utf8(F.GetWordForm(0), m_CurrentLanguage) + " ";
+	for (auto& f : Paradigms) {
+        std::ostringstream ss;
+		ss << (f.m_bFound ? "+" : "-") << " ";
+		ss <<  f.GetWordFormUtf8(0) << " ";
 
 		{
-			std::string GramCodes = F.GetSrcAncode();
+			std::string GramCodes = f.GetSrcAncode();
 			BYTE PartOfSpeech = m_pGramTab->GetPartOfSpeech(GramCodes.c_str());
-			Result += m_pGramTab->GetPartOfSpeechStr(PartOfSpeech) + std::string(" ");
+			ss << m_pGramTab->GetPartOfSpeechStr(PartOfSpeech) << " ";
 
-			std::string CommonAncode = F.GetCommonAncode();
-			Result += Format("%s ", (CommonAncode.empty()) ? "" : GetGrammems(CommonAncode.c_str()).c_str());
+			auto type = f.GetCommonAncode();
+			ss << (type.empty() ? "" : GetGrammems(type.c_str())) << " ";
 
 			for (long i = 0; i < GramCodes.length(); i += 2) {
 				if (i > 0)
-					Result += ";";
-				Result += Format("%s", GetGrammems(GramCodes.c_str() + i).c_str());
+					ss << ";";
+				ss << GetGrammems(GramCodes.c_str() + i);
 			}
 
 		}
 
 		if (printIds)
-			Result += Format(" %i", F.GetParadigmId());
+			ss << " " << f.GetParadigmId();
 
-		BYTE Accent = F.GetSrcAccentedVowel();
-		if (Accent != 0xff)
-			Result += Format(" %s'%s", Form.substr(0, Accent + 1).c_str(), Form.substr(Accent + 1).c_str());
+		BYTE Accent = f.GetSrcAccentedVowel();
+        if (Accent != UnknownAccent) {
+            auto af = Form.substr(0, Accent + 1) + "'" + Form.substr(Accent + 1);
+            ss << " " << convert_to_utf8(af, m_CurrentLanguage);
+        }
 
 		if (printForms) {
-			Result += " ";
-			for (int k = 0; k < F.GetCount(); k++) {
+			ss << " ";
+			for (int k = 0; k < f.GetCount(); k++) {
 				if (k > 0)
-					Result += ",";
-				Result += convert_to_utf8(Paradigms[i].GetWordForm(k), m_CurrentLanguage);
+					ss << ",";
+				ss << f.GetWordFormUtf8(k);
 			};
 		};
-		Results.push_back(Result);
+		Results.push_back(ss.str());
 	};
 
 	if (sortParadigms) {
@@ -400,7 +401,7 @@ std::vector<CFormAndGrammems> BuildFormAndGrammems(const CMorphanHolder *Holder,
             F.m_Langua = Holder->m_CurrentLanguage;
             F.m_Form = piParadigm->GetWordForm(j);
             BYTE AccentedCharNo = piParadigm->GetAccentedVowel(j);
-            if (AccentedCharNo != 255)
+            if (AccentedCharNo != UnknownAccent)
                 F.m_Form.insert(AccentedCharNo + 1, "'");
             F.m_Grammems = pGramtab->GetAllGrammems(GramInfo.substr(i, 2).c_str());
             F.m_PartOfSpeech = pGramtab->GetPartOfSpeech(GramInfo.substr(i, 2).c_str());
@@ -442,7 +443,7 @@ nlohmann::json GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMor
                 auto &f = FormAndGrammems[formNo + saveFormNo];
                 std::string grm = pGramtab->GrammemsToStr(f.m_Grammems & ~(fg.m_IntersectGrammems | commonGrammems));
                 subg["forms"].push_back(
-                        {{"f", f.m_Form},
+                        {{"f", convert_to_utf8(f.m_Form, Holder->m_CurrentLanguage)},
                          {"grm", TrimCommaRight(grm)}});
             };
             if (sortForms)
@@ -477,10 +478,10 @@ nlohmann::json GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorph
         };
     };
     result["commonGrammems"] = TrimCommaRight(commonGrammems);
-    result["wordForm"] = piParadigm->GetWordForm(0);
+    result["wordForm"] = piParadigm->GetWordFormUtf8(0);
     if (!piParadigm->m_bFound)
     {
-        result["srcNorm"] = piParadigm->GetSrcNorm();
+        result["srcNorm"] = piParadigm->GetSrcNormUtf8();
     }
     std::string GramInfo;
     try
@@ -516,7 +517,7 @@ std::string CMorphanHolder::LemmatizeJson(std::string WordForm, bool withParadig
     {
         result.push_back(GetStringByParadigmJson(&(p), this, withParadigm, sortForms));
     };
-    ConvertToUtfRecursive(result, m_CurrentLanguage);
+    //ConvertToUtfRecursive(result, m_CurrentLanguage);
     return result.dump(prettyJson ? 1 : -1);
 }
 

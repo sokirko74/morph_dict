@@ -165,6 +165,10 @@ std::string CFormInfo::GetSrcNorm() const
 	return result;
 }
 
+std::string CFormInfo::GetSrcNormUtf8() const {
+	return convert_to_utf8(GetSrcNorm(), m_pParent->GetLanguage());
+}
+
 int CFormInfo::GetHomonymWeightWithForm(uint16_t pos) const 
 {
 	assert (IsValid());
@@ -235,6 +239,10 @@ std::string CFormInfo::GetWordForm (uint16_t pos) const
     // "F.m_PrefixStr" is a prefix that is ascribed to the current word form
 
 	return Result;
+}
+
+std::string CFormInfo::GetWordFormUtf8(uint16_t pos) const {
+	return convert_to_utf8(GetWordForm(pos), m_pParent->GetLanguage());
 }
 
 

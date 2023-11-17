@@ -38,23 +38,24 @@ public:
 	uint32_t	GetCount () const;
 	
 	std::string	GetSrcNorm() const; 
-	// returns the weight of a word form 
-	int		GetHomonymWeightWithForm(uint16_t pos) const; 
-	// returns the weight of this word 
-	int		GetWordWeight() const;
-
-	std::string	GetAncode(uint16_t pos) const;
-	std::string	GetWordForm (uint16_t pos) const;
+	std::string GetSrcNormUtf8() const;
 	std::string	GetSrcAncode() const;
 	int		GetHomonymWeight() const;
-	BYTE	GetAccentedVowel(uint16_t pos) const;
 	BYTE	GetSrcAccentedVowel() const;
 	std::string	GetCommonAncode() const;
-	char	GetLemSign() const; 
-	size_t	GetLemmaPrefixLength() const; 
-    void    SetUserPrefix(const std::string& UserPrefix);
+	// returns the weight of this word 
+	int		GetWordWeight() const;
+	char	GetLemSign() const;
+	size_t	GetLemmaPrefixLength() const;
+
+	std::string	GetWordForm(uint16_t pos) const;
+	std::string	GetWordFormUtf8(uint16_t pos) const;
+	int		GetHomonymWeightWithForm(uint16_t pos) const; 
+	std::string	GetAncode(uint16_t pos) const;
+	BYTE	GetAccentedVowel(uint16_t pos) const;
+
+	void    SetUserPrefix(const std::string& UserPrefix);
     void    SetUserUnknown();
-	
 	std::string  GetGramInfoStr(const CAgramtab* gramtab) const;
 	std::string  FormatAsInPlmLine() const;
 };

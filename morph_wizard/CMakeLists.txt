@@ -20,7 +20,9 @@ add_library(morph_wizard_lib
         "paradigm_info.cpp" 
         "paradigm_info.h" 
         "accent_model.cpp"
-        "accent_model.h")
+        "accent_model.h"
+        "paradigm_consts.h"
+)
 
 target_link_libraries(morph_wizard_lib
     AgramtabLib
