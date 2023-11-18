@@ -325,3 +325,6 @@ bool _find(_II It, const _Ty& _V)
 extern std::string& MakeUpperUtf8(std::string& s_utf8);
 extern std::string& MakeLowerUtf8(std::string& s_utf8);
 extern size_t CountLettersInUtf8(std::string& s_utf8);
+extern bool CheckRussianUtf8(const std::string& s);
+extern bool CheckRussianLowerUtf8(const std::string& s);
+extern bool ContainsRussianUtf8(const std::string& s);

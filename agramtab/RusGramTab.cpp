@@ -555,10 +555,10 @@ bool CRusGramTab::IsStrongClauseRoot(const part_of_speech_mask_t poses) const
 		|| (poses & (1 << PREDK));
 };
 
-const static std::string months[] = { _R("ЯНВАРЬ"),_R("ФЕВРАЛЬ"),_R("МАРТ"),
-			   _R("АПРЕЛЬ"),_R("МАЙ"),_R("ИЮНЬ"),
-			   _R("ИЮЛЬ"),_R("АВГУСТ"),_R("СЕНТЯБРЬ")
-			   ,_R("ОКТЯБРЬ"),_R("НОЯБРЬ"),_R("ДЕКАБРЬ") };
+const static std::string months[] = { "ЯНВАРЬ", "ФЕВРАЛЬ", "МАРТ",
+			   "АПРЕЛЬ","МАЙ","ИЮНЬ",
+			   "ИЮЛЬ","АВГУСТ","СЕНТЯБРЬ"
+			   ,"ОКТЯБРЬ","НОЯБРЬ","ДЕКАБРЬ" };
 
 bool CRusGramTab::is_month(const char* lemma) const
 {
@@ -569,7 +569,7 @@ bool CRusGramTab::is_month(const char* lemma) const
 	return false;
 }
 
-const static std::string SmallNumbers[] = { _R("ДВА"),_R("ТРИ"),_R("ЧЕТЫРЕ"),_R("ОБА"),_R("ПОЛТОРА") };
+const static std::string SmallNumbers[] = { "ДВА","ТРИ","ЧЕТЫРЕ","ОБА","ПОЛТОРА" };
 
 
 bool CRusGramTab::IsMorphNoun(part_of_speech_mask_t poses)  const
@@ -652,7 +652,7 @@ bool CRusGramTab::is_morph_personal_pronoun(part_of_speech_mask_t poses, grammem
 
 
 const size_t  ParticleCount = 8;
-const static std::string Particles[ParticleCount] = { _R("ЛИ"),_R("ЖЕ"),_R("БЫ"),_R("УЖ"),_R("ТОЛЬКО"), _R("Ж"), _R("Б"), _R("ЛЬ") };
+const static std::string Particles[ParticleCount] = { "ЛИ","ЖЕ","БЫ","УЖ","ТОЛЬКО", "Ж", "Б", "ЛЬ" };
 
 bool CRusGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t poses) const
 {
@@ -675,7 +675,7 @@ bool CRusGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t pose
 
 /*
 	Есть такие  мест. прилагательные, которые могут выступать в роли существительных:
-	_R("КАЖДЫЙ"), _R("ОДИН"), _R("ДРУГОЙ"),_R("ТОТ"),_R("КОТОРЫЙ").
+	"КАЖДЫЙ", "ОДИН", "ДРУГОЙ","ТОТ","КОТОРЫЙ".
 	Для  них не имеет смысла вводит аналогичные местоимения,поскольку  все они могут
 	быть использованы во всех родах. Эти прилагательные могут вести себя так же, как
 	существительные. Например,
@@ -683,14 +683,14 @@ bool CRusGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t pose
 	Я знаю ту, которая тебя видит
 	Один пришел, другой ушел.
 	Я вижу дом, который разрушился.
-	Вышеуказанные мест. прилагательные отличаются, например, от местоимения _R(_R("этот")) и _R("всякий"), поскольку
+	Вышеуказанные мест. прилагательные отличаются, например, от местоимения _R("этот") и "всякий", поскольку
 	трудно себе представить что-то вроде:
 	"эта пришла"
 	"всякая пришла"
 	Но возможно:
 	"всякое бывает"
 	"это бывает"
-	Здесь _R("всякое") и _R("это") - простые местоимения ср рода.
+	Здесь "всякое" и "это" - простые местоимения ср рода.
 
 	!! Таким образом, я не хочу дублировать в морфологии МС-П, если они могут использованы
 	!! во всех родах в качестве существительного.
@@ -702,11 +702,11 @@ bool CRusGramTab::IsSynNoun(part_of_speech_mask_t poses, const char* lemma) cons
 	return   IsMorphNoun(poses)
 		|| (poses & (1 << PRONOUN))
 		|| ((poses & (1 << PRONOUN_P))
-			&& (_R("КАЖДЫЙ") == lemma)
-			|| (_R("ОДИН") == lemma)
-			|| (_R("ДРУГОЙ") == lemma)
-			|| (_R("ТОТ") == lemma)
-			|| (_R("КОТОРЫЙ") == lemma)
+			&& ("КАЖДЫЙ" == lemma)
+			|| ("ОДИН" == lemma)
+			|| ("ДРУГОЙ" == lemma)
+			|| ("ТОТ" == lemma)
+			|| ("КОТОРЫЙ" == lemma)
 			)
 		;
 };
@@ -714,11 +714,11 @@ bool CRusGramTab::IsSynNoun(part_of_speech_mask_t poses, const char* lemma) cons
 
 const int StandardParamAbbrCount = 8;
 const static std::string StandardParamAbbr[StandardParamAbbrCount] =
-{ _R("КГ"), _R("КМ"), _R("СМ"),_R("МЛ"), _R("МБ"),_R("КБ"), _R("МГЦ"), _R("КВ") };
+{ "КГ", "КМ", "СМ","МЛ", "МБ","КБ", "МГЦ", "КВ" };
 
 bool CRusGramTab::IsStandardParamAbbr(const char* WordStrUpper) const
 {
-	if (strlen(WordStrUpper) > 4) return false;
+	if (strlen(WordStrUpper) > 6) return false;
 	for (long i = 0; i < StandardParamAbbrCount; i++)
 		if (StandardParamAbbr[i] == WordStrUpper)
 			return true;
