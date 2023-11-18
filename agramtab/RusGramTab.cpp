@@ -651,18 +651,12 @@ bool CRusGramTab::is_morph_personal_pronoun(part_of_speech_mask_t poses, grammem
 
 
 
-const size_t  ParticleCount = 8;
-const static std::string Particles[ParticleCount] = { "ЛИ","ЖЕ","БЫ","УЖ","ТОЛЬКО", "Ж", "Б", "ЛЬ" };
+const static std::unordered_set<std::string> Particles = { "ЛИ","ЖЕ","БЫ","УЖ","ТОЛЬКО", "Ж", "Б", "ЛЬ" };
 
-bool CRusGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t poses) const
+bool CRusGramTab::IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const
 {
-	if (!lemma) return false;
 	if (!(poses & (1 << PARTICLE))) return false;
-	for (int i = 0; i < ParticleCount; i++)
-		if (Particles[i] == lemma)
-			return true;
-
-	return false;
+	return Particles.find(lemma) != Particles.end();
 }
 
 

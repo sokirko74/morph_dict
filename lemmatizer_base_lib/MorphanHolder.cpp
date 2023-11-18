@@ -78,26 +78,33 @@ void CMorphanHolder::LoadLemmatizer(MorphLanguageEnum langua, std::string custom
 		m_CurrentLanguage = langua;
 }
 
+DwordVector CMorphanHolder::_GetLemmaIds(bool bNorm, std::string& word_str, bool capital, bool bUsePrediction) const {
+    DwordVector ids;
+
+    std::vector<CFormInfo > ParadigmCollection;
+    std::string s8 = convert_from_utf8(word_str.c_str(), m_CurrentLanguage);
+    if (!m_pLemmatizer->CreateParadigmCollection(bNorm, word_str, capital, bUsePrediction, ParadigmCollection))
+    {
+        throw CExpc("cannot lemmatize %s", word_str.c_str());
+    }
+    for (auto& p : ParadigmCollection)
+    {
+        if (p.m_bFound || bUsePrediction) {
+            ids.push_back(p.GetParadigmId());
+        }
+    }
+    return ids;
+}
+
 
 DwordVector CMorphanHolder::GetLemmaIds(std::string lemma) const
 {
-    DwordVector ids;
-	
-	std::vector<CFormInfo > ParadigmCollection;
-	
-	if (!m_pLemmatizer->CreateParadigmCollection(true, lemma, true, false, ParadigmCollection))
-	{
-		throw CExpc("cannot lemmatize %s\n", lemma.c_str());
-	}
-	
+    return _GetLemmaIds(true, lemma, true, false);
+}
 
-	for(auto& p : ParadigmCollection)
-	{
-        if (p.m_bFound) {
-            ids.push_back(p.GetParadigmId());
-        }
-	}
-    return ids;
+DwordVector CMorphanHolder::GetWordFormIds(std::string word_form) const
+{
+    return _GetLemmaIds(false, word_form, false, false);
 }
 
 std::string CMorphanHolder::id_to_string(long id) const
@@ -106,17 +113,9 @@ std::string CMorphanHolder::id_to_string(long id) const
 	CFormInfo Res;
 	if (!m_pLemmatizer->CreateParadigmFromID(id, Res))
 		throw CExpc (Format( "cannot get lemma  by id %i", id));
-	return Res.GetWordForm(0);
+	return convert_to_utf8(Res.GetWordForm(0), m_CurrentLanguage);
 }
 
-CFormInfo CMorphanHolder::id_to_paradigm(long id) const
-{
-	
-	CFormInfo Res;
-	if (!m_pLemmatizer->CreateParadigmFromID(id, Res))
-		throw CExpc (Format( "cannot get lemma  by id %i", id));
-	return Res;
-}
 
 
 std::string CMorphanHolder::GetGrammems(const char* tab_str) const {
@@ -130,10 +129,11 @@ std::string CMorphanHolder::GetGrammems(const char* tab_str) const {
 
 std::string CMorphanHolder::PrintMorphInfoUtf8(std::string Form, bool printIds, bool printForms, bool sortParadigms) const
 {
-	bool bCapital = is_upper_alpha((BYTE)Form[0], m_CurrentLanguage);
+    std::string word_s8 = convert_from_utf8(Form.c_str(), m_CurrentLanguage);
+	bool bCapital = is_upper_alpha((BYTE)word_s8[0], m_CurrentLanguage);
 
 	std::vector<CFormInfo> Paradigms;
-	m_pLemmatizer->CreateParadigmCollection(false, Form, bCapital, true, Paradigms);
+	m_pLemmatizer->CreateParadigmCollection(false, word_s8, bCapital, true, Paradigms);
 
 	std::vector<std::string> Results;
 	for (auto& f : Paradigms) {
@@ -162,7 +162,7 @@ std::string CMorphanHolder::PrintMorphInfoUtf8(std::string Form, bool printIds, 
 
 		BYTE Accent = f.GetSrcAccentedVowel();
         if (Accent != UnknownAccent) {
-            auto af = Form.substr(0, Accent + 1) + "'" + Form.substr(Accent + 1);
+            auto af = word_s8.substr(0, Accent + 1) + "'" + word_s8.substr(Accent + 1);
             ss << " " << convert_to_utf8(af, m_CurrentLanguage);
         }
 
@@ -189,13 +189,8 @@ std::string CMorphanHolder::PrintMorphInfoUtf8(std::string Form, bool printIds, 
 	return result;
 };
 
-inline  bool IsUpper(int x, MorphLanguageEnum Langua)
-{
-	return is_upper_alpha(x, Langua);
-};
-
-bool CMorphanHolder::GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>&	Paradigms) const {
-	if (WordForm.length() == 0)	{
+bool CMorphanHolder::_GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>&	Paradigms) const {
+	if (WordForm.empty())	{
 		return false;
 	};
 
@@ -203,10 +198,8 @@ bool CMorphanHolder::GetParadigmCollection(std::string WordForm, std::vector<CFo
 	{
 		if (m_pLemmatizer == nullptr) return false;
 
-		m_pLemmatizer->CreateParadigmCollection(false,
-                                                  WordForm,
-                                                  IsUpper((unsigned char)WordForm[0],
-                                                          m_CurrentLanguage),
+		m_pLemmatizer->CreateParadigmCollection(false,WordForm,
+                                    is_upper_alpha((unsigned char)WordForm[0], m_CurrentLanguage),
                                                           m_bUsePrediction,
                                                           Paradigms);
 	}
@@ -217,11 +210,10 @@ bool CMorphanHolder::GetParadigmCollection(std::string WordForm, std::vector<CFo
 	return true;
 };
 
-bool CMorphanHolder::IsInDictionary(std::string WordForm) const {
-    return m_pLemmatizer->IsInDictionary(WordForm, true);
+bool CMorphanHolder::IsInDictionaryUtf8(std::string w) const {
+    std::string s = convert_from_utf8(w.c_str(), m_pLemmatizer->GetLanguage());
+    return m_pLemmatizer->IsInDictionary(s, true);
 }
-
-
 
 const int ParagigmGroupsCount = 45;
 const std::string ParagigmGroups[ParagigmGroupsCount] = {
@@ -503,10 +495,11 @@ nlohmann::json GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorph
     return result;
 }
 
-std::string CMorphanHolder::LemmatizeJson(std::string WordForm, bool withParadigm, bool prettyJson, bool sortForms) const
+std::string CMorphanHolder::LemmatizeJson(std::string word_utf8, bool withParadigm, bool prettyJson, bool sortForms) const
 {
+    auto word = convert_from_utf8(word_utf8.c_str(), m_pLemmatizer->GetLanguage());
     std::vector<CFormInfo> Paradigms;
-    if (!GetParadigmCollection(WordForm, Paradigms))
+    if (!_GetParadigmCollection(word, Paradigms))
     {
         return "[]";
     };
@@ -517,17 +510,16 @@ std::string CMorphanHolder::LemmatizeJson(std::string WordForm, bool withParadig
     {
         result.push_back(GetStringByParadigmJson(&(p), this, withParadigm, sortForms));
     };
-    //ConvertToUtfRecursive(result, m_CurrentLanguage);
     return result.dump(prettyJson ? 1 : -1);
 }
 
 std::vector<CFuzzyResult> CMorphanHolder::CorrectMisspelledWordUtf8(std::string word_utf8) const {
     std::vector<CFuzzyResult> r;
-    auto word_s8 = convert_from_utf8(word_utf8.c_str(), m_CurrentLanguage);
-    if (IsInDictionary(word_s8)) {
+    if (IsInDictionaryUtf8(word_utf8)) {
         r.push_back({ word_utf8, 0});
     }
     else {
+        auto word_s8 = convert_from_utf8(word_utf8.c_str(), m_CurrentLanguage);
         r = m_pLemmatizer->CorrectMisspelledWord1(word_s8);
     }
     for (auto& a: r) {

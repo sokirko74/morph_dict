@@ -7,11 +7,15 @@
 #include "Paradigm.h"
 #include "Lemmatizers.h"
 
+
+// input and output strings in utf8
 class CMorphanHolder
 {
+	DwordVector _GetLemmaIds(bool bNorm, std::string& word_str, bool capital, bool bUsePrediction) const;
 protected:
 	std::string GetGrammems(const char* tab_str) const;
 	void CreateMorphDicts(MorphLanguageEnum langua);
+	bool _GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>& Paradigms) const;
 public:
 	MorphLanguageEnum				m_CurrentLanguage;
 	CAgramtab*						m_pGramTab;
@@ -24,12 +28,12 @@ public:
     void LoadLemmatizer(MorphLanguageEnum langua, std::string custom_folder="");
 	void DeleteProcessors();
 	DwordVector GetLemmaIds(std::string lemma) const;
+	DwordVector GetWordFormIds(std::string word_form) const;
 	std::string		id_to_string(long id) const;
-	CFormInfo		id_to_paradigm(long id) const;
 	std::string PrintMorphInfoUtf8(std::string Form, bool printIds, bool printForms, bool sortParadigms) const;
-	std::string LemmatizeJson(std::string WordForm, bool withParadigms, bool prettyJson=false, bool sortForms=false) const;
-	bool IsInDictionary(std::string WordForm) const;
+	std::string LemmatizeJson(std::string word_utf8, bool withParadigms, bool prettyJson=false, bool sortForms=false) const;
+	bool IsInDictionaryUtf8(std::string WordForm) const;
 	std::vector<CFuzzyResult> CorrectMisspelledWordUtf8(std::string word_utf8) const;
-	bool GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>& Paradigms) const;
+	
 };
 

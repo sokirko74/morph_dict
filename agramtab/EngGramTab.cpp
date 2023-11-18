@@ -168,7 +168,7 @@ bool CEngGramTab::is_morph_personal_pronoun (part_of_speech_mask_t poses, gramme
 	return		false;
 };
 
-bool CEngGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t poses) const
+bool CEngGramTab::IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const
 {
 	return false;
 }

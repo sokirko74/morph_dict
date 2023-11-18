@@ -226,7 +226,7 @@ public:
 
     bool is_morph_personal_pronoun(part_of_speech_mask_t poses, grammems_mask_t grammems) const override;
 
-    bool IsSimpleParticle(const char *lemma, part_of_speech_mask_t poses) const override;
+    bool IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const override;
 
     bool IsSynNoun(part_of_speech_mask_t poses, const char *Lemma) const override;
 

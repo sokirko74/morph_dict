@@ -109,7 +109,7 @@ int main(int argc, const char **argv) {
             auto word_s8 = convert_from_utf8(word.c_str(), language);
 		    std::string result;
             if (args.Exists("misspell")) {
-                if (Holder.IsInDictionary(word_s8)) {
+                if (Holder.IsInDictionaryUtf8(word)) {
                     result = "in dictionary\n";
                 }
                 else {
@@ -119,10 +119,10 @@ int main(int argc, const char **argv) {
                 }
             }
             else if (args.Exists("morphan")) {
-                result = Holder.LemmatizeJson(word_s8.c_str(), printForms, true, true);
+                result = Holder.LemmatizeJson(word.c_str(), printForms, true, true);
             }
             else {
-                result = Holder.PrintMorphInfoUtf8(word_s8, printIds, printForms, sortParadigms);
+                result = Holder.PrintMorphInfoUtf8(word, printIds, printForms, sortParadigms);
                 
             }
             args.GetOutputStream() << result << "\n";

@@ -264,7 +264,7 @@ typedef  uint64_t grammems_mask_t;
 
 enum RegisterEnum {AnyRegister=0, LowLow=1, UpLow=2, UpUp=3};
 
-extern size_t FindFloatingPoint(const char* str);
+extern size_t FindFloatingPoint(const std::string& s);
 
 inline std::string _R(const char* buffer) {
 	return convert_from_utf8(buffer, morphRussian);

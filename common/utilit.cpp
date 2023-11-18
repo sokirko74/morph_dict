@@ -1992,10 +1992,9 @@ std::string BuildRMLPath (const char* s)
 }
 
 
-size_t FindFloatingPoint(const char* str)
+size_t FindFloatingPoint(const std::string& s)
 {
-	if(!str || sizeof(str)<3) return -1;
-	std::string s(str);
+	if (s.length() < 3) return -1;
 	size_t c = s.rfind(",");
 	if (c == std::string::npos) 
 		c = s.rfind(".");
