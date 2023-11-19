@@ -112,8 +112,6 @@ public:
     */
     virtual bool IsStrongClauseRoot(const part_of_speech_mask_t poses) const = 0;
 
-    virtual bool is_month(const char *lemma) const = 0;
-
     virtual bool IsMorphNoun(part_of_speech_mask_t poses) const = 0;
 
     virtual bool is_morph_adj(part_of_speech_mask_t poses) const = 0;
@@ -140,7 +138,7 @@ public:
 
     virtual bool IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const = 0;
 
-    virtual bool IsSynNoun(part_of_speech_mask_t poses, const char *Lemma) const = 0;
+    virtual bool IsSynNoun(part_of_speech_mask_t poses, const std::string& lemma) const = 0;
 
     virtual bool IsStandardParamAbbr(const char *WordStrUpper) const = 0;
 

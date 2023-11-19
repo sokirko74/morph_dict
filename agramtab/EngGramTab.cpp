@@ -100,11 +100,6 @@ bool CEngGramTab::IsStrongClauseRoot(const part_of_speech_mask_t poses)  const
 };
 
 
-bool CEngGramTab::is_month (const char* lemma) const
-{
-	return false;
-};
-
 bool CEngGramTab::IsMorphNoun (part_of_speech_mask_t poses)  const
 {
 	return  false;
@@ -179,7 +174,7 @@ bool CEngGramTab::IsSimpleParticle(const std::string& lemma, part_of_speech_mask
 
 
 
-bool CEngGramTab::IsSynNoun(part_of_speech_mask_t poses, const char* Lemma) const
+bool CEngGramTab::IsSynNoun(part_of_speech_mask_t poses, const std::string& lemma) const
 {
 	return false;
 };

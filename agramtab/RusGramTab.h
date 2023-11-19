@@ -200,8 +200,6 @@ public:
 
     bool IsStrongClauseRoot(part_of_speech_mask_t poses) const override;
 
-    bool is_month(const char *lemma) const override;
-
     bool IsMorphNoun(part_of_speech_mask_t poses) const override;
 
     bool is_morph_adj(part_of_speech_mask_t poses) const override;
@@ -228,7 +226,7 @@ public:
 
     bool IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const override;
 
-    bool IsSynNoun(part_of_speech_mask_t poses, const char *Lemma) const override;
+    bool IsSynNoun(part_of_speech_mask_t poses, const std::string& lemma) const override;
 
     bool IsStandardParamAbbr(const char *WordStrUpper) const override;
 

@@ -555,19 +555,6 @@ bool CRusGramTab::IsStrongClauseRoot(const part_of_speech_mask_t poses) const
 		|| (poses & (1 << PREDK));
 };
 
-const static std::string months[] = { "ЯНВАРЬ", "ФЕВРАЛЬ", "МАРТ",
-			   "АПРЕЛЬ","МАЙ","ИЮНЬ",
-			   "ИЮЛЬ","АВГУСТ","СЕНТЯБРЬ"
-			   ,"ОКТЯБРЬ","НОЯБРЬ","ДЕКАБРЬ" };
-
-bool CRusGramTab::is_month(const char* lemma) const
-{
-	if (!lemma) return false;
-	for (size_t i = 0; i < 12; i++)
-		if (months[i] == lemma)
-			return true;
-	return false;
-}
 
 const static std::string SmallNumbers[] = { "ДВА","ТРИ","ЧЕТЫРЕ","ОБА","ПОЛТОРА" };
 
@@ -691,7 +678,7 @@ bool CRusGramTab::IsSimpleParticle(const std::string& lemma, part_of_speech_mask
 
 	1 марта 2001 года, Сокирко
 */
-bool CRusGramTab::IsSynNoun(part_of_speech_mask_t poses, const char* lemma) const
+bool CRusGramTab::IsSynNoun(part_of_speech_mask_t poses, const std::string& lemma) const
 {
 	return   IsMorphNoun(poses)
 		|| (poses & (1 << PRONOUN))

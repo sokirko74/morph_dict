@@ -17,6 +17,11 @@ set(my_SOURCES
 
 add_library(morphology_common  ${my_SOURCES})
 
+add_subdirectory(tests)
+
+
 target_link_libraries(morphology_common
     iconv_subset
 )
+
+
