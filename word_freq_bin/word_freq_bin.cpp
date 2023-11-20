@@ -196,7 +196,7 @@ int main(int argc, const char **argv) {
     init_plog(args.GetLogLevel(), "word_dat_bin.log");
 
     try {
-        MorphHolderRus.LoadLemmatizer(args.GetLanguage(), args.Retrieve("morph-folder"));
+        MorphHolderRus.LoadMorphology(args.GetLanguage(), args.Retrieve("morph-folder"));
         MorphHolderRus.m_pGramTab->SetUseNationalConstants(false);
         PLOGI << "morphology for " << GetStringByLanguage(MorphHolderRus.m_pGramTab->m_Language) << " loaded";
         if (loadDat(args.GetInputStream()))

@@ -122,7 +122,7 @@ float calc_precision(CMorphanHolder& holder, std::vector<TPredictItem>& base) {
 
 int main(int argc, const char **argv) {
     CMorphanHolder Holder;
-    Holder.LoadLemmatizer(morphRussian);
+    Holder.LoadMorphology(morphRussian);
     try {
         auto base = read_base(Holder, argv[1]);
         float prec = calc_precision(Holder, base);

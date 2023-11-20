@@ -33,49 +33,62 @@ void CMorphanHolder::DeleteProcessors()
 
 };
 
-void CMorphanHolder::CreateMorphDicts(MorphLanguageEnum langua) 
+void CMorphanHolder::LoadOnlyGramtab(MorphLanguageEnum langua, std::string custom_folder)
 {
-    if (langua == morphRussian)
-    {
-        m_pGramTab = new CRusGramTab;
-        m_pLemmatizer = new CLemmatizerRussian;
+    switch (langua) {
+    case morphRussian:
+    case morphFioDisclosures:
+        m_pGramTab = new CRusGramTab;;
+        break;
+    case morphGerman:
+        m_pGramTab = new CGerGramTab;
+        break;
+    case morphEnglish:
+        m_pGramTab = new CEngGramTab;
+        break;
+    default:
+        throw CExpc("unsupported language");
     }
-    else if (langua == morphFioDisclosures)
-    {
-        m_pGramTab = new CRusGramTab;
-        m_pLemmatizer = new CLemmatizer(morphFioDisclosures);
+
+    if (custom_folder.empty()) {
+        m_pGramTab->LoadFromRegistry();
     }
-    else
-        if (langua == morphGerman)
-        {
-            m_pGramTab = new CGerGramTab;
-            m_pLemmatizer = new CLemmatizerGerman;
-        }
-        else
-            if (langua == morphEnglish)
-            {
-                m_pGramTab = new CEngGramTab;
-                m_pLemmatizer = new CLemmatizerEnglish;
-            }
-            else
-            {
-                throw CExpc("unsupported language");
-            };
+    else {
+        m_pGramTab->ReadFromFolder(custom_folder);
+    }
 }
 
-void CMorphanHolder::LoadLemmatizer(MorphLanguageEnum langua, std::string custom_folder)
+void CMorphanHolder::LoadOnlyLemmatizer(MorphLanguageEnum langua, std::string custom_folder)
 {
-        DeleteProcessors();
-        CreateMorphDicts(langua);
-        if (custom_folder.empty()) {
-            m_pLemmatizer->LoadDictionariesRegistry();
-            m_pGramTab->LoadFromRegistry();
-        }
-        else {
-            m_pLemmatizer->LoadDictionariesFromPath(custom_folder);
-            m_pGramTab->ReadFromFolder(custom_folder);
-        }
-		m_CurrentLanguage = langua;
+    switch (langua) {
+    case morphRussian:
+        m_pLemmatizer = new CLemmatizerRussian;
+        break;
+    case morphFioDisclosures:
+        m_pLemmatizer = new CLemmatizer(morphFioDisclosures);
+        break;
+    case morphGerman:
+        m_pLemmatizer = new CLemmatizerGerman;
+        break;
+    case morphEnglish:
+        m_pLemmatizer = new CLemmatizerEnglish;
+        break;
+    default:
+        throw CExpc("unsupported language");
+    }
+    if (custom_folder.empty()) {
+        m_pLemmatizer->LoadDictionariesRegistry();
+    }
+    else {
+        m_pLemmatizer->LoadDictionariesFromPath(custom_folder);
+    }
+}
+
+void CMorphanHolder::LoadMorphology(MorphLanguageEnum langua, std::string custom_folder)
+{
+    m_CurrentLanguage = langua;
+    LoadOnlyLemmatizer(langua, custom_folder);
+    LoadOnlyGramtab(langua, custom_folder);
 }
 
 DwordVector CMorphanHolder::_GetLemmaIds(bool bNorm, std::string& word_str, bool capital, bool bUsePrediction) const {

@@ -14,7 +14,6 @@ class CMorphanHolder
 	DwordVector _GetLemmaIds(bool bNorm, std::string& word_str, bool capital, bool bUsePrediction) const;
 protected:
 	std::string GetGrammems(const char* tab_str) const;
-	void CreateMorphDicts(MorphLanguageEnum langua);
 	bool _GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>& Paradigms) const;
 public:
 	MorphLanguageEnum				m_CurrentLanguage;
@@ -25,7 +24,10 @@ public:
 	CMorphanHolder();
 	~CMorphanHolder();
 
-    void LoadLemmatizer(MorphLanguageEnum langua, std::string custom_folder="");
+    void LoadMorphology(MorphLanguageEnum langua, std::string custom_folder="");
+	void LoadOnlyLemmatizer(MorphLanguageEnum langua, std::string custom_folder="");
+	void LoadOnlyGramtab(MorphLanguageEnum langua, std::string custom_folder = "");
+
 	void DeleteProcessors();
 	DwordVector GetLemmaIds(std::string lemma) const;
 	DwordVector GetWordFormIds(std::string word_form) const;

@@ -88,9 +88,9 @@ int main(int argc, const char **argv) {
    
     try {
         if (args.Exists("morph-folder")) {
-            Holder.LoadLemmatizer(language, args.Retrieve("morph-folder"));
+            Holder.LoadMorphology(language, args.Retrieve("morph-folder"));
         } else {
-            Holder.LoadLemmatizer(language);
+            Holder.LoadMorphology(language);
         }
 
         if (args.Exists("speed-test")) {

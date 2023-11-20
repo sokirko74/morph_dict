@@ -202,7 +202,7 @@ int main(int argc, const char** argv) {
     initArgParser(argc, argv, args);
     init_plog(args.GetLogLevel(), "stat_dat_bin.log");
     try {
-        MorphHolder.LoadLemmatizer(args.GetLanguage(), args.Retrieve("morph-folder"));
+        MorphHolder.LoadMorphology(args.GetLanguage(), args.Retrieve("morph-folder"));
 
         loadDat(args.GetInputStream(), args.GetLanguage());
 

@@ -34,7 +34,7 @@ TEST_CASE("lemmatize_Russian_word") {
 	R.BuildLemmatizer(MakePath(folder, "project.mwz"), true, 5, 3, folder);
 
 	CMorphanHolder Holder;
-	Holder.LoadLemmatizer(morphRussian, folder);
+	Holder.LoadMorphology(morphRussian, folder);
 
 	auto word = "дума";
 	std::string test = Holder.PrintMorphInfoUtf8(word, false, false, true);
@@ -72,7 +72,7 @@ TEST_CASE("misspell_Russian_word") {
 	R.BuildLemmatizer(MakePath(folder, "project.mwz"), true, -1, -1, folder);
 
 	CMorphanHolder holder;
-	holder.LoadLemmatizer(morphFioDisclosures, folder);
+	holder.LoadMorphology(morphFioDisclosures, folder);
 
 	Misspell(holder, "сакирко_а_в", "СОКИРКО_А_В");
 	Misspell(holder, "сакурко_а_в", "СОКИРКО_А_В");
