@@ -47,15 +47,6 @@ class MorphoWizard : public CMorphWizardBase
     void _find_lemm_by_regex(std::string pattern, bool bCheckLemmaPrefix, std::vector<lemma_iterator_t>& res);
 
 public:
-    struct AncodeLess
-    {
-        const CAgramtab* m_pGramTab;
-        void init(const CAgramtab* pGramTab);
-        bool operator()(const std::string& s1, const std::string& s2)const;
-    };
-    AncodeLess ancode_less;
-
-
 
     std::vector<std::set<std::string> >	m_PrefixSets;
     TLemmaPredictor m_Predictor;
@@ -126,19 +117,17 @@ public:
     //============ Main functions for editing dictionary ====================
     // Mrd -> Slf (Converting from dictionary to text representation)
     std::string	mrd_to_slf(const std::string& lemm, const CFlexiaModel& p, uint16_t AccentModelNo, BYTE AuxAccent, int line_size) const;
-    // Slf -> Mrd (Converting from text to dictionary representation)
-    void	slf_to_mrd(const std::string& s, std::string& lemm, CFlexiaModel& FlexiaModel, CAccentModel& AccentModel, BYTE& AuxAccent, int& line_no_err) const;
     void	check_paradigm(long line_no);
     void	remove_lemm(lemma_iterator_t it);
     std::string	get_slf_string(lemma_iterator_t it, std::string& dict, std::string& Prefixes, int line_size = 79);
     void	get_wordforms(const_lemma_iterator_t it, StringVector& forms) const;
     CParadigmInfo	add_lemma_to_dict(const std::string& slf, std::string common_grammems, const std::string& prefixes, int& line_no_err, uint16_t SessionNo = UnknownSessionNo);
+    void   check_slf(const std::string& slf, int& line_no_err) const;
     void	set_to_delete_false();
     void	delete_checked_lemms();
     bool	change_prd_info(CParadigmInfo& I, const std::string& Lemma, uint16_t NewParadigmNo, uint16_t newAccentModelNo, bool keepOldAccents);
     std::string	show_differences_in_two_paradigms(uint16_t FlexiaModelNo1, uint16_t FlexiaModelNo2) const;
 
-    bool	slf2ancode(const std::string slf_line, std::string& gramcode) const;
     bool	check_common_grammems(std::string common_grammems) const;
     bool	check_prefixes(std::string prefixes) const;
     bool	attach_form_prefixes_to_bases();
@@ -181,4 +170,3 @@ private:
 
 
 extern BYTE  MapReverseVowelNoToCharNo(const std::string& form, BYTE AccentCharNo, MorphLanguageEnum Language);
-

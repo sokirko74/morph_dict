@@ -22,7 +22,7 @@ add_library(morph_wizard_lib
         "accent_model.cpp"
         "accent_model.h"
         "paradigm_consts.h"
-)
+        "parse_slf.cpp")
 
 target_link_libraries(morph_wizard_lib
     AgramtabLib

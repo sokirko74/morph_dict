@@ -188,6 +188,19 @@ bool CAgramtab::GetGramCodeByGrammemsAndPartofSpeechIfCan(part_of_speech_t Pos, 
     return false;
 };
 
+std::string CAgramtab::GetFirstAncodeByPattern(const std::string& slf) const{
+    // todo optimize me to make morphwizard faster
+    part_of_speech_t pos;
+    grammems_mask_t gra;
+    std::string gramcode;
+    if (   ProcessPOSAndGrammemsIfCan(slf.c_str(), &pos, &gra)
+        && GetGramCodeByGrammemsAndPartofSpeechIfCan(pos, gra, gramcode)
+        )
+        return gramcode;
+    return "";
+
+}
+
 bool CAgramtab::CheckGramCode(const char* gram_code) const
 {
     if (gram_code == 0) return true;

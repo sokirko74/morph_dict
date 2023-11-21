@@ -334,3 +334,4 @@ extern bool IsUnicodeUpperGermanVowel(uint32_t u);
 extern bool IsUnicodeUpperEnglishVowel(uint32_t u);
 extern bool IsUnicodeUpperRussianVowel(uint32_t u);
 extern uint32_t GetFirstUnicodeLetterFromUtf8(const std::string& s);
+extern bool IsUpperVowel(uint32_t u);

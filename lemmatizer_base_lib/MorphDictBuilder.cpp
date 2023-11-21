@@ -293,9 +293,7 @@ void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russia
 	{
 		auto opt_path = std::filesystem::path(output_folder) / OPTIONS_FILE;
 		LOGI << "writing options file " << opt_path;
-		std::ofstream file(opt_path);
-		file << dump_rapidjson_pretty(opts);
-			file.close();
+		opts.dump_rapidjson_pretty(opt_path.string());
 	}
 
 	{

@@ -198,5 +198,6 @@ public:
 
     void SetUseNationalConstants(bool value);
 
+    std::string GetFirstAncodeByPattern(const std::string& slf) const;
 
 };

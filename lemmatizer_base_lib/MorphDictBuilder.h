@@ -31,7 +31,7 @@ class CMorphDictBuilder : public CMorphDict
 	void	CreateAutomat(const MorphoWizard& Wizard);
 	void	GenerateLemmas(const MorphoWizard& Wizard);
 	void	GenerateUnitedFlexModels(const MorphoWizard& Wizard);
-	bool	GenPredictIdx(const MorphoWizard& wizard, int PostfixLength, int MinFreq, std::string path, rapidjson::Document& output_opts);
+	bool	GenPredictIdx(const MorphoWizard& wizard, int PostfixLength, int MinFreq, std::string path, CJsonObject& output_opts);
 
 
 public:

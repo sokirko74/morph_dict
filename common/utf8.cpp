@@ -8338,6 +8338,10 @@ bool IsUnicodeUpperRussianVowel(uint32_t u) {
 	}
 }
 
+bool IsUpperVowel(uint32_t u) {
+	return IsUnicodeUpperRussianVowel(u) || IsUnicodeUpperGermanVowel(u) || IsUnicodeUpperEnglishVowel(u);
+}
+
 uint32_t GetFirstUnicodeLetterFromUtf8 (const std::string& s) {
 	if (s.empty()) {
 		return 0;

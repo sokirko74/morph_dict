@@ -101,7 +101,7 @@ void MorphoWizard::load_gramtab(bool useNationalConstants) {
     };
     sort(m_TypeGrammemsList.begin(), m_TypeGrammemsList.end());
 
-    ancode_less.init(m_pGramTab);
+    
 
 };
 
@@ -861,215 +861,6 @@ void MorphoWizard::get_wordforms(const_lemma_iterator_t it, StringVector& forms)
 }
 
 
-bool MorphoWizard::slf2ancode(const std::string slf_line, std::string& gramcode) const {
-    BYTE pos;
-    uint64_t gra;
-
-    if (!m_pGramTab->ProcessPOSAndGrammemsIfCan(slf_line.c_str(), &pos, &gra)
-        || !m_pGramTab->GetGramCodeByGrammemsAndPartofSpeechIfCan(pos, gra, gramcode)
-        )
-        return false;
-    return true;
-};
-
-
-struct CSlfLineByAncode {
-    std::string m_Form;
-    BYTE m_AccentByte;
-    std::string m_Prefix;
-};
-
-
-//----------------------------------------------------------------------------
-// при добавлении парадигмы производится сортировка сначала по граммемам, 
-//		при совпадающих граммемах - по формам,
-//		при совпадающих формах - по ударениям
-// изменено Кецарисом [12/Apr/2004]
-//----------------------------------------------------------------------------
-struct CSlfLineByAncodeLess {
-    bool operator()(const CSlfLineByAncode& s1, const CSlfLineByAncode& s2) const {
-        int c = s1.m_Form.compare(s2.m_Form);
-        if (c != 0) return c < 0;
-        c = s1.m_Prefix.compare(s2.m_Prefix);
-        if (c != 0) return c < 0;
-        return s1.m_AccentByte < s2.m_AccentByte;
-    }
-};
-
-void MorphoWizard::slf_to_mrd(const std::string& s, std::string& lemm, CFlexiaModel& FlexiaModel, CAccentModel& AccentModel,
-    BYTE& AuxAccent, int& line_no_err) const {
-
-    StringTokenizer lines(s.c_str(), "\r\n");
-
-    std::string lemm_gramcode;
-    typedef std::set<CSlfLineByAncode, CSlfLineByAncodeLess> SlfLineSet;
-    typedef std::map<std::string, SlfLineSet, AncodeLess> Gramcode2SlfLineMap;
-    Gramcode2SlfLineMap Paradigm(ancode_less);
-    size_t CommonLeftPartSize = lemm.size();
-    BYTE LemmaAccentByte;
-    AuxAccent = UnknownAccent;
-
-    StringSet TestForFullDublicates;
-
-    //  going through all lines of slf-representation,
-    // building all pairs <wordform, gramcode>
-    line_no_err = 0;
-    int start = 0;
-    do {
-        line_no_err++;
-
-        std::string line;
-        {
-            size_t end = s.find("\n", start);
-            if (end == std::string::npos) {
-                // no last eoln
-                line = s.substr(start);
-                start = (int)s.length();
-            }
-            else {
-                line = s.substr(start, end - start);
-                start = (int)end + 1;
-            }
-        }
-
-        Trim(line);
-        if (line.empty()) continue;
-
-        if (TestForFullDublicates.find(line) == TestForFullDublicates.end())
-            TestForFullDublicates.insert(line);
-        else
-            continue;
-
-        std::string form;
-        StringTokenizer tok(line.c_str(), "\t \r");
-        if (!tok()) throw CExpc("Error! Cannot find a word form");
-        form = tok.val();
-        if (form.empty()) throw CExpc("Error! Empty word form");
-
-        std::string pos_and_grammems;
-        if (!tok()) throw CExpc("Error! Cannot find part of speech");
-        pos_and_grammems = tok.val();
-        if (tok()) pos_and_grammems += std::string(" ") + tok.val();
-
-        if (pos_and_grammems.empty())
-            throw CExpc("Error! No morphological annotation");
-
-        if (tok())
-            throw CExpc("Error! Unparsed chars at the end of the line");
-
-        std::string gramcode;
-        if (!slf2ancode(pos_and_grammems, gramcode))
-            throw CExpc("Error! Wrong morphological annotation(%s)", pos_and_grammems.c_str());
-
-
-        BYTE AccentByte = UnknownAccent;
-        size_t CountOfAccents = 0;
-        size_t CountOfVowels = 0;
-
-        for (int k = (int)form.length() - 1; k >= 0; k--) {
-            if (is_lower_vowel((BYTE)form[k], m_Language))
-                CountOfVowels++;
-
-            if (form[k] == '\'') {
-                CountOfAccents++;
-                if (CountOfAccents > 2)
-                    throw CExpc("Error! Too many stresses!");
-                if ((k == 0)
-                    || !is_lower_vowel((BYTE)form[k - 1], m_Language)
-                    )
-                    throw CExpc("A stress should be put on a vowel ");
-                //  we should determine the auxiliary accent, which is permanent for all word forms that's  why
-                // we can read it from the first line, but it should differ from the main accent
-                // So it should be something like this "aaaAaaaMaaa", where A is the auxiliary
-                //  stress, and M  is the main stress.
-                if (AccentByte == UnknownAccent)
-                    AccentByte = (BYTE)CountOfVowels;
-                else {
-                    if (AuxAccent != UnknownAccent) {
-                        if (AuxAccent != k - 1)
-                            throw CExpc("Auxiliary stress should be on the same position");
-                    }
-                    else
-                        AuxAccent = k - 1;
-                };
-                form.erase(k, 1);
-            };
-
-        };
-
-
-        MakeUpperUtf8(form);
-        std::string Prefix;
-        size_t PrefixInd = form.find("|");
-        if (PrefixInd != std::string::npos) {
-            Prefix = form.substr(0, PrefixInd);
-            form.erase(0, PrefixInd + 1);
-        };
-
-
-        if (line_no_err == 1) {
-            lemm = form;
-            lemm_gramcode = gramcode;
-            LemmaAccentByte = AccentByte;
-            CommonLeftPartSize = form.length();
-        }
-        else {
-            CSlfLineByAncode Line;
-            Line.m_AccentByte = AccentByte;
-            Line.m_Form = form;
-            Line.m_Prefix = Prefix;
-
-            SlfLineSet slfset;
-            slfset.insert(Line);
-            std::pair<Gramcode2SlfLineMap::iterator, bool> p = Paradigm.insert(std::make_pair(gramcode, slfset));
-            if (!p.second) {
-                p.first->second.insert(Line);
-            }
-
-            //  calculating the common left part  of  all wordforms
-            size_t i = 0;
-            for (; i < std::min(CommonLeftPartSize, form.length()); i++)
-                if (form[i] != lemm[i])
-                    break;
-
-            CommonLeftPartSize = i;
-        };
-    } while (start < s.length());
-
-
-    if (lemm.empty())
-        throw CExpc("Error! Empty paradigm");
-
-    FlexiaModel.m_Flexia.clear();
-    AccentModel.m_Accents.clear();
-
-    //  adding lemma, it should be always at the first position
-    FlexiaModel.m_Flexia.push_back(CMorphForm(lemm_gramcode, lemm.substr(CommonLeftPartSize), ""));
-    AccentModel.m_Accents.push_back(LemmaAccentByte);
-
-    //  adding the rest paradigm ordered by ancode
-    for (Gramcode2SlfLineMap::const_iterator pit = Paradigm.begin(); pit != Paradigm.end(); pit++) {
-        const SlfLineSet& slf_set = pit->second;
-        std::string Gramcode = pit->first;
-        for (SlfLineSet::const_iterator it = slf_set.begin(); it != slf_set.end(); it++) {
-            std::string Flexia = it->m_Form.substr(CommonLeftPartSize);
-            BYTE AccentByte = it->m_AccentByte;
-            std::string Prefix = it->m_Prefix;
-            FlexiaModel.m_Flexia.push_back(CMorphForm(Gramcode, Flexia, Prefix));
-            AccentModel.m_Accents.push_back(AccentByte);
-        }
-    };
-
-}
-
-void MorphoWizard::AncodeLess::init(const CAgramtab* pGramTab) {
-    m_pGramTab = pGramTab;
-}
-
-bool MorphoWizard::AncodeLess::operator()(const std::string& s1, const std::string& s2) const {
-    return m_pGramTab->GetSourceLineNo(s1.c_str()) < m_pGramTab->GetSourceLineNo(s2.c_str());
-}
-
 std::string MorphoWizard::GetUserName() const {
     if (m_Sessions.empty())
         return "guest";
@@ -1152,6 +943,8 @@ uint16_t MorphoWizard::AddPrefixSet(std::string PrefixSetStr) {
     return Result;
 }
 
+extern void parse_slf(const CAgramtab* gramtab, const std::string& s, std::string& lemm, CFlexiaModel& FlexiaModel, CAccentModel& AccentModel, BYTE& AuxAccent, int& line_no_err);
+
 CParadigmInfo
 MorphoWizard::add_lemma_to_dict(const std::string& slf, std::string common_grammems, const std::string& prefixes, int& line_no_err,
     uint16_t SessionNo) {
@@ -1159,12 +952,14 @@ MorphoWizard::add_lemma_to_dict(const std::string& slf, std::string common_gramm
     CFlexiaModel FlexiaModel;
     CAccentModel AccentModel;
     BYTE AuxAccent;
-    slf_to_mrd(slf, lemm, FlexiaModel, AccentModel, AuxAccent, line_no_err);
+    parse_slf(m_pGramTab, slf, lemm, FlexiaModel, AccentModel, AuxAccent, line_no_err);
 
     std::string common_gramcode;
-    if (!common_grammems.empty())
-        if (!slf2ancode("* " + common_grammems, common_gramcode))
+    if (!common_grammems.empty()) {
+        common_gramcode = m_pGramTab->GetFirstAncodeByPattern("* " + common_grammems);
+        if (common_gramcode.empty())
             throw CExpc(Format("Wrong common grammems  \"%s\"", common_grammems.c_str()));
+    }
 
 
     uint16_t ParadigmNo = AddFlexiaModel(*this, FlexiaModel);
@@ -1181,6 +976,13 @@ MorphoWizard::add_lemma_to_dict(const std::string& slf, std::string common_gramm
     return NewInfo;
 }
 
+void MorphoWizard::check_slf(const std::string& slf, int& line_no_err) const {
+    std::string d1;
+    CFlexiaModel d2;
+    CAccentModel d3;
+    BYTE d4;
+    parse_slf(m_pGramTab, slf, d1, d2, d3, d4, line_no_err);
+}
 //----------------------------------------------------------------------------
 void MorphoWizard::set_to_delete_false() {
     for (lemma_iterator_t i1 = m_LemmaToParadigm.begin(); i1 != m_LemmaToParadigm.end(); ++i1) {
@@ -1465,9 +1267,7 @@ std::string MorphoWizard::show_differences_in_two_paradigms(uint16_t FlexiaModel
 //----------------------------------------------------------------------------
 bool MorphoWizard::check_common_grammems(std::string common_grammems) const {
     Trim(common_grammems);
-    if (common_grammems.empty()) return true;
-    std::string common_ancode;
-    return slf2ancode("* " + common_grammems, common_ancode);
+    return common_grammems.empty() || !m_pGramTab->GetFirstAncodeByPattern("* " + common_grammems).empty();
 }
 
 //----------------------------------------------------------------------------

@@ -48,7 +48,7 @@ TEST_CASE("slf_accented") {
 	auto w = wizard.find_lemm(form, false);
 	CHECK(1 == w.size());
 	auto accented = wizard.get_lemm_string_with_accents(w[0]);
-
+	CHECK("ударе'ние" == accented);
 }
 
 TEST_CASE("mrd_serialization") {

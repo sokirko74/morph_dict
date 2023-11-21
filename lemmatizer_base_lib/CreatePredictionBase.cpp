@@ -143,7 +143,7 @@ struct IsLessByModelNoAndBase
 
 const size_t MinimalFlexiaModelFrequence = 10;
 
-bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLength, int MinFreq, std::string path, rapidjson::Document& output_opts)
+bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLength, int MinFreq, std::string path, CJsonObject& output_opts)
 {
 	LOGI << "CMorphDictBuilder::GenPredictIdx";
 	DwordVector ModelFreq(wizard.m_FlexiaModels.size(), 0);
@@ -212,7 +212,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 		if (base + paradigm.get_first_flex() == plug_noun)
 		{
 			PlugLemmaInfoNo = (int)lin;
-			output_opts.AddMember("PlugNounGramCode",  rapidjson::StringRef(paradigm.get_first_code()), output_opts.GetAllocator());
+			output_opts.add_member("PlugNounGramCode",  paradigm.get_first_code());
 			continue;
 		};
 
