@@ -36,7 +36,7 @@ TEST_CASE("lemmatize_Russian_word") {
 	CMorphanHolder Holder;
 	Holder.LoadMorphology(morphRussian, folder);
 
-	auto word = "дума";
+	std::string word = "дума";
 	std::string test = Holder.PrintMorphInfoUtf8(word, false, false, true);
 	std::string canon = "+ ДУМА С нп,нс ср,жр,мр,пр,тв,вн,дт,рд,им,ед,мн\n"
 		"\t+ ДУМА С пе,нс ср,жр,мр,пр,тв,вн,дт,рд,им,ед,мн\n";

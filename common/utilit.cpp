@@ -1792,15 +1792,15 @@ void CMyTimeSpanHolder::ClearTimers()
 };
 
 
-bool LoadFileToString(std::string FileName, std::string& Result)
+std::string LoadFileToString(std::string path)
 {
-	if ( access(FileName.c_str(), 4) != 0) return false;
-
-
-	std::vector<char> V;
-	ReadVector(FileName,V);
-	Result = std::string (V.begin(), V.end());
-	return true;
+	std::ifstream t(path);
+	if (!t.good()) {
+		throw CExpc("cannot read file %s", path.c_str());
+	}
+	std::stringstream buffer;
+	buffer << t.rdbuf();
+	return buffer.str();
 };
 
 bool is_pseudo_graph(BYTE x)

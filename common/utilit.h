@@ -128,7 +128,7 @@ extern std::string	Format( const char* format, ... );
 extern std::string&  TrimLeft (std::string& str);
 extern std::string&  TrimRight (std::string& str);
 extern std::string&	Trim (std::string& str);
-extern bool		LoadFileToString(std::string FileName, std::string& Result);
+extern std::string LoadFileToString(std::string path);
 
 const int	UnknownSyntaxElement = 0xffff;
 typedef enum {DontKillHomonyms = 0, CoverageKillHomonyms = 1} KillHomonymsEnum;

@@ -28,4 +28,4 @@ target_link_libraries(morph_wizard_lib
     AgramtabLib
 )
 
-#add_subdirectory(scripts/read_mrd)
+add_subdirectory (tests)

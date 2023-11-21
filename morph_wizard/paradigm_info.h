@@ -21,7 +21,7 @@ struct CParadigmInfo : public CLemmaInfo
 
     CParadigmInfo	AnyParadigmInfo();
     bool	IsAnyEqual(const CParadigmInfo& X) const;
-    nlohmann::json GetJson(const std::string& lemma) const;
-    CParadigmInfo& FromJson(nlohmann::json inj);
+    void GetJson(const std::string& lemma, CJsonObject& out) const;
+    CParadigmInfo& FromJson(const rapidjson::Value& inj);
 };
 

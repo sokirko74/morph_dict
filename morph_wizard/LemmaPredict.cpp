@@ -71,7 +71,7 @@ void TLemmaPredictor::CreateIndex() {
         S.m_pWizard = m_pWizard;
         S.m_FlexiaModelNo = value.m_FlexiaModelNo;
         S.m_SourceLemmaAncode = p.get_first_code();
-        S.m_SourceCommonAncode = value.GetCommonAncodeIfCan();
+        S.m_SourceCommonAncode = value.GetCommonAncodeCopy();
         S.m_SourceLemma = lemma;
         S.m_PrefixSetStr = m_pWizard->get_prefix_set(value);
         S.m_Frequence = 1;

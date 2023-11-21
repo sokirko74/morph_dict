@@ -19,19 +19,24 @@ bool CMorphSession::IsEmpty() const {
     return m_UserName.empty();
 };
 
-nlohmann::json CMorphSession::GetJson() const {
-    return {
-        {"user", m_UserName},
-        {"start", m_SessionStart},
-        {"last_save", m_LastSessionSave}
-    };
+void CMorphSession::GetJson(CJsonObject& out) const {
+    out.add_member("user", m_UserName);
+    out.add_member("start", m_SessionStart);
+    out.add_member("last_save", m_LastSessionSave);
 };
 
-CMorphSession& CMorphSession::FromJson(nlohmann::json inj) {
-    m_UserName = inj["user"];
-    m_SessionStart = inj["start"];
-    m_LastSessionSave = inj["last_save"];
+CMorphSession& CMorphSession::FromJson(const rapidjson::Value& inj) {
+    m_UserName = inj["user"].GetString();
+    m_SessionStart = inj["start"].GetString();
+    m_LastSessionSave = inj["last_save"].GetString();
     return *this;
+}
+
+std::string CMorphSession::GetJsonStr() const {
+    rapidjson::Document d(rapidjson::kObjectType);
+    CJsonObject v(d, d);
+    GetJson(v);
+    return v.dump_rapidjson();
 }
 
 
@@ -121,8 +126,9 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
             else {
                 std::string s = s.substr(ind + 1);
                 Trim(s);
-                auto js = nlohmann::json::parse(s);
-                m_Session.FromJson(s);
+                rapidjson::Document d;
+                auto& js = d.Parse(s.c_str());
+                m_Session.FromJson(js);
             };
             continue;
         };
@@ -144,7 +150,7 @@ std::string CDumpParadigm::ToStringUtf8() const {
     if (!m_TypeGrammemsStr.empty())
         outp << TypeGrmField << " = " << m_TypeGrammemsStr << "\n";
     if (!m_Session.IsEmpty())
-        outp << SessionField << " = " << m_Session.GetJson().dump() << "\n";
+        outp << SessionField << " = " << m_Session.GetJsonStr() << "\n";
     outp << m_SlfStr;
     return convert_to_utf8(outp.str(), m_pWizard->m_Language);
 };

@@ -102,7 +102,7 @@ void  CMorphDictBuilder::GenerateUnitedFlexModels(const MorphoWizard& Wizard)
 
 		if ( p.m_Flexia.size() >=  MaxNumberFormsInOneParadigm)
 		{
-			throw CExpc ("Error: flexia %s contains more than %i forms. !\n", p.ToJson().dump().c_str(), MaxNumberFormsInOneParadigm);
+			throw CExpc ("Error: flexia %s contains more than %i forms. !", p.ToString().c_str(), MaxNumberFormsInOneParadigm);
 		};
 
 		for (size_t i=0; i <p.m_Flexia.size(); i++)
@@ -240,27 +240,34 @@ void  CMorphDictBuilder::CreateAutomat(const MorphoWizard& Wizard)
 	GetFormBuilder()->ConvertBuildRelationsToRelations();
 };
 
+void create_options(CJsonObject& opts, bool allow_russian_jo, int postfix_len, int min_freq) {
+	opts.add_member("AllowRussianJo", allow_russian_jo);
 
-void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russian_jo, int postfix_len, int min_freq, std::string output_folder) {
-	nlohmann::json opts;
-	opts["AllowRussianJo"] = allow_russian_jo;
-	opts["SkipPredictBase"] = false;
+	bool skip_predict = false;
 	if (postfix_len == -1 || min_freq == -1) {
 		LOGI << "skip prediction base generation ";
-		opts["SkipPredictBase"] = true;
+		skip_predict = true;
 	}
 	else {
 		if (!(0 < postfix_len <= 5))
 		{
-			throw CExpc ("postfix_len should be between 1 and 5");
+			throw CExpc("postfix_len should be between 1 and 5");
 		};
 		if (min_freq <= 0) {
 			throw CExpc("MinFreq should be more than 0");
 		};
 	}
+	opts.add_member("SkipPredictBase", skip_predict);
+}
+
+void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russian_jo, int postfix_len, int min_freq, std::string output_folder) {
+	rapidjson::Document d_opts(rapidjson::kObjectType);
+	CJsonObject opts(d_opts);
+
+	create_options(opts, allow_russian_jo, postfix_len, min_freq);
 
 	MorphoWizard wizard;
-	wizard.load_wizard(mwz_path.c_str(), "guest", false);
+	wizard.load_wizard(mwz_path.c_str(), "guest", false, true, true);
 	m_Language = wizard.m_Language;
 	InitAutomat(new CMorphAutomatBuilder(m_Language, MorphAnnotChar));
 	if (!allow_russian_jo)
@@ -275,7 +282,7 @@ void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russia
 		auto outFileName = std::filesystem::path(output_folder) / MORPH_MAIN_FILES;
 		Save(outFileName.string());
 		LOGI << "Successful written indices of the main automat to " << outFileName << std::endl;
-		if (!opts["SkipPredictBase"]) {
+		if (!opts.get_value()["SkipPredictBase"].GetBool()) {
 			if (!GenPredictIdx(wizard, postfix_len, min_freq, output_folder, opts))
 			{
 				throw CExpc("Cannot create prediction base");
@@ -287,8 +294,8 @@ void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russia
 		auto opt_path = std::filesystem::path(output_folder) / OPTIONS_FILE;
 		LOGI << "writing options file " << opt_path;
 		std::ofstream file(opt_path);
-		file << opts.dump(4);
-		file.close();
+		file << dump_rapidjson_pretty(opts);
+			file.close();
 	}
 
 	{

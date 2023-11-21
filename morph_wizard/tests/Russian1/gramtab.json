@@ -1,0 +1,62 @@
+{
+  "plug_noun_gram_code": "zz",
+  "inanim_indecl_noun": "MM",
+  "mas_abbr_noun": "Lv",
+  "gramcodes": {
+    "Lu": {
+      "p": "",
+      "g": [
+        "imperf",
+        "trans"
+      ],
+      "f": 0,
+      "l": "ДЕЛАТЬ"
+    },
+    "Lv": {
+      "p": "",
+      "g": [
+        "imperf",
+        "intrans"
+      ],
+      "f": 0,
+      "l": "БЕЖАТЬ"
+    },
+    "MM": {
+      "p": "",
+      "g": [
+        "inanim"
+      ],
+      "f": 0
+    },
+    "aa": {
+      "p": "N",
+      "g": [
+        "sg"
+       ]
+     },
+    "ab": {
+      "p": "N",
+      "g": [
+        "pl"
+       ]
+     },
+    "zz": {
+      "p": "N",
+      "g": [
+        "mas",
+        "fem",
+        "neu",
+        "sg",
+        "pl",
+        "nom",
+        "gen",
+        "dat",
+        "acc",
+        "ins",
+        "prp"
+      ],
+      "f": 2,
+      "l": "НЕУБИВАЙМЕНЯ"
+    }
+  }
+}

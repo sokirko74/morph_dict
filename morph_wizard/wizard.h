@@ -24,7 +24,8 @@ class MorphWizardMeter;
 class MorphoWizard : public CMorphWizardBase
 {
 
-    bool			m_bWasChanged;
+    bool m_bWasChanged;
+    bool m_bUseUtf8;
 
     StringVector  m_PosesList;
     StringVector  m_GrammemsList;
@@ -39,10 +40,11 @@ class MorphoWizard : public CMorphWizardBase
     MorphWizardMeter* m_pMeter;	// Nick 30.11.2003
 
     void load_gramtab(bool useNationalConstants);
-    nlohmann::json GetPrefixSetsJson() const;
-    nlohmann::json GetSessionsJson() const;
-    nlohmann::json GetLemmsJson() const;
-    void	load_mrd_json(bool guest, bool bCreatePrediction);
+    void SavePrefixSetsToJson(CJsonObject& out) const;
+    void SaveSessionsToJson(CJsonObject& out) const;
+    void SaveLemmsToJson(CJsonObject& out) const;
+    void load_mrd_json(bool guest, bool bCreatePrediction);
+    void _find_lemm_by_regex(std::string pattern, bool bCheckLemmaPrefix, std::vector<lemma_iterator_t>& res);
 
 public:
     struct AncodeLess
@@ -81,7 +83,7 @@ public:
     ~MorphoWizard();
 
     //=================  general: loading, saving, logging ======================
-    void	load_wizard(std::string path, std::string user_name, bool bCreatePrediction = true, bool useNationalConstants=true);
+    void	load_wizard(std::string path, std::string user_name, bool bCreatePrediction = true, bool useNationalConstants=true, bool convert_to_s8_encoding=false);
     void	log_lemma(const std::string& lemm, const CFlexiaModel& p, bool is_added) const;
     bool	is_changed() { return m_bWasChanged; }
     void	save_mrd();
@@ -112,10 +114,9 @@ public:
 
     //  ===========   find procedures ================
     void find_lemm_by_grammem(const std::string& pos_and_grammems, std::vector<lemma_iterator_t>& res);
-    void find_lemm(std::string lemm, bool bCheckLemmaPrefix, std::vector<lemma_iterator_t>& res);
-    void find_lemm_by_regex(std::string pattern, bool bCheckLemmaPrefix, std::vector<lemma_iterator_t>& res);
+    std::vector<lemma_iterator_t> find_lemm(std::string lemm, bool bCheckLemmaPrefix);
     void find_lemm_by_user(std::string username, std::vector<lemma_iterator_t>& res);
-    void find_wordforms(std::string lemm, std::vector<lemma_iterator_t>& res);
+    std::vector<lemma_iterator_t> find_wordforms(std::string lemm);
     void find_ancodes(const std::string& ancode, std::vector<lemma_iterator_t>& res);
     void find_lemm_by_prdno(uint16_t no, std::vector<lemma_iterator_t>& res);
     void find_lemm_by_accent_model(int no, std::vector<lemma_iterator_t>& res);
@@ -131,7 +132,7 @@ public:
     void	remove_lemm(lemma_iterator_t it);
     std::string	get_slf_string(lemma_iterator_t it, std::string& dict, std::string& Prefixes, int line_size = 79);
     void	get_wordforms(const_lemma_iterator_t it, StringVector& forms) const;
-    CParadigmInfo	add_lemma(const std::string& slf, std::string common_grammems, const std::string& prefixes, int& line_no_err, uint16_t SessionNo = UnknownSessionNo);
+    CParadigmInfo	add_lemma_to_dict(const std::string& slf, std::string common_grammems, const std::string& prefixes, int& line_no_err, uint16_t SessionNo = UnknownSessionNo);
     void	set_to_delete_false();
     void	delete_checked_lemms();
     bool	change_prd_info(CParadigmInfo& I, const std::string& Lemma, uint16_t NewParadigmNo, uint16_t newAccentModelNo, bool keepOldAccents);
@@ -155,8 +156,6 @@ public:
     uint16_t	RegisterSession(const CMorphSession& S);
     bool    Filter(std::string flt_str, std::vector<lemma_iterator_t>& found_paradigms) const;
 
-    std::string ToRMLEncoding(std::wstring strText) const;
-    std::wstring FromRMLEncoding(std::string s) const;
     std::string create_slf_for_lemm(std::string lemm, size_t flexiaModelNo, int line_size) const;
 
 private:
@@ -181,5 +180,5 @@ private:
 };
 
 
-extern BYTE  TransferReverseVowelNoToCharNo(const std::string& form, BYTE AccentCharNo, MorphLanguageEnum Language);
+extern BYTE  MapReverseVowelNoToCharNo(const std::string& form, BYTE AccentCharNo, MorphLanguageEnum Language);
 

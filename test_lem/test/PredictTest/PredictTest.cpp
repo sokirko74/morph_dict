@@ -65,7 +65,7 @@ TCheckResult check_word(CMorphanHolder& holder, TPredictItem& i) {
     std::string input = convert_from_utf8(i.Input.c_str(), holder.m_CurrentLanguage);
     TCheckResult result;
     holder.m_pLemmatizer->CreateParadigmCollection(false, input, IsUpper((unsigned char)input[0], holder.m_CurrentLanguage,
-        m_bUsePrediction, Paradigms);
+        true, Paradigms);
 
     size_t paradigms_count = Paradigms.size();
     std::cerr << "generate " << paradigms_count << " paradigms by " << i.Input << "\n";

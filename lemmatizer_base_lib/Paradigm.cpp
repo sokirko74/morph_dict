@@ -108,7 +108,7 @@ std::string CFormInfo::GetCommonAncode() const
 {
 	assert (IsValid());
 	if (!IsValid()) return "??";
-    std::string c = GetLemmaInfo().m_LemmaInfo.GetCommonAncodeIfCan();
+    std::string c = GetLemmaInfo().m_LemmaInfo.GetCommonAncodeCopy();
     if (!c.empty()) 
         return c;
     else
@@ -270,8 +270,7 @@ BYTE	CFormInfo::GetAccentedVowel(uint16_t pos) const
 
 	BYTE BackVowelNo = m_pParent->m_AccentModels[I.m_LemmaInfo.m_AccentModelNo].m_Accents[pos];
 	std::string s = GetWordForm(pos);	
-	RmlMakeLower(s, m_pParent->GetLanguage());
-	return TransferReverseVowelNoToCharNo(s, BackVowelNo, m_pParent->GetLanguage());
+	return MapReverseVowelNoToCharNo(s, BackVowelNo, m_pParent->GetLanguage());
 };
 
 BYTE	CFormInfo::GetSrcAccentedVowel() const
