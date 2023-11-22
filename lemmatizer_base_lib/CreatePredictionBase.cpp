@@ -212,7 +212,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 		if (base + paradigm.get_first_flex() == plug_noun)
 		{
 			PlugLemmaInfoNo = (int)lin;
-			output_opts.add_member("PlugNounGramCode",  paradigm.get_first_code());
+			output_opts.add_string("PlugNounGramCode",  paradigm.get_first_code());
 			continue;
 		};
 

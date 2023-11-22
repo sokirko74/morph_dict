@@ -14,24 +14,25 @@
 
 class CJsonObject {
 	rapidjson::Document& m_Doc;
-	rapidjson::Value& m_Value;
-	rapidjson::Value m_InnerValue;
+	rapidjson::Value m_Value;
 public: 
-	CJsonObject(rapidjson::Document& d, rapidjson::Value& v);
-	CJsonObject(rapidjson::Document& d);
+	CJsonObject(rapidjson::Document& d, rapidjson::Type t=rapidjson::kObjectType);
 	rapidjson::Value& get_value() { return m_Value;}
 	rapidjson::Document& get_doc() { return m_Doc; }
 	rapidjson::Document::AllocatorType& get_allocator() { return m_Doc.GetAllocator(); }
 
+	void add_string(const char* key, const std::string& value);
+	void add_string(const char* key, const char* value);
+	void add_string_copy(const char* key, const std::string& value); // copies value to json
+	void add_int(const char* key, uint32_t v);
+	void add_double(const char* key, double v);
+	void add_bool(const char* key, bool v);
+	void add_member(const char* key, rapidjson::Value& value);
+	void push_back(rapidjson::Value& value);
+
 	std::string dump_rapidjson() const;
 	std::string dump_rapidjson_pretty() const;
 	void dump_rapidjson_pretty(std::string filepath) const;
-	void add_member(const char* key, const std::string& value);
-	void add_member(const char* key, const char* value);
-	void add_member(const char* key, rapidjson::Value& value);
-	void add_member_int(const char* key, uint32_t v);
-	void add_member(const char* key, bool v);
-	void add_member_copy(const char* key, const std::string& value); // copies value to json
-	void push_back(rapidjson::Value& value);
+
 };
 

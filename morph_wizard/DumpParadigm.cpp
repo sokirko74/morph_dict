@@ -20,9 +20,9 @@ bool CMorphSession::IsEmpty() const {
 };
 
 void CMorphSession::GetJson(CJsonObject& out) const {
-    out.add_member("user", m_UserName);
-    out.add_member("start", m_SessionStart);
-    out.add_member("last_save", m_LastSessionSave);
+    out.add_string("user", m_UserName);
+    out.add_string("start", m_SessionStart);
+    out.add_string("last_save", m_LastSessionSave);
 };
 
 CMorphSession& CMorphSession::FromJson(const rapidjson::Value& inj) {
@@ -34,7 +34,7 @@ CMorphSession& CMorphSession::FromJson(const rapidjson::Value& inj) {
 
 std::string CMorphSession::GetJsonStr() const {
     rapidjson::Document d(rapidjson::kObjectType);
-    CJsonObject v(d, d);
+    CJsonObject v(d);
     GetJson(v);
     return v.dump_rapidjson();
 }

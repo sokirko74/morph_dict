@@ -310,8 +310,8 @@ void MorphoWizard::save_mrd() {
     assert(m_bLoaded);
     EndSession();
 
-    rapidjson::Document d(rapidjson::kObjectType);
-    CJsonObject mrd(d, d);
+    rapidjson::Document d;
+    CJsonObject mrd(d);
     SaveFlexiaModelsToJson(mrd);
     SaveAccentModelsToJson(mrd);
     SaveSessionsToJson(mrd);

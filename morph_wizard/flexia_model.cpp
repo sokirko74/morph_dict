@@ -28,10 +28,10 @@ CMorphForm::CMorphForm(const std::string& s) {
 
 
 void CMorphForm::ToJson(CJsonObject& out) const {
-    out.add_member("flexia", m_FlexiaStr);
-    out.add_member("gramcode", m_Gramcode);
+    out.add_string("flexia", m_FlexiaStr);
+    out.add_string("gramcode", m_Gramcode);
     if (!m_PrefixStr.empty()) {
-        out.add_member("prefix", m_PrefixStr);
+        out.add_string("prefix", m_PrefixStr);
     }
 }
 
@@ -91,11 +91,11 @@ void CFlexiaModel::ToJson(CJsonObject& out) const {
     out.add_member("endings", endings);
 
     if (!m_Comments.empty()) {
-        out.add_member("comments",  m_Comments);
+        out.add_string("comments",  m_Comments);
     }
     
     if (!m_WiktionaryMorphTemplate.empty()) {
-        out.add_member("wiki", m_WiktionaryMorphTemplate);
+        out.add_string("wiki", m_WiktionaryMorphTemplate);
     }
 };
 

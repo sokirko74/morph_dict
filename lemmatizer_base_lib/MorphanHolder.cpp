@@ -93,7 +93,7 @@ DwordVector CMorphanHolder::_GetLemmaIds(bool bNorm, std::string& word_str, bool
 
     std::vector<CFormInfo > ParadigmCollection;
     std::string s8 = convert_from_utf8(word_str.c_str(), m_CurrentLanguage);
-    if (!m_pLemmatizer->CreateParadigmCollection(bNorm, word_str, capital, bUsePrediction, ParadigmCollection))
+    if (!m_pLemmatizer->CreateParadigmCollection(bNorm, s8, capital, bUsePrediction, ParadigmCollection))
     {
         throw CExpc("cannot lemmatize %s", word_str.c_str());
     }
@@ -107,10 +107,17 @@ DwordVector CMorphanHolder::_GetLemmaIds(bool bNorm, std::string& word_str, bool
 }
 
 
+DwordVector CMorphanHolder::GetLemmaIds(std::string lemma, bool is_capital) const
+{
+    return _GetLemmaIds(true, lemma, is_capital, false);
+}
+
 DwordVector CMorphanHolder::GetLemmaIds(std::string lemma) const
 {
-    return _GetLemmaIds(true, lemma, true, false);
+    bool is_capital = FirstLetterIsUpper(lemma);
+    return _GetLemmaIds(true, lemma, is_capital, false);
 }
+
 
 DwordVector CMorphanHolder::GetWordFormIds(std::string word_form) const
 {
@@ -430,13 +437,13 @@ void  GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolde
         std::string pos = pGramtab->GetPartOfSpeechStrLong(FormAndGrammems[saveFormNo].m_PartOfSpeech);
         if (commonGrammems > 0)
             pos += std::string(" ") + pGramtab->GrammemsToStr(commonGrammems);
-        prdPart.add_member_copy("pos", TrimCommaRight(pos));
+        prdPart.add_string_copy("pos", TrimCommaRight(pos));
         rapidjson::Value formsGroups(rapidjson::kArrayType);
         for (auto fg : FormGroups)
         {
             CJsonObject subg (out.get_doc());
             std::string grm = pGramtab->GrammemsToStr(fg.m_IntersectGrammems & ~commonGrammems);
-            subg.add_member_copy("grm", TrimCommaRight(grm));
+            subg.add_string_copy("grm", TrimCommaRight(grm));
             
             std::vector<std::pair<std::string, std::string>> forms;
             for (auto formNo : fg.m_FormNos)
@@ -454,8 +461,8 @@ void  GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolde
             rapidjson::Value forms_json(rapidjson::kArrayType);
             for (auto& p : forms) {
                 CJsonObject v(out.get_doc());
-                v.add_member_copy("f", p.first);
-                v.add_member_copy("grm", p.second);
+                v.add_string_copy("f", p.first);
+                v.add_string_copy("grm", p.second);
                 forms_json.PushBack(v.get_value().Move(), out.get_allocator());
             }
             subg.add_member("forms", forms_json);
@@ -470,7 +477,7 @@ void  GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolde
 
 static void GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool withParadigm, bool sortForms, CJsonObject& out)
 {
-    out.add_member("found", piParadigm->m_bFound);
+    out.add_bool("found", piParadigm->m_bFound);
 
     std::string typeAncode = piParadigm->GetCommonAncode();
     std::string commonGrammems;
@@ -478,11 +485,11 @@ static void GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanH
     {
         commonGrammems = Holder->m_pGramTab->GrammemsToStr(Holder->m_pGramTab->GetAllGrammems(typeAncode.c_str()));
     };
-    out.add_member_copy("commonGrammems", TrimCommaRight(commonGrammems));
-    out.add_member_copy("wordForm", piParadigm->GetWordFormUtf8(0));
+    out.add_string_copy("commonGrammems", TrimCommaRight(commonGrammems));
+    out.add_string_copy("wordForm", piParadigm->GetWordFormUtf8(0));
     if (!piParadigm->m_bFound)
     {
-        out.add_member_copy("srcNorm", piParadigm->GetSrcNormUtf8());
+        out.add_string_copy("srcNorm", piParadigm->GetSrcNormUtf8());
     }
     std::string GramInfo;
     try
@@ -493,7 +500,7 @@ static void GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanH
     {
         GramInfo = piParadigm->GetAncode(0);
     }
-    out.add_member_copy("morphInfo", GetGramInfoStr(GramInfo, Holder));
+    out.add_string_copy("morphInfo", GetGramInfoStr(GramInfo, Holder));
 
     if (withParadigm)
     {
@@ -502,8 +509,8 @@ static void GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanH
         GetParadigmFromDictionary(piParadigm, Holder, sortForms, v);
         out.add_member("paradigm", v.get_value());
     }
-    out.add_member_int("wordWeight", (uint32_t)piParadigm->GetWordWeight());
-    out.add_member_int("homonymWeight", (uint32_t)piParadigm->GetHomonymWeight());
+    out.add_int("wordWeight", (uint32_t)piParadigm->GetWordWeight());
+    out.add_int("homonymWeight", (uint32_t)piParadigm->GetHomonymWeight());
 }
 
 std::string CMorphanHolder::LemmatizeJson(std::string word_utf8, bool withParadigm, bool prettyJson, bool sortForms) const
@@ -514,19 +521,20 @@ std::string CMorphanHolder::LemmatizeJson(std::string word_utf8, bool withParadi
     {
         return "[]";
     };
-    rapidjson::Document d(rapidjson::kArrayType);
+    rapidjson::Document d;
+    CJsonObject result(d, rapidjson::kArrayType);
     std::string strResult = "[";
     for (auto& p : Paradigms)
     {
-        CJsonObject v(d);
+        CJsonObject v(result.get_doc());
         GetStringByParadigmJson(&(p), this, withParadigm, sortForms, v);
-        d.PushBack(v.get_value().Move(), d.GetAllocator());
+        result.push_back(v.get_value());
     };
     if (prettyJson) {
-        return CJsonObject(d, d).dump_rapidjson_pretty();
+        return result.dump_rapidjson_pretty();
     }
     else {
-        return CJsonObject(d, d).dump_rapidjson();
+        return result.dump_rapidjson();
     }
 }
 
@@ -544,3 +552,5 @@ std::vector<CFuzzyResult> CMorphanHolder::CorrectMisspelledWordUtf8(std::string 
     }
     return r;
 }
+
+

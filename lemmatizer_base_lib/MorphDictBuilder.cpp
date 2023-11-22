@@ -241,7 +241,7 @@ void  CMorphDictBuilder::CreateAutomat(const MorphoWizard& Wizard)
 };
 
 void create_options(CJsonObject& opts, bool allow_russian_jo, int postfix_len, int min_freq) {
-	opts.add_member("AllowRussianJo", allow_russian_jo);
+	opts.add_bool("AllowRussianJo", allow_russian_jo);
 
 	bool skip_predict = false;
 	if (postfix_len == -1 || min_freq == -1) {
@@ -257,7 +257,7 @@ void create_options(CJsonObject& opts, bool allow_russian_jo, int postfix_len, i
 			throw CExpc("MinFreq should be more than 0");
 		};
 	}
-	opts.add_member("SkipPredictBase", skip_predict);
+	opts.add_bool("SkipPredictBase", skip_predict);
 }
 
 void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russian_jo, int postfix_len, int min_freq, std::string output_folder) {

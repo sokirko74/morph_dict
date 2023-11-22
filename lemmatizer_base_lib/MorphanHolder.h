@@ -29,13 +29,15 @@ public:
 	void LoadOnlyGramtab(MorphLanguageEnum langua, std::string custom_folder = "");
 
 	void DeleteProcessors();
-	DwordVector GetLemmaIds(std::string lemma) const;
+	DwordVector GetLemmaIds(std::string lemma, bool is_capital) const;
+	DwordVector GetLemmaIds(std::string str) const;
 	DwordVector GetWordFormIds(std::string word_form) const;
 	std::string		id_to_string(long id) const;
 	std::string PrintMorphInfoUtf8(std::string Form, bool printIds, bool printForms, bool sortParadigms) const;
 	std::string LemmatizeJson(std::string word_utf8, bool withParadigms, bool prettyJson=false, bool sortForms=false) const;
 	bool IsInDictionaryUtf8(std::string WordForm) const;
 	std::vector<CFuzzyResult> CorrectMisspelledWordUtf8(std::string word_utf8) const;
+
 	
 };
 

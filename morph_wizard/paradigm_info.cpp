@@ -55,15 +55,15 @@ bool CParadigmInfo::IsAnyEqual(const CParadigmInfo& X) const {
 
 
 void  CParadigmInfo::GetJson(const std::string& lemma, CJsonObject& out) const {
-    out.add_member("l", lemma);
-    out.add_member_int("f", m_FlexiaModelNo);
-    out.add_member_int("a", m_AccentModelNo);
-    out.add_member_int("s", m_SessionNo);
+    out.add_string("l", lemma);
+    out.add_int("f", m_FlexiaModelNo);
+    out.add_int("a", m_AccentModelNo);
+    out.add_int("s", m_SessionNo);
     if (GetCommonAncode()[0] != 0) {
-        out.add_member("t", GetCommonAncode());
+        out.add_string("t", GetCommonAncode());
     }
     if (m_PrefixSetNo != UnknownPrefixSetNo) {
-        out.add_member("p", m_PrefixSetNo);
+        out.add_int("p", m_PrefixSetNo);
     }
     
 }
