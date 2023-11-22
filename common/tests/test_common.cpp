@@ -46,6 +46,12 @@ TEST_CASE("unicode2") {
 	CHECK(U'ẞ' == GetFirstUnicodeLetterFromUtf8("ẞ")); // 3 bytes
 	CHECK(IsUnicodeUpperRussianVowel(U'Ю'));
 	CHECK(CountLettersInUtf8(std::string("юẞ")) == 2);
+	CHECK(FirstLetterIsUpper(std::string("мама")) == false);
+	CHECK(FirstLetterIsUpper(std::string("Мама")) == true);
+	CHECK(FirstLetterIsUpper(std::string("Mother")) == true);
+	CHECK(FirstLetterIsUpper(std::string("mother")) == false);
+	CHECK(FirstLetterIsUpper(std::string("122")) == false);
+	CHECK(FirstLetterIsUpper(std::string("!@")) == false);
 }
 
 

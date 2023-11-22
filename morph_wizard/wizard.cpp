@@ -520,6 +520,7 @@ std::vector<lemma_iterator_t> MorphoWizard::find_wordforms(std::string wordform)
     }
     catch (std::regex_error r) {
         ErrorMessage(r.what());
+        return res;
     }
 }
 

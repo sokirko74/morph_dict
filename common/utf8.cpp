@@ -8365,3 +8365,9 @@ uint32_t GetFirstUnicodeLetterFromUtf8 (const std::string& s) {
 	auto s32 = conv_utf8_utf32.from_bytes(s.substr(0, i));
 	return s32[0];
 }
+
+bool FirstLetterIsUpper(const std::string& s) {
+	uint32_t c = GetFirstUnicodeLetterFromUtf8(s);
+	return tolower_utf32(c) != c; // if it can be lowercased then it is uppercased
+}
+

@@ -38,6 +38,10 @@ void CJsonObject::add_member(const char* key, const std::string& value) {
 	m_Value.AddMember(rapidjson::StringRef(key), rapidjson::StringRef(value.c_str(), value.length()), m_Doc.GetAllocator());
 }
 
+void CJsonObject::add_member_copy(const char* key, const std::string& value) {
+	m_Value.AddMember(rapidjson::StringRef(key), value, m_Doc.GetAllocator());
+}
+
 
 void CJsonObject::add_member(const char* key, const char* value) {
 	m_Value.AddMember(rapidjson::StringRef(key), rapidjson::StringRef(value), m_Doc.GetAllocator());
@@ -47,7 +51,7 @@ void CJsonObject::add_member(const char* key, rapidjson::Value& value) {
 	m_Value.AddMember(rapidjson::StringRef(key), value.Move(), m_Doc.GetAllocator());
 }
 
-void CJsonObject::add_member(const char* key, uint16_t v) {
+void CJsonObject::add_member_int(const char* key, uint32_t v) {
 	m_Value.AddMember(rapidjson::StringRef(key), v, m_Doc.GetAllocator());
 }
 
@@ -56,4 +60,8 @@ void CJsonObject::add_member(const char* key, bool v) {
 	v1.SetBool(v);
 	m_Value.AddMember(rapidjson::StringRef(key), v, m_Doc.GetAllocator());
 
+}
+
+void CJsonObject::push_back(rapidjson::Value& value) {
+	m_Value.PushBack(value.Move(), m_Doc.GetAllocator());
 }

@@ -29,7 +29,9 @@ public:
 	void add_member(const char* key, const std::string& value);
 	void add_member(const char* key, const char* value);
 	void add_member(const char* key, rapidjson::Value& value);
-	void add_member(const char* key, uint16_t v);
+	void add_member_int(const char* key, uint32_t v);
 	void add_member(const char* key, bool v);
+	void add_member_copy(const char* key, const std::string& value); // copies value to json
+	void push_back(rapidjson::Value& value);
 };
 

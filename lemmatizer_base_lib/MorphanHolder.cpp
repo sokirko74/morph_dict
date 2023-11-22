@@ -1,10 +1,7 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
-// ==========  Dialing Lemmatizer (www.aot.ru)
-// ==========  Copyright by Alexey Sokirko
-
-#include "morph_dict/common/json.h"
-#include "morph_dict/morph_wizard/paradigm_consts.h"
 #include "MorphanHolder.h"
+#include "morph_dict/morph_wizard/paradigm_consts.h"
+
+#include "morph_dict/common/rapidjson.h"
 
 CMorphanHolder::CMorphanHolder()
 {
@@ -418,11 +415,10 @@ std::vector<CFormAndGrammems> BuildFormAndGrammems(const CMorphanHolder *Holder,
 }
 
 
-nlohmann::json GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool sortForms)
+void  GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool sortForms, CJsonObject& out)
 {
     const CAgramtab *pGramtab = Holder->m_pGramTab;
     const std::vector<CFormAndGrammems> FormAndGrammems = BuildFormAndGrammems(Holder, piParadigm);
-    nlohmann::json result = nlohmann::json::array();
     int FormNo = 0;
     while (FormNo < FormAndGrammems.size())
     {
@@ -430,63 +426,63 @@ nlohmann::json GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMor
         grammems_mask_t commonGrammems;
         const std::vector<CFormGroup> FormGroups = BuildInterfaceParadigmPart(Holder, FormAndGrammems, FormNo, commonGrammems);
         assert(FormNo > saveFormNo);
-        auto prdPart = nlohmann::json::object();
+        CJsonObject prdPart(out.get_doc());
         std::string pos = pGramtab->GetPartOfSpeechStrLong(FormAndGrammems[saveFormNo].m_PartOfSpeech);
         if (commonGrammems > 0)
             pos += std::string(" ") + pGramtab->GrammemsToStr(commonGrammems);
-        prdPart["pos"] = TrimCommaRight(pos);
-
-        prdPart["formsGroups"] = nlohmann::json::array();
+        prdPart.add_member_copy("pos", TrimCommaRight(pos));
+        rapidjson::Value formsGroups(rapidjson::kArrayType);
         for (auto fg : FormGroups)
         {
-            auto subg = nlohmann::json::object();
+            CJsonObject subg (out.get_doc());
             std::string grm = pGramtab->GrammemsToStr(fg.m_IntersectGrammems & ~commonGrammems);
-            subg["grm"] = TrimCommaRight(grm);
-            subg["forms"] = nlohmann::json::array();
+            subg.add_member_copy("grm", TrimCommaRight(grm));
+            
+            std::vector<std::pair<std::string, std::string>> forms;
             for (auto formNo : fg.m_FormNos)
             {
                 auto &f = FormAndGrammems[formNo + saveFormNo];
-                std::string grm = pGramtab->GrammemsToStr(f.m_Grammems & ~(fg.m_IntersectGrammems | commonGrammems));
-                subg["forms"].push_back(
-                        {{"f", convert_to_utf8(f.m_Form, Holder->m_CurrentLanguage)},
-                         {"grm", TrimCommaRight(grm)}});
+                auto form = convert_to_utf8(f.m_Form, Holder->m_CurrentLanguage);
+                std::string grm = TrimCommaRight(pGramtab->GrammemsToStr(f.m_Grammems & ~(fg.m_IntersectGrammems | commonGrammems)));
+                forms.push_back({form, grm});
             };
+
             if (sortForms)
             {
-                sort(subg["forms"].begin(), subg["forms"].end());
+                sort(forms.begin(), forms.end());
             }
-            prdPart["formsGroups"].push_back(subg);
+            rapidjson::Value forms_json(rapidjson::kArrayType);
+            for (auto& p : forms) {
+                CJsonObject v(out.get_doc());
+                v.add_member_copy("f", p.first);
+                v.add_member_copy("grm", p.second);
+                forms_json.PushBack(v.get_value().Move(), out.get_allocator());
+            }
+            subg.add_member("forms", forms_json);
+
+            formsGroups.PushBack(subg.get_value().Move(), out.get_allocator());
         };
-        result.push_back(prdPart);
+        prdPart.add_member("formsGroups", formsGroups);
+        out.push_back(prdPart.get_value());
     };
-    return result;
 };
 
 
-nlohmann::json GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool withParadigm, bool sortForms)
+static void GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool withParadigm, bool sortForms, CJsonObject& out)
 {
-    auto result = nlohmann::json::object();
-    result["found"] = piParadigm->m_bFound;
+    out.add_member("found", piParadigm->m_bFound);
 
     std::string typeAncode = piParadigm->GetCommonAncode();
     std::string commonGrammems;
     if (!typeAncode.empty())
     {
-        const CAgramtab *pGramtab = Holder->m_pGramTab;
-        try
-        {
-            commonGrammems = pGramtab->GrammemsToStr(pGramtab->GetAllGrammems(typeAncode.c_str()));
-        }
-        catch (...)
-        {
-            throw CExpc(" an exception occurred while getting Common Ancode");
-        };
+        commonGrammems = Holder->m_pGramTab->GrammemsToStr(Holder->m_pGramTab->GetAllGrammems(typeAncode.c_str()));
     };
-    result["commonGrammems"] = TrimCommaRight(commonGrammems);
-    result["wordForm"] = piParadigm->GetWordFormUtf8(0);
+    out.add_member_copy("commonGrammems", TrimCommaRight(commonGrammems));
+    out.add_member_copy("wordForm", piParadigm->GetWordFormUtf8(0));
     if (!piParadigm->m_bFound)
     {
-        result["srcNorm"] = piParadigm->GetSrcNormUtf8();
+        out.add_member_copy("srcNorm", piParadigm->GetSrcNormUtf8());
     }
     std::string GramInfo;
     try
@@ -497,15 +493,17 @@ nlohmann::json GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorph
     {
         GramInfo = piParadigm->GetAncode(0);
     }
-    result["morphInfo"] = GetGramInfoStr(GramInfo, Holder);
+    out.add_member_copy("morphInfo", GetGramInfoStr(GramInfo, Holder));
 
     if (withParadigm)
     {
-        result["paradigm"] = GetParadigmFromDictionary(piParadigm, Holder, sortForms);
+        CJsonObject v(out.get_doc());
+        v.get_value().SetArray();
+        GetParadigmFromDictionary(piParadigm, Holder, sortForms, v);
+        out.add_member("paradigm", v.get_value());
     }
-    result["wordWeight"] = piParadigm->GetWordWeight();
-    result["homonymWeight"] = piParadigm->GetHomonymWeight();
-    return result;
+    out.add_member_int("wordWeight", (uint32_t)piParadigm->GetWordWeight());
+    out.add_member_int("homonymWeight", (uint32_t)piParadigm->GetHomonymWeight());
 }
 
 std::string CMorphanHolder::LemmatizeJson(std::string word_utf8, bool withParadigm, bool prettyJson, bool sortForms) const
@@ -516,14 +514,20 @@ std::string CMorphanHolder::LemmatizeJson(std::string word_utf8, bool withParadi
     {
         return "[]";
     };
-
-    nlohmann::json result = nlohmann::json::array();
+    rapidjson::Document d(rapidjson::kArrayType);
     std::string strResult = "[";
     for (auto& p : Paradigms)
     {
-        result.push_back(GetStringByParadigmJson(&(p), this, withParadigm, sortForms));
+        CJsonObject v(d);
+        GetStringByParadigmJson(&(p), this, withParadigm, sortForms, v);
+        d.PushBack(v.get_value().Move(), d.GetAllocator());
     };
-    return result.dump(prettyJson ? 1 : -1);
+    if (prettyJson) {
+        return CJsonObject(d, d).dump_rapidjson_pretty();
+    }
+    else {
+        return CJsonObject(d, d).dump_rapidjson();
+    }
 }
 
 std::vector<CFuzzyResult> CMorphanHolder::CorrectMisspelledWordUtf8(std::string word_utf8) const {

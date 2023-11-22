@@ -1,13 +1,15 @@
 Mutter	[
  {
-  "commonGrammems": "",
   "found": true,
-  "homonymWeight": 0,
+  "commonGrammems": "",
+  "wordForm": "MUTTER",
   "morphInfo": "SUB akk,dat,gen,nom,sin,fem",
   "paradigm": [
    {
+    "pos": "SUB fem",
     "formsGroups": [
      {
+      "grm": "",
       "forms": [
        {
         "f": "MUTTER",
@@ -41,27 +43,27 @@ Mutter	[
         "f": "MÜTTERN",
         "grm": "dat,plu"
        }
-      ],
-      "grm": ""
+      ]
      }
-    ],
-    "pos": "SUB fem"
+    ]
    }
   ],
-  "wordForm": "MUTTER",
-  "wordWeight": 0
+  "wordWeight": 0,
+  "homonymWeight": 0
  }
 ]
 VÖGEL	[
  {
-  "commonGrammems": "",
   "found": true,
-  "homonymWeight": 0,
+  "commonGrammems": "",
+  "wordForm": "VOGEL",
   "morphInfo": "SUB akk,gen,nom,plu,mas",
   "paradigm": [
    {
+    "pos": "SUB mas",
     "formsGroups": [
      {
+      "grm": "",
       "forms": [
        {
         "f": "VOGEL",
@@ -95,14 +97,12 @@ VÖGEL	[
         "f": "VÖGELN",
         "grm": "dat,plu"
        }
-      ],
-      "grm": ""
+      ]
      }
-    ],
-    "pos": "SUB mas"
+    ]
    }
   ],
-  "wordForm": "VOGEL",
-  "wordWeight": 0
+  "wordWeight": 0,
+  "homonymWeight": 0
  }
 ]
