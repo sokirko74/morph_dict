@@ -5,7 +5,7 @@
 #pragma once
 
 #include "../common/utilit.h"
-#include "../common/json.h"
+#include "../common/rapidjson.h"
 #include <unordered_map>
 
 enum NamingAlphabet {
@@ -46,7 +46,7 @@ protected:
         return (na == naDefault && m_bUseNationalConstants) || na == naNational;
     }
     std::string GetDefaultPath() const;
-
+    virtual void InitLanguageSpecific(rapidjson::Document& doc) {};
 
 public:
     
@@ -59,7 +59,7 @@ public:
 
     virtual void LoadFromRegistry() = 0;
 
-    nlohmann::json ReadFromFolder(std::string folder);
+    void ReadFromFolder(std::string folder);
 
     std::string GetGramtabPath() const;
 

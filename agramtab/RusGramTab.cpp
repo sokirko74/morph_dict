@@ -165,10 +165,12 @@ unsigned int count_of_bits(grammems_mask_t n)
 
 void CRusGramTab::LoadFromRegistry()
 {
-    auto gramtab = ReadFromFolder(GetDefaultPath());
+	ReadFromFolder(GetDefaultPath());
+}
 
-    m_PopularGramCodes.m_InanimIndeclNoun = gramtab.at("inanim_indecl_noun");
-	m_PopularGramCodes.m_MasAbbrNoun = gramtab.at("mas_abbr_noun");
+void CRusGramTab::InitLanguageSpecific(rapidjson::Document& doc)  {
+    m_PopularGramCodes.m_InanimIndeclNoun = doc["inanim_indecl_noun"].GetString();
+	m_PopularGramCodes.m_MasAbbrNoun = doc["mas_abbr_noun"].GetString();
     m_PopularGramCodes.m_ProductiveNoun = "";
     m_PopularGramCodes.m_ProductiveSingNoun = "";
 

@@ -11,6 +11,7 @@
 #include "../contrib/rapidjson/prettywriter.h"
 
 #include <fstream>
+#include <vector>
 
 class CJsonObject {
 	rapidjson::Document& m_Doc;
@@ -29,10 +30,23 @@ public:
 	void add_bool(const char* key, bool v);
 	void add_member(const char* key, rapidjson::Value& value);
 	void push_back(rapidjson::Value& value);
+	void push_back(CJsonObject& o);
+
 
 	std::string dump_rapidjson() const;
 	std::string dump_rapidjson_pretty() const;
-	void dump_rapidjson_pretty(std::string filepath) const;
+	void dump_rapidjson_pretty(std::string filepath, int ident=1) const;
 
 };
 
+/*
+struct CTestCase {
+	std::string Text;
+	std::string Comment;
+};
+
+struct CTestCaseBase {
+	std::vector<CTestCase> TestCases;
+	void read_test_cases(std::istream& inp);
+};
+*/

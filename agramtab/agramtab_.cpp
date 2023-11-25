@@ -259,7 +259,7 @@ grammems_mask_t CAgramtab::GetAllGrammems(const char* gram_code) const
     return grammems;
 }
 
-nlohmann::json CAgramtab::ReadFromFolder(std::string folder) {
+void CAgramtab::ReadFromFolder(std::string folder) {
     BuildPartOfSpeechMap();
 
     m_InputJsonPath = (std::filesystem::path(folder) / "gramtab.json").string();
@@ -268,7 +268,10 @@ nlohmann::json CAgramtab::ReadFromFolder(std::string folder) {
     if (!inp.good()) {
         throw CExpc("Cannot read gramtab for language %s path=%s", GetStringByLanguage(m_Language).c_str(), m_InputJsonPath.c_str());
     }
-    nlohmann::json gramtab = nlohmann::json::parse(inp);
+    
+    rapidjson::Document doc;
+    rapidjson::IStreamWrapper isw(inp);
+    doc.ParseStream(isw);
     inp.close();
 
     std::unordered_map<std::string, grammem_t> grammem_dict;
@@ -280,21 +283,21 @@ nlohmann::json CAgramtab::ReadFromFolder(std::string folder) {
         GetLine(i) = 0;
 
     size_t line_no = 0;
-    auto all_gramcodes = gramtab["gramcodes"].items();
-    for (auto& [key, val] : all_gramcodes) {
-        std::string gramcode = key;
+    for (auto& item : doc["gramcodes"].GetObject()) {
+        std::string gramcode = item.name.GetString();
+        auto& val = item.value;
         part_of_speech_t pos = UnknownPartOfSpeech;
-        const auto pos_it = val.find("p");
-        if (pos_it != val.end()) {
-            const std::string& pos_str = pos_it.value();
+        auto pos_it = rapidjson::Pointer("/p").Get(val);
+        if (pos_it != nullptr) {
+            const std::string& pos_str = pos_it->GetString();
             if (!pos_str.empty()) {
                 pos = m_PartOfSpeechesHashMap.at(pos_str);
             }
         }
         grammems_mask_t grammems = 0;
-        nlohmann::json grs = val["g"];
-        for (auto it = grs.begin(); it != grs.end(); ++it) {
-            grammems |= _QM(grammem_dict[*it]);
+        auto& grs = val["g"];
+        for (auto& s: val["g"].GetArray()) {
+            grammems |= _QM(grammem_dict[s.GetString()]);
         }
 
         CAgramtabLine* pAgramtabLine = new CAgramtabLine(line_no);
@@ -302,18 +305,18 @@ nlohmann::json CAgramtab::ReadFromFolder(std::string folder) {
         pAgramtabLine->m_PartOfSpeech = pos;
         size_t gram_index = GramcodeToLineIndex(gramcode.c_str());
         if (GetLine(gram_index)) {
-            throw CExpc(Format("line %s in  %s contains a dublicate gramcode",key.c_str(), m_InputJsonPath));
+            throw CExpc(Format("line %s in  %s contains a dublicate gramcode", gramcode.c_str(), m_InputJsonPath));
         }
         GetLine(gram_index) = pAgramtabLine;
         line_no++;
     }
    
-    std::string gramcode = gramtab["plug_noun_gram_code"].template get<std::string>();
+    std::string gramcode = doc["plug_noun_gram_code"].GetString();
     m_PlugNoun.m_GramCode = gramcode;
     assert(!m_PlugNoun.m_GramCode.empty());
-    m_PlugNoun.m_Lemma  = convert_from_utf8(gramtab["gramcodes"][gramcode]["l"].template get<std::string>().c_str(), m_Language);
+    m_PlugNoun.m_Lemma  = doc["gramcodes"][gramcode]["l"].GetString();
     assert(!m_PlugNoun.m_Lemma.empty());
-    return gramtab;
+    InitLanguageSpecific(doc);
 }
 
 std::string CAgramtab::GetGramtabPath() const {

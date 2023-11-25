@@ -149,6 +149,8 @@ class CRusGramTab : public CAgramtab {
     const static size_t rMaxGrmCount = rEndUp - rStartUp; // (14 kb)
 
     CRusPopularGramCodes m_PopularGramCodes;
+protected:
+    void InitLanguageSpecific(rapidjson::Document& doc) override;
 
 public:
     CAgramtabLine *Lines[rMaxGrmCount];

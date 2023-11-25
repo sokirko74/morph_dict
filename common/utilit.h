@@ -23,6 +23,9 @@
 #include <unordered_set>
 #include <limits>
 #include <plog/Log.h>
+#include <filesystem>>
+
+namespace fs = std::filesystem;
 
 #pragma warning (disable : 4018)
 #pragma warning (disable : 4244)

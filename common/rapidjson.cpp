@@ -22,11 +22,11 @@ std::string CJsonObject::dump_rapidjson_pretty() const {
 	return buffer.GetString();
 }
 
-void CJsonObject::dump_rapidjson_pretty(std::string filepath) const {
+void CJsonObject::dump_rapidjson_pretty(std::string filepath, int ident) const {
 	std::ofstream ofs(filepath);
 	rapidjson::OStreamWrapper osw(ofs);
 	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer(osw);
-	writer.SetIndent(' ', 1);
+	writer.SetIndent(' ', ident);
 	m_Value.Accept(writer);
 	ofs.close();
 }
@@ -65,3 +65,27 @@ void CJsonObject::add_bool(const char* key, bool v) {
 void CJsonObject::push_back(rapidjson::Value& value) {
 	m_Value.PushBack(value.Move(), m_Doc.GetAllocator());
 }
+
+void CJsonObject::push_back(CJsonObject& o) {
+	m_Value.PushBack(o.get_value().Move(), m_Doc.GetAllocator());
+}
+
+/*
+void CTestCaseBase::read_test_cases(std::istream& inp) {
+	TestCases.clear();
+	std::string s;
+	while (getline(inp, s)) {
+		size_t commentsIndex = s.find("//");
+		CTestCase e;
+		if (commentsIndex != -1) {
+			e.Comment = s.substr(commentsIndex);
+			s = s.substr(0, commentsIndex);
+		}
+		while (!s.empty() && isspace((unsigned char)s.back())) {
+			s.pop_back();
+		}
+		e.Text = s;
+		TestCases.emplace_back(e);
+	}
+}
+*/
