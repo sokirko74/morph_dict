@@ -209,7 +209,7 @@ int main(int argc, const char** argv) {
         if (saveBin(args.CloseOutputStreamAndGetName()))
             return 0;
     }
-    catch (std::exception e) {
+    catch (std::exception& e) {
         LOGE << "exception occurred:" << e.what();
     }
     catch (...) {
