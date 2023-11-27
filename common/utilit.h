@@ -23,7 +23,7 @@
 #include <unordered_set>
 #include <limits>
 #include <plog/Log.h>
-#include <filesystem>>
+#include <filesystem>
 
 namespace fs = std::filesystem;
 
@@ -327,6 +327,7 @@ bool _find(_II It, const _Ty& _V)
 
 extern std::string& MakeUpperUtf8(std::string& s_utf8);
 extern std::string& MakeLowerUtf8(std::string& s_utf8);
+extern std::string& MakeTitleUtf8(std::string& s_utf8);
 extern size_t CountLettersInUtf8(std::string& s_utf8);
 extern bool CheckRussianUtf8(const std::string& s);
 extern bool CheckRussianLowerUtf8(const std::string& s);
@@ -339,3 +340,5 @@ extern bool IsUnicodeUpperRussianVowel(uint32_t u);
 extern uint32_t GetFirstUnicodeLetterFromUtf8(const std::string& s);
 extern bool IsUpperVowel(uint32_t u);
 extern bool FirstLetterIsUpper(const std::string& s);
+std::u32string convert_utf8_to_utf32(const std::string& s);
+

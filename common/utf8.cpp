@@ -8216,6 +8216,19 @@ std::string& MakeLowerUtf8(std::string& s_utf8) {
 	return s_utf8;
 }
 
+std::string& MakeTitleUtf8(std::string& s_utf8) {
+	if (s_utf8.empty()) {
+		return std::string();
+	}
+	std::u32string s32 = conv_utf8_utf32.from_bytes(s_utf8);
+	std::transform(s32.cbegin() + 1, s32.cend(),
+		s32.begin(), // write to the same location
+		[](uint32_t c) { return tolower_utf32(c); });
+	s32[0] = toupper_utf32(s32[0]);
+	s_utf8 = conv_utf8_utf32.to_bytes(s32);
+	return s_utf8;
+}
+
 size_t CountLettersInUtf8(std::string& s_utf8) {
 	return conv_utf8_utf32.from_bytes(s_utf8).length();
 }
@@ -8371,3 +8384,7 @@ bool FirstLetterIsUpper(const std::string& s) {
 	return tolower_utf32(c) != c; // if it can be lowercased then it is uppercased
 }
 
+std::u32string convert_utf8_to_utf32(const std::string& s_utf8)
+{
+	return conv_utf8_utf32.from_bytes(s_utf8);
+}

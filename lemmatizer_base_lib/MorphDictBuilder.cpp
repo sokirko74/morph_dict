@@ -249,7 +249,7 @@ void create_options(CJsonObject& opts, bool allow_russian_jo, int postfix_len, i
 		skip_predict = true;
 	}
 	else {
-		if (!(0 < postfix_len <= 5))
+		if (!(0 < postfix_len && postfix_len <= 5))
 		{
 			throw CExpc("postfix_len should be between 1 and 5");
 		};
