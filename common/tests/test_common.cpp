@@ -54,6 +54,16 @@ TEST_CASE("unicode2") {
 	CHECK(FirstLetterIsUpper(std::string("!@")) == false);
 }
 
+TEST_CASE("check_english") {
+	const std::locale c_locale("C");
+	CHECK(std::isalpha('a', c_locale));
+	CHECK(std::isalpha('z', c_locale));
+	CHECK(std::isalpha('A', c_locale));
+	CHECK(!std::isalpha('1', c_locale));
+	CHECK(!std::isalpha(U'Я', c_locale));
+
+}
+
 
 int main(int argc, char** argv) {
 	init_plog(plog::Severity::debug, "test_common.log");

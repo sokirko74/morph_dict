@@ -9,6 +9,7 @@
 
 #include  "single_byte_encoding.h"
 
+
 #include <assert.h>
 #include <stdarg.h>
 #include <ctype.h>
@@ -50,29 +51,23 @@ typedef std::unordered_set<std::string> StringHashSet;
 typedef std::set<std::string> StringSet;
 typedef std::vector<uint32_t> DwordVector;
 
-inline uint64_t GetMaxQWORD ()
-{
-	#ifdef WIN32
-		return  0xffffffffffffffff;
-	#else
-	    return std::numeric_limits<uint64_t>::max();
-	#endif
-};
+typedef  uint8_t part_of_speech_t;
+const BYTE	UnknownPartOfSpeech = 0xff;
+typedef  uint8_t grammem_t;
+typedef  uint8_t graph_descr_t;
+typedef  uint32_t part_of_speech_mask_t;
+typedef  uint64_t grammems_mask_t;
 
+//  uint64_t mask
+#define _QM(X) (((uint64_t)1)<<(X))
+
+
+const int	UnknownSyntaxElement = 0xffff;
 
 // morph_dict&syntax
-typedef enum {	
-	morphUnknown = 0, 
-	morphRussian = 1, 
-	morphEnglish = 2, 
-	morphGerman = 3, 
-	morphGeneric = 4, 
-	morphURL = 5, 
-	morphDigits = 6,
-	morphFioDisclosures = 7,
-} MorphLanguageEnum;
 extern bool GetLanguageByString(std::string s, MorphLanguageEnum& Result);
 extern std::string GetStringByLanguage(MorphLanguageEnum Langua);
+
 
 
 template <class T1, class T2, class T3>
@@ -93,24 +88,26 @@ public:
 	virtual char const* what() const override;
 };
 	
+extern inline uint64_t GetMaxQWORD();
 
 
 // working with files
 extern bool			FileExists (const char *FName);
 extern bool         DirExists(const char *path);
 extern file_off_t	FileSize (const char *filename);
+extern std::vector<std::string> list_path_by_file_mask(std::string filemask);
+extern std::string	CreateTempFileName();
+extern std::string LoadFileToString(std::string path);
+extern std::string	MakeFName(const std::string& InpitFileName, const std::string& Ext);
+extern std::string   MakePath(const std::string path, const std::string fileName);
+extern std::string	GetParentPath(std::string FileName);
 
 
-
+// error  messages
 extern void		ErrorMessage (const std::string& Titul, const std::string& Message);
 extern void		ErrorMessage (const std::string& Message);
-extern std::string	MakeFName ( const std::string& InpitFileName,  const std::string& Ext);
-extern std::string   MakePath(const std::string path, const std::string fileName);
-extern std::string	GetParentPath (std::string FileName);
-extern bool		IsHtmlFile (const std::string& FileName);
-extern std::string	CreateTempFileName();
 
-// working with registry 
+// working with registry  (RML/Bin/rml.ini)
 extern std::string	GetRegistryString (std::string RegistryPath);
 extern bool		CanGetRegistryString (std::string RegistryPath);
 extern bool		IsRmlRegistered(std::string& Error);
@@ -119,212 +116,32 @@ extern std::string	GetIniFilePath();
 extern std::string	GetRmlVariable();
 extern std::string   BuildRMLPath (const char* s);
 
-// working with std::strings
+// working with std::strings (ASCII)
 extern char*	rtrim (char* s);
-extern bool		IsSuperEqualChar (BYTE ch1, BYTE ch2, MorphLanguageEnum langua);
-extern int		CompareWithoutRegister ( const char *s1, const char *s2, size_t l, MorphLanguageEnum langua);
-extern BYTE		force_rus_char (BYTE ch);
-extern bool		force_to_rus (char* dest, const char* sour, size_t len);
 extern char*	IntToStr (int Value, char* Buffer);
 extern std::string&	IntToStr (int Value, std::string& oBuffer);
 extern std::string	Format( const char* format, ... );
 extern std::string&  TrimLeft (std::string& str);
 extern std::string&  TrimRight (std::string& str);
 extern std::string&	Trim (std::string& str);
-extern std::string LoadFileToString(std::string path);
-
-const int	UnknownSyntaxElement = 0xffff;
-typedef enum {DontKillHomonyms = 0, CoverageKillHomonyms = 1} KillHomonymsEnum;
-
-typedef enum { LocThes = 0, FinThes, CompThes, OmniThes, NoneThes } EThesType;
-typedef enum { EClause = 0, EWord, EGroup, ENoneType } EUnitType;
-
-
 extern int isbracket  (BYTE x);
 extern size_t dual_bracket (BYTE x);
-
-
-
-//==================    Digits   ===========================
 extern bool is_upper_roman_digit (BYTE ch);
 extern bool is_lower_roman_digit (BYTE ch);
 extern bool is_roman_number ( const char *s, size_t len);
 extern bool is_pseudo_graph(BYTE x);
-//  =============  Punctuation Letters ======================
-
-extern	bool is_spc_fill (BYTE x);
-extern  bool is_english_upper(BYTE x);
-extern  bool is_english_lower(BYTE x);
-extern  bool is_german_upper(BYTE x);
-extern  bool is_german_lower(BYTE x);
-extern  bool is_russian_upper(BYTE x);     
-extern  bool is_russian_lower(BYTE x);
-
-extern  bool is_upper_consonant(BYTE x, MorphLanguageEnum Langua);
-extern  bool is_lower_vowel(BYTE x, MorphLanguageEnum Langua);
-extern  bool is_upper_vowel(BYTE x, MorphLanguageEnum Langua);
-
-extern  bool is_english_alpha(BYTE x);
-extern  bool is_russian_alpha(BYTE x);
-extern  bool is_german_alpha(BYTE x);
-
-extern  bool is_alpha (BYTE x);
-extern  bool is_alpha (BYTE x, MorphLanguageEnum langua);
-extern  bool is_lower_alpha(BYTE x, MorphLanguageEnum langua);
-extern  bool is_upper_alpha(BYTE x, MorphLanguageEnum langua);
-extern  bool isnspace(BYTE x);
-
-
-// ===============  Register ========================================
-extern  BYTE etoupper (BYTE ch);
-extern  BYTE etolower (BYTE ch);
-extern  BYTE rtoupper (BYTE ch); 
-extern  BYTE rtolower (BYTE ch); 
-extern  BYTE gtoupper (BYTE ch); 
-extern  BYTE gtolower (BYTE ch); 
-extern  BYTE ReverseChar (BYTE ch, MorphLanguageEnum langua);
-extern char* RusMakeUpper (char *word);
-extern char* EngMakeUpper (char *word);
-extern std::string& EngMakeUpper (std::string& word);
-extern std::string& EngMakeLower (std::string& word);
-extern char* GerMakeUpper (char *word);
-extern std::string& GerMakeUpper (std::string& word);
-extern char* RusMakeLower (char *word);
-extern std::string& EngRusMakeLower (std::string& word);
-extern char* EngRusMakeLower (char* word);
-extern char* RmlMakeUpper (char *word, MorphLanguageEnum langua);
-extern std::string& RmlMakeUpper (std::string& word, MorphLanguageEnum langua);
-extern std::string& RmlMakeLower (std::string& word, MorphLanguageEnum langua);
-
-extern std::string&  EngRusMakeUpper (std::string& word);
-extern char*  EngRusMakeUpper (char* word);
-std::string convert_from_utf8(const char *utf8str, const MorphLanguageEnum langua);
-std::string convert_to_utf8(const std::string& str, const MorphLanguageEnum langua);
-std::wstring utf8_to_utf16(const std::string& str);
-std::string utf16_to_utf8(const std::wstring& str);
-
-
-
-// check languaage 
-extern bool IsRussian (const char *word); 
-extern bool IsRussian (const std::string& word);
-extern bool IsEnglish (const char *word);
-extern bool IsEnglish (const std::string& word);
-extern bool IsGerman (const char *word);
-extern bool IsGerman (const std::string& word);
-extern bool CheckLanguage (const char *word, MorphLanguageEnum langua);
-extern bool CheckLanguage (const std::string& word, MorphLanguageEnum langua);
-
-
-extern bool HasJO(std::string src);
-extern void ConvertJO2Je(std::string& src);
-extern void ConvertJO2Je(char* src);
-extern void ConvertJO2Je(char* src, size_t Length);
-extern std::string ConvertASCIIToHtmlSymbols(const std::string& txt);
-
-
-template <class T, class Pred, class Conv>
-T& RegisterConverter (T& word, size_t Len, Pred P,  Conv C)
-{
-	for( size_t i = 0 ; i < Len; i++ )
-        if ( P( (BYTE)word[i] )  )
-			word[i] = C ( (BYTE)word[i] );
-
-    return word;
-}
-
-
-template <class T>
-T& GerEngRusMakeUpperTemplate (T& word, MorphLanguageEnum Langua, size_t Len )
-{
-	if (Len == 0) return word;
-
-	if (Langua == morphGerman)
-		return RegisterConverter(word, Len, is_german_lower, gtoupper);
-	else
-		for( size_t i = 0 ; i < Len; i++ )
-			if (is_russian_lower((BYTE)word[i]))
-					word[i] = rtoupper ( (BYTE)word[i] );
-			else
-			if (is_english_lower((BYTE)word[i]))
-					word[i] = etoupper ( (BYTE)word[i] );
-
-	return word;
-};	
-
-
-
-typedef  uint8_t part_of_speech_t;
-const BYTE	UnknownPartOfSpeech = 0xff;
-
-typedef  uint8_t grammem_t;
-typedef  uint8_t graph_descr_t;
-typedef  uint32_t part_of_speech_mask_t;
-typedef  uint64_t grammems_mask_t;
-
-//  uint64_t mask
-#define _QM(X) (((uint64_t)1)<<(X))
-
-enum RegisterEnum {AnyRegister=0, LowLow=1, UpLow=2, UpUp=3};
-
+extern bool is_spc_fill (BYTE x);
+extern bool isnspace(BYTE x);
 extern size_t FindFloatingPoint(const std::string& s);
-
-inline std::string _R(const char* buffer) {
-	return convert_from_utf8(buffer, morphRussian);
-}
-
-inline std::string _R(const std::string& s) {
-	return _R(s.c_str());
-}
-
-inline std::string _R0(const char* buffer) {
-	return buffer;
-}
-
-inline std::string _R0(const std::string& s) {
-	return s;
-}
-
-inline std::string _E(const char* buffer) {
-	return convert_from_utf8(buffer, morphEnglish);
-}
-
-inline std::string _E(const std::string& s) {
-	return _E(s.c_str());
-}
-
-inline std::string _G(const char* buffer) {
-	return convert_from_utf8(buffer, morphGerman);
-}
-
-inline std::string _G(const std::string& s) {
-	return _G(s.c_str());
-}
-
-inline bool startswith(const std::string& main, const std::string& prefix) {
-	return main.rfind(prefix, 0) == 0;
-}
-
-inline bool endswith(const std::string& main, const std::string& suffix) {
-	if (main.length() >= suffix.length()) {
-		return (0 == main.compare(main.length() - suffix.length(), suffix.length(), suffix));
-	}
-	else {
-		return false;
-	}
-}
-extern std::vector<std::string> list_path_by_file_mask(std::string filemask);
+extern bool startswith(const std::string& main, const std::string& prefix);
+extern bool endswith(const std::string& main, const std::string& suffix);
 extern std::string join_string(const std::vector<std::string>& items, const std::string& delimiter);
 extern std::vector<std::string> split_string(const std::string& s, char delim);
 
-extern void init_plog(plog::Severity severity, std::string filename, bool overwrite=true, MorphLanguageEnum langua=morphUnknown);
 
-template<class _II, class _Ty> inline
-bool _find(_II It, const _Ty& _V)
-{
-	return !(find(It.begin(), It.end(), _V) == It.end());
-}
-
+// multibyte encoding
+extern std::wstring utf8_to_utf16(const std::string& str);
+extern std::string utf16_to_utf8(const std::wstring& str);
 extern std::string& MakeUpperUtf8(std::string& s_utf8);
 extern std::string& MakeLowerUtf8(std::string& s_utf8);
 extern std::string& MakeTitleUtf8(std::string& s_utf8);
@@ -342,3 +159,13 @@ extern bool IsUpperVowel(uint32_t u);
 extern bool FirstLetterIsUpper(const std::string& s);
 std::u32string convert_utf8_to_utf32(const std::string& s);
 
+
+// logging
+extern void init_plog(plog::Severity severity, std::string filename, bool overwrite = true, MorphLanguageEnum langua = morphUnknown);
+
+// helpers
+template<class _II, class _Ty> inline
+bool _find(_II It, const _Ty& _V)
+{
+	return !(find(It.begin(), It.end(), _V) == It.end());
+}

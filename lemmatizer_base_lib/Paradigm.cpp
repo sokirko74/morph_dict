@@ -256,6 +256,7 @@ int  CFormInfo::GetHomonymWeight() const
 	return m_InnerAnnot.m_nWeight;
 }
 
+// method GetAccentedVowel is slow, but it is not used frequently in workflow
 BYTE	CFormInfo::GetAccentedVowel(uint16_t pos) const
 {
 	if (!m_bFound) return UnknownAccent;
@@ -269,8 +270,8 @@ BYTE	CFormInfo::GetAccentedVowel(uint16_t pos) const
 		return UnknownAccent;
 
 	BYTE BackVowelNo = m_pParent->m_AccentModels[I.m_LemmaInfo.m_AccentModelNo].m_Accents[pos];
-	std::string s = GetWordForm(pos);	
-	return MapReverseVowelNoToCharNo(s, BackVowelNo, m_pParent->GetLanguage());
+	std::wstring s = utf8_to_utf16(GetWordFormUtf8(pos));
+	return MapReverseVowelNoToCharNo(s, BackVowelNo);
 };
 
 BYTE	CFormInfo::GetSrcAccentedVowel() const

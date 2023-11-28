@@ -44,11 +44,11 @@ TEST_CASE("slf_accented") {
 	int error_line;
 	wizard.add_lemma_to_dict(slf, "", "", error_line);
 
-	std::string form = "ударение";
+	std::string form = "УДАРЕНИЕ";
 	auto w = wizard.find_lemm(form, false);
 	CHECK(1 == w.size());
 	auto accented = wizard.get_lemm_string_with_accents(w[0]);
-	CHECK("ударе'ние" == accented);
+	CHECK("УДАРЕ'НИЕ" == accented);
 }
 
 TEST_CASE("mrd_serialization") {
@@ -73,6 +73,23 @@ TEST_CASE("mrd_serialization") {
 	CHECK(w.size() == 3);
 
 	fs::remove_all(tmp_folder);
+}
+
+TEST_CASE("change_prd_info") {
+	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
+	MorphoWizard wizard;
+	wizard.load_wizard(path.string(), "guest", false, false, false);
+	auto w = wizard.find_lemm("слово", false);
+	REQUIRE(w.size() == 1);
+	REQUIRE(wizard.m_FlexiaModels.size() == 3);
+	wizard.change_prd_info(w[0]->second, w[0]->first, 2, w[0]->second.m_AccentModelNo, true);
+	std::string type_grm, prefixes;
+	auto slf = wizard.get_slf_string(w[0], type_grm, prefixes);
+	std::string canon =
+		"словю'                                                                N pl,\r\n"
+		"сло'вюм                                                              N sg,\r\n";
+	CHECK(canon == slf);
+
 }
 
 

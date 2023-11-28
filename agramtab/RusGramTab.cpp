@@ -194,11 +194,13 @@ void CRusGramTab::InitLanguageSpecific(rapidjson::Document& doc)  {
             }
         }
     }
-    assert (m_PopularGramCodes.m_ProductiveNoun.length() == 72); //72 = 6 cases * 2 numbers * 3 genders * 2 chars
-    assert (m_PopularGramCodes.m_ProductiveSingNoun.length() == 36); // 72 / 2
+	m_PopularGramCodes.m_GenderNumeral = GetAllGramCodes(NUMERAL, 0, AnyGender);
 
-    m_PopularGramCodes.m_GenderNumeral = GetAllGramCodes(NUMERAL, 0, AnyGender);
-    assert (m_PopularGramCodes.m_GenderNumeral.length() == 18 * 2);
+	if (!doc.HasMember("test_gramtab")) {
+		assert(m_PopularGramCodes.m_ProductiveNoun.length() == 72); //72 = 6 cases * 2 numbers * 3 genders * 2 chars
+		assert(m_PopularGramCodes.m_ProductiveSingNoun.length() == 36); // 72 / 2
+		assert(m_PopularGramCodes.m_GenderNumeral.length() == 18 * 2);
+	}
 
 };
 

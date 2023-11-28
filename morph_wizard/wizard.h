@@ -45,6 +45,13 @@ class MorphoWizard : public CMorphWizardBase
     void SaveLemmsToJson(CJsonObject& out) const;
     void load_mrd_json(bool guest, bool bCreatePrediction);
     void _find_lemm_by_regex(std::string pattern, bool bCheckLemmaPrefix, std::vector<lemma_iterator_t>& res);
+    BYTE	_GetReverseVowelNo(const std::string& form, uint16_t accentModelNo, uint16_t formInd) const;
+    void	SetAccent(uint16_t AccentModelNo, BYTE AuxAccent, int FormNo, std::string& form) const;
+    std::string	get_prefix_set_str(uint16_t PrefixSetNo) const;
+    void	ReadOnePrefixSet(std::string PrefixSet, std::set<std::string>& Result) const;
+    uint16_t	AddPrefixSet(std::string PrefixSetStr);
+    std::wstring to_wstring(const std::string& s) const;
+    std::string from_wstring(const std::wstring& s) const;
 
 public:
 
@@ -147,15 +154,6 @@ public:
 
     std::string create_slf_for_lemm(std::string lemm, size_t flexiaModelNo, int line_size) const;
 
-private:
-    BYTE	_GetReverseVowelNo(const std::string& form, uint16_t accentModelNo, uint16_t formInd) const;
-    void	SetAccent(uint16_t AccentModelNo, BYTE AuxAccent, int FormNo, std::string& form) const;
-    std::string	get_prefix_set_str(uint16_t PrefixSetNo) const;
-    void	ReadOnePrefixSet(std::string PrefixSet, std::set<std::string>& Result) const;
-    uint16_t	AddPrefixSet(std::string PrefixSetStr);
-
-
-
 };
 
 //----------------------------------------------------------------------------
@@ -169,4 +167,4 @@ private:
 };
 
 
-extern BYTE  MapReverseVowelNoToCharNo(const std::string& form, BYTE AccentCharNo, MorphLanguageEnum Language);
+extern BYTE  MapReverseVowelNoToCharNo(const std::wstring& form, BYTE AccentCharNo);

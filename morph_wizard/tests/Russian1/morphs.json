@@ -20,7 +20,20 @@
      "gramcode": "ab"
     }
    ]
+  },
+  {
+   "endings": [
+    {
+     "flexia": "Ю",
+     "gramcode": "ab"
+    },
+    {
+     "flexia": "ЮМ",
+     "gramcode": "aa"
+    }
+   ]
   }
+
  ],
  "accent_models": [
   [

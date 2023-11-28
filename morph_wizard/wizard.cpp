@@ -710,7 +710,6 @@ std::string MorphoWizard::get_lemm_string(const_lemma_iterator_t it) const {
 //----------------------------------------------------------------------------
 std::string MorphoWizard::get_lemm_string_with_accents(const_lemma_iterator_t it) const {
     std::string form = it->first;
-    MakeLowerUtf8(form);
     SetAccent(it->second.m_AccentModelNo, it->second.m_AuxAccent, 0, form);
     return form;
 }
@@ -769,20 +768,16 @@ std::string MorphoWizard::get_slf_string(lemma_iterator_t it, std::string& commo
 }
 
 
-BYTE MapReverseVowelNoToCharNo(const std::string& form, BYTE AccentCharNo, MorphLanguageEnum Language) {
+BYTE MapReverseVowelNoToCharNo(const std::wstring& form, BYTE AccentCharNo) {
     if (AccentCharNo == UnknownAccent) return UnknownAccent;
-
     assert(AccentCharNo < form.length());
-    int CountOfVowels = -1;
-    int i = (int)form.length() - 1;
-    assert(i < UnknownAccent);
-    for (; i >= 0; i--) {
-        if (is_lower_vowel((BYTE)form[i], Language)
-            || is_upper_vowel((BYTE)form[i], Language)
-            )
-            CountOfVowels++;
+    assert(form.length() + 1 < UnknownAccent);
+    int vowelBackIndex = -1;
+    for (int i = (int)form.length() - 1; i >= 0; i--) {
+        if (IsUpperVowel(form[i]))
+            vowelBackIndex++;
 
-        if (CountOfVowels == AccentCharNo) {
+        if (vowelBackIndex == AccentCharNo) {
             return i;
         };
     }
@@ -792,21 +787,19 @@ BYTE MapReverseVowelNoToCharNo(const std::string& form, BYTE AccentCharNo, Morph
 void MorphoWizard::SetAccent(uint16_t AccentModelNo, BYTE AuxAccent, int FormNo, std::string& form) const {
     if (AccentModelNo == UnknownAccentModelNo) return;
     assert(FormNo < m_AccentModels[AccentModelNo].m_Accents.size());
-    std::string& form_s8 = (m_bUseUtf8 ? convert_from_utf8(form.c_str(), m_Language) : form);
-    int u = MapReverseVowelNoToCharNo(form_s8, m_AccentModels[AccentModelNo].m_Accents[FormNo], m_Language);
+    std::wstring& wform = to_wstring(form);
+    int u = MapReverseVowelNoToCharNo(wform, m_AccentModels[AccentModelNo].m_Accents[FormNo]);
     if (u != UnknownAccent) {
-        form_s8.insert(u + 1, "'");
+        wform.insert(u + 1, 1, U'\'');
     };
     if (AuxAccent != UnknownAccent) {
         assert(AccentModelNo != UnknownAccentModelNo);
         // in  some forms auxiliary and main accents can be the same
-        if (form_s8[AuxAccent + 1] != '\'')
-            form_s8.insert(AuxAccent + 1, "'");
+        if (wform[AuxAccent + 1] != '\'')
+            wform.insert(AuxAccent + 1, 1, '\'');
 
     };
-    if (m_bUseUtf8) {
-        form = convert_to_utf8(form_s8, m_Language);
-    }
+    form = from_wstring(wform);
 };
 
 
@@ -823,9 +816,8 @@ std::string MorphoWizard::mrd_to_slf(const std::string& lemm, const CFlexiaModel
         if (!n) base = lemm.substr(0, lemm.size() - flex.size());
         if (code.size() % 2 != 0) throw CExpc("Wrong gramm code");
         std::string form = prefix + base + flex;
-
-        MakeLowerUtf8(form);
         SetAccent(AccentModelNo, AuxAccent, (int)n, form);
+        MakeLowerUtf8(form);
 
 
         for (int i = 0; i < code.size(); i += 2) {
@@ -1441,8 +1433,8 @@ BYTE MorphoWizard::GetLemmaAccent(const_lemma_iterator_t it) const {
     if (it->second.m_AccentModelNo == UnknownAccentModelNo)
         return UnknownAccent;
 
-    return MapReverseVowelNoToCharNo(it->first,
-        m_AccentModels[it->second.m_AccentModelNo].m_Accents[0], m_Language);
+    return MapReverseVowelNoToCharNo(to_wstring(it->first),
+        m_AccentModels[it->second.m_AccentModelNo].m_Accents[0]);
 }
 
 //----------------------------------------------------------------------------
@@ -1452,7 +1444,7 @@ BYTE MorphoWizard::_GetReverseVowelNo(const std::string& form, uint16_t accentMo
         return UnknownAccent;
 
     BYTE vowelNo = m_AccentModels[accentModelNo].m_Accents[formInd];
-    return MapReverseVowelNoToCharNo(form, vowelNo, m_Language) == UnknownAccent
+    return MapReverseVowelNoToCharNo(to_wstring(form), vowelNo) == UnknownAccent
         ? UnknownAccent : vowelNo;
 }
 
@@ -1509,4 +1501,24 @@ std::string MorphoWizard::create_slf_for_lemm(std::string lemm, size_t flexiaMod
     if (NewLemma.find("|"))
         NewLemma.erase(0, NewLemma.find("|") + 1);
     return mrd_to_slf(NewLemma, P, UnknownAccentModelNo, UnknownAccent, line_size);
+}
+
+std::wstring MorphoWizard::to_wstring(const std::string& s) const {
+    if (m_bUseUtf8) {
+        return utf8_to_utf16(s);
+    }
+    else {
+        // only during morph_gen, really is is not used
+        return utf8_to_utf16(convert_to_utf8(s, m_Language));
+    }
+}
+
+std::string MorphoWizard::from_wstring(const std::wstring& s) const {
+    if (m_bUseUtf8) {
+        return utf16_to_utf8(s);
+    }
+    else {
+        // only during morph_gen, really is is not used
+        return convert_from_utf8(utf16_to_utf8(s).c_str(), m_Language);
+    }
 }
