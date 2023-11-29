@@ -203,7 +203,7 @@ static size_t getCount(std::ifstream& mrdFile, const char* sectionName) {
 
 
 void MorphoWizard::ReadOnePrefixSet(std::string in, std::set<std::string>& out) const {
-    RmlMakeUpper(in, m_Language);
+    MakeUpperUtf8(in);
     out.clear();
     for (auto p : split_string(in, ' ')) {
         Trim(p);
@@ -1044,7 +1044,7 @@ void MorphoWizard::pack() {
     }
 
     {
-        LOGD << "finding all used flexia and accent modleys";
+        LOGD << "finding all used flexia and accent models";
         std::set<uint16_t> UsedFlexiaModels;
         std::set<uint16_t> UsedAccentModels;
         std::set<uint16_t> UsedPrefixSets;

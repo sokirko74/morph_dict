@@ -346,36 +346,6 @@ BYTE convert_latin_char_similar_russian_lower_char(BYTE ch) {
 }
 
 
-// ================== IsSuperEqualChar проверяет, что символы равны с точностью до регистра
-//  и с точностью до "языка", m.е. латинское "a" будет равно  русскому "а".
-bool IsSuperEqualChar(BYTE ch1, BYTE ch2, MorphLanguageEnum langua)
-{
-	if ((ch1 == ch2)
-		|| (ch1 == ReverseChar(ch2, langua))
-		)
-		return true;
-
-	ch1 = convert_latin_char_similar_russian_lower_char(ch1);
-	ch2 = convert_latin_char_similar_russian_lower_char(ch2);
-
-	if (is_russian_upper(ch1))
-		ch1 = rtolower(ch1);
-
-	if (is_russian_upper(ch2))
-		ch2 = rtolower(ch2);
-
-	if (is_english_upper(ch1))
-		ch1 = tolower(ch1);
-
-	if (is_english_upper(ch2))
-		ch2 = tolower(ch2);
-
-	return ch1 == ch2;
-}
-
-
-
-
 
 // == strincmp
 int CompareWithoutRegister(const char* s1, const char* s2, size_t l, MorphLanguageEnum langua)
@@ -705,6 +675,35 @@ BYTE rtolower(BYTE ch)
 };
 
 
+// ================== IsSuperEqualChar проверяет, что символы равны с точностью до регистра
+//  и с точностью до "языка", m.е. латинское "a" будет равно  русскому "а".
+bool IsSuperEqualChar(BYTE ch1, BYTE ch2, MorphLanguageEnum langua)
+{
+	if ((ch1 == ch2)
+		|| (ch1 == ReverseChar(ch2, langua))
+		)
+		return true;
+
+	ch1 = convert_latin_char_similar_russian_lower_char(ch1);
+	ch2 = convert_latin_char_similar_russian_lower_char(ch2);
+
+	if (is_russian_upper(ch1))
+		ch1 = rtolower(ch1);
+
+	if (is_russian_upper(ch2))
+		ch2 = rtolower(ch2);
+
+	if (is_english_upper(ch1))
+		ch1 = tolower(ch1);
+
+	if (is_english_upper(ch2))
+		ch2 = tolower(ch2);
+
+	return ch1 == ch2;
+}
+
+
+
 //========================================= ===========
 //============= General encoding functions ============
 //====================================================
@@ -734,20 +733,6 @@ bool is_alpha(BYTE x)
 };
 
 
-bool is_alpha(BYTE x, MorphLanguageEnum Langua)
-{
-	switch (Langua)
-	{
-	case morphFioDisclosures:
-	case morphRussian: return is_russian_alpha(x);
-	case morphEnglish: return is_english_alpha(x);
-	case morphGerman: return is_german_alpha(x);
-	case morphGeneric: return is_generic_alpha(x);
-	case morphURL: return is_URL_alpha(x);
-	};
-	assert(false);
-	return false;
-};
 
 bool is_lower_alpha(BYTE x, MorphLanguageEnum Langua)
 {
@@ -758,7 +743,6 @@ bool is_lower_alpha(BYTE x, MorphLanguageEnum Langua)
 	case morphEnglish: return is_english_lower(x);
 	case morphGerman: return is_german_lower(x);
 	case morphGeneric: return is_generic_lower(x);
-	case morphURL: return false;
 	};
 	assert(false);
 	return false;
@@ -773,7 +757,6 @@ bool is_upper_alpha(BYTE x, MorphLanguageEnum Langua)
 	case morphEnglish: return is_english_upper(x);
 	case morphGerman: return is_german_upper(x);
 	case morphGeneric: return is_generic_upper(x);
-	case morphURL: return false;
 	};
 	assert(false);
 	return false;
@@ -832,44 +815,6 @@ BYTE ReverseChar(BYTE ch, MorphLanguageEnum langua)
 };
 
 
-// конвертирует из прописной кириллицы в заглавную 
-char* RusMakeUpper(char* word)
-{
-	return RegisterConverter(word, strlen(word), is_russian_lower, rtoupper);
-}
-// конвертирует из прописной кириллицы в заглавную 
-char* EngMakeUpper(char* word)
-{
-	return RegisterConverter(word, strlen(word), is_english_lower, etoupper);
-}
-
-std::string& EngMakeUpper(std::string& word)
-{
-	return RegisterConverter(word, word.length(), is_english_lower, etoupper);
-}
-
-std::string& EngMakeLower(std::string& word)
-{
-	return RegisterConverter(word, word.length(), is_english_upper, etolower);
-}
-
-
-char* GerMakeUpper(char* word)
-{
-	return RegisterConverter(word, strlen(word), is_german_lower, gtoupper);
-}
-
-std::string& GerMakeUpper(std::string& word)
-{
-	return RegisterConverter(word, word.length(), is_german_lower, gtoupper);
-}
-
-// конвертирует из заглавной кириллицы в прописную 
-char* RusMakeLower(char* word)
-{
-	return RegisterConverter(word, strlen(word), is_russian_upper, rtolower);
-}
-
 bool is_arab_digit(BYTE c)
 {
 	return isdigit(c) != 0;
@@ -927,17 +872,6 @@ bool IsGerman(const std::string& word)
 	return CheckLanguage(word, word.length(), morphGerman);
 }
 
-bool CheckLanguage(const char* word, MorphLanguageEnum langua)
-{
-	return CheckLanguage(word, strlen(word), langua);
-};
-
-bool CheckLanguage(const std::string& word, MorphLanguageEnum langua)
-{
-	return CheckLanguage(word, word.length(), langua);
-};
-
-
 
 
 // конвертирует из прописные  кириллицы в строчную
@@ -969,6 +903,23 @@ char* EngRusMakeLower(char* word)
 	return word;
 }
 
+template <class T>
+T& GerEngRusMakeUpperTemplate(T& word, MorphLanguageEnum Langua, size_t Len)
+{
+	if (Len == 0) return word;
+
+	if (Langua == morphGerman)
+		return RegisterConverter(word, Len, is_german_lower, gtoupper);
+	else
+		for (size_t i = 0; i < Len; i++)
+			if (is_russian_lower((BYTE)word[i]))
+				word[i] = rtoupper((BYTE)word[i]);
+			else
+				if (is_english_lower((BYTE)word[i]))
+					word[i] = etoupper((BYTE)word[i]);
+
+	return word;
+};
 
 
 char* RmlMakeUpper(char* word, MorphLanguageEnum langua)
@@ -1101,4 +1052,8 @@ BYTE convert_html_entity_to_char(const std::string& entity) {
 	else if (entity == "egrave") { return egrave; }
 	else if (entity == "eacute") { return eacute; }
 	else return 0;
+}
+
+void MakeUpperVector(std::vector<char>& v, MorphLanguageEnum langua) {
+	GerEngRusMakeUpperTemplate(v, langua, v.size());
 }

@@ -1,16 +1,18 @@
 ﻿// from https://www.alphabet.se/download/UtfConv.c
+#include "base_types.h"
 #include <iostream>
 #include <string>
 #include <codecvt>
 #include <locale>
 #include <algorithm>
+#include <assert.h>
 
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 
 std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
 
 
-inline uint32_t toupper_utf32(uint32_t c)
+uint32_t toupper_utf32(uint32_t c)
 {
 	if ((c >= 0x61) && (c <= 0x7a)) /* US ASCII */
 		return c - 0x20;
@@ -8218,7 +8220,7 @@ std::string& MakeLowerUtf8(std::string& s_utf8) {
 
 std::string& MakeTitleUtf8(std::string& s_utf8) {
 	if (s_utf8.empty()) {
-		return std::string();
+		return s_utf8;
 	}
 	std::u32string s32 = conv_utf8_utf32.from_bytes(s_utf8);
 	std::transform(s32.cbegin() + 1, s32.cend(),
@@ -8259,6 +8261,10 @@ bool IsUnicodeGerman(uint16_t u) {
 		case U'ü': return true;
 	default: return false;
 	}
+}
+
+bool IsUnicodeAlpha(uint16_t u) {
+	return IsUnicodeRussian(u) || IsUnicodeGerman(u);
 }
 
 typedef bool (*unicode_check_pred)(uint16_t u);
@@ -8313,13 +8319,13 @@ bool CheckGermanUtf8(const std::string& s) {
 
 bool IsUnicodeUpperGermanVowel(uint32_t u) {
 	switch (u) {
-	case U'Ä': return true;
-	case U'Ö': return true;
-	case U'Ü': return true;
-	case U'A': return true;
-	case U'E': return true;
-	case U'U': return true;
-	case U'I': return true;
+	case U'Ä': 
+	case U'Ö': 
+	case U'Ü': 
+	case U'A': 
+	case U'E': 
+	case U'U': 
+	case U'I': 
 	case U'O': return true;
 	default: return false;
 	}
@@ -8327,10 +8333,10 @@ bool IsUnicodeUpperGermanVowel(uint32_t u) {
 
 bool IsUnicodeUpperEnglishVowel(uint32_t u) {
 	switch (u) {
-	case U'A': return true;
-	case U'E': return true;
-	case U'U': return true;
-	case U'I': return true;
+	case U'A': 
+	case U'E': 
+	case U'U': 
+	case U'I': 
 	case U'O': return true;
 	default: return false;
 	}
@@ -8338,14 +8344,14 @@ bool IsUnicodeUpperEnglishVowel(uint32_t u) {
 
 bool IsUnicodeUpperRussianVowel(uint32_t u) {
 	switch (u) {
-	case U'Е': return true;
-	case U'Ы': return true;
-	case U'А': return true;
-	case U'О': return true;
-	case U'Э': return true;
-	case U'Я': return true;
-	case U'И': return true;
-	case U'Ю': return true;
+	case U'Е': 
+	case U'Ы': 
+	case U'А': 
+	case U'О': 
+	case U'Э': 
+	case U'Я': 
+	case U'И': 
+	case U'Ю': 
 	case U'Ё': return true;
 	default: return false;
 	}
@@ -8387,4 +8393,16 @@ bool FirstLetterIsUpper(const std::string& s) {
 std::u32string convert_utf8_to_utf32(const std::string& s_utf8)
 {
 	return conv_utf8_utf32.from_bytes(s_utf8);
+}
+
+bool CheckLanguage(const std::string& s, MorphLanguageEnum langua) {
+	switch (langua) {
+		case morphFioDisclosures:
+		case morphRussian: return CheckRussianUtf8(s);
+		case morphGerman: return CheckGermanUtf8(s);
+		case morphEnglish: return CheckEnglishUtf8(s);
+		default: 
+			assert(false);
+					return true;
+	};
 }

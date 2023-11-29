@@ -91,7 +91,24 @@ TEST_CASE("change_prd_info") {
 	CHECK(canon == slf);
 
 }
-
+TEST_CASE("prefixes") {
+	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
+	MorphoWizard wizard;
+	wizard.load_wizard(path.string(), "guest", false, false, false);
+	std::string slf = "ВОРД N sg\nПО|ВОРД N sg";
+	int error_line;
+	std::string in_prefix = "ПСЕВДО";
+	wizard.add_lemma_to_dict(slf, "", in_prefix, error_line);
+	auto lemmas = wizard.find_lemm("ВОРД", false);
+	REQUIRE(1 == lemmas.size());
+	std::string type_grm, out_prefix;
+	slf = wizard.get_slf_string(lemmas[0], type_grm, out_prefix);
+	std::string canon =
+		"ворд                                                                   N sg,\r\n"
+		"по|ворд                                                              N sg,\r\n";
+	CHECK(canon == slf);
+	CHECK(in_prefix == out_prefix);
+}
 
 int main(int argc, char** argv) {
 	init_plog(plog::Severity::debug, "morph_wizard_test.log");

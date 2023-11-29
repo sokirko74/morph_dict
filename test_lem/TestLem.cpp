@@ -27,7 +27,8 @@ void CheckSpeed(std::istream& inputStream, std::ostream& output) {
         while(getline(inputStream, line)) {
             Trim(line);
             if (line.empty()) continue;
-            RmlMakeUpper(line, Holder.m_pLemmatizer->GetLanguage());
+            MakeLowerUtf8(line);
+            line = convert_from_utf8(line, Holder.m_CurrentLanguage);
             Forms.push_back(line);
         };
     };

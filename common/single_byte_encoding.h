@@ -1,6 +1,7 @@
 #pragma once
 #include  "base_types.h"
 #include "../contrib/iconv_subset/iconv.h"
+#include "vector"
 
 // single byte chars for Graphan
 const BYTE GraphematicalTAB    = (BYTE) 16;
@@ -40,24 +41,13 @@ extern  bool is_russian_alpha(BYTE x);
 extern  bool is_german_alpha(BYTE x);
 
 extern  bool is_alpha(BYTE x);
-extern  bool is_alpha(BYTE x, MorphLanguageEnum langua);
 extern  bool is_lower_alpha(BYTE x, MorphLanguageEnum langua);
 extern  bool is_upper_alpha(BYTE x, MorphLanguageEnum langua);
-extern  BYTE etoupper(BYTE ch);
-extern  BYTE etolower(BYTE ch);
-extern  BYTE rtoupper(BYTE ch);
-extern  BYTE rtolower(BYTE ch);
-extern  BYTE gtoupper(BYTE ch);
-extern  BYTE gtolower(BYTE ch);
+
 extern  BYTE ReverseChar(BYTE ch, MorphLanguageEnum langua);
-extern char* RusMakeUpper(char* word);
-extern char* EngMakeUpper(char* word);
-extern std::string& EngMakeUpper(std::string& word);
-extern std::string& EngMakeLower(std::string& word);
-extern char* GerMakeUpper(char* word);
-extern std::string& GerMakeUpper(std::string& word);
-extern char* RusMakeLower(char* word);
-extern std::string& EngRusMakeLower(std::string& word);
+
+
+
 extern char* EngRusMakeLower(char* word);
 extern char* RmlMakeUpper(char* word, MorphLanguageEnum langua);
 extern std::string& RmlMakeUpper(std::string& word, MorphLanguageEnum langua);
@@ -74,8 +64,6 @@ extern bool IsEnglish(const char* word);
 extern bool IsEnglish(const std::string& word);
 extern bool IsGerman(const char* word);
 extern bool IsGerman(const std::string& word);
-extern bool CheckLanguage(const char* word, MorphLanguageEnum langua);
-extern bool CheckLanguage(const std::string& word, MorphLanguageEnum langua);
 
 
 extern bool HasJO(std::string src);
@@ -96,23 +84,8 @@ T& RegisterConverter(T& word, size_t Len, Pred P, Conv C)
 }
 
 
-template <class T>
-T& GerEngRusMakeUpperTemplate(T& word, MorphLanguageEnum Langua, size_t Len)
-{
-	if (Len == 0) return word;
 
-	if (Langua == morphGerman)
-		return RegisterConverter(word, Len, is_german_lower, gtoupper);
-	else
-		for (size_t i = 0; i < Len; i++)
-			if (is_russian_lower((BYTE)word[i]))
-				word[i] = rtoupper((BYTE)word[i]);
-			else
-				if (is_english_lower((BYTE)word[i]))
-					word[i] = etoupper((BYTE)word[i]);
-
-	return word;
-};
+void MakeUpperVector(std::vector<char>& v, MorphLanguageEnum Langua);
 
 inline std::string _R(const char* buffer) {
 	return convert_from_utf8(buffer, morphRussian);

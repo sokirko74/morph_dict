@@ -28,9 +28,6 @@ static int  InitAlphabet(MorphLanguageEnum Language, int* pCode2Alphabet, int* p
 			|| ((Language == morphFioDisclosures)
 				&& (additionalFioDisclosuresChars.find((BYTE)i) != std::string::npos)
 				)
-			|| ((Language == morphURL)
-				&& is_alpha((BYTE)i, morphURL)
-				)
 			)
 		{
 			pCode2Alphabet[AlphabetSize] = (int)i;
