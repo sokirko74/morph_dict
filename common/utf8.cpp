@@ -12,6 +12,7 @@
 std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
 
 
+
 uint32_t toupper_utf32(uint32_t c)
 {
 	if ((c >= 0x61) && (c <= 0x7a)) /* US ASCII */
@@ -8390,9 +8391,16 @@ bool FirstLetterIsUpper(const std::string& s) {
 	return tolower_utf32(c) != c; // if it can be lowercased then it is uppercased
 }
 
-std::u32string convert_utf8_to_utf32(const std::string& s_utf8)
+std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv_utf8_wstring;
+
+std::wstring utf8_to_wstring(const std::string& s_utf8)
 {
-	return conv_utf8_utf32.from_bytes(s_utf8);
+	return conv_utf8_wstring.from_bytes(s_utf8);
+}
+
+std::string wstring_to_utf8(const std::wstring& wstr)
+{
+	return conv_utf8_wstring.to_bytes(wstr);
 }
 
 bool CheckLanguage(const std::string& s, MorphLanguageEnum langua) {

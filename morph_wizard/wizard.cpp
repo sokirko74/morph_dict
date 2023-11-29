@@ -1505,20 +1505,20 @@ std::string MorphoWizard::create_slf_for_lemm(std::string lemm, size_t flexiaMod
 
 std::wstring MorphoWizard::to_wstring(const std::string& s) const {
     if (m_bUseUtf8) {
-        return utf8_to_utf16(s);
+        return utf8_to_wstring(s);
     }
     else {
         // only during morph_gen, really is is not used
-        return utf8_to_utf16(convert_to_utf8(s, m_Language));
+        return utf8_to_wstring(convert_to_utf8(s, m_Language));
     }
 }
 
 std::string MorphoWizard::from_wstring(const std::wstring& s) const {
     if (m_bUseUtf8) {
-        return utf16_to_utf8(s);
+        return wstring_to_utf8(s);
     }
     else {
         // only during morph_gen, really is is not used
-        return convert_from_utf8(utf16_to_utf8(s).c_str(), m_Language);
+        return convert_from_utf8(wstring_to_utf8(s).c_str(), m_Language);
     }
 }

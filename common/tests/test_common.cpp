@@ -1,6 +1,7 @@
 #include "morph_dict/common/utilit.h"
 #include <locale>
 #include <cwctype>
+#include <codecvt>
 
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "morph_dict/contrib/doctest/doctest.h"
@@ -55,6 +56,7 @@ TEST_CASE("unicode2") {
 }
 
 TEST_CASE("check_english") {
+	// possibly unused
 	const std::locale c_locale("C");
 	CHECK(std::isalpha('a', c_locale));
 	CHECK(std::isalpha('z', c_locale));
@@ -64,6 +66,22 @@ TEST_CASE("check_english") {
 
 }
 
+TEST_CASE("check_utf16") {
+	std::string rus_utf8 = "zмама";
+	CHECK(9 == rus_utf8.length());
+	std::wstring wstr = utf8_to_wstring(rus_utf8);
+	CHECK(5 == wstr.length());
+	std::string s = wstring_to_utf8(wstr);
+	CHECK(s == rus_utf8);
+}
+
+TEST_CASE("check_punct") {
+	std::string puncts = "!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}";
+	for (auto i : puncts) {
+		CHECK(std::iswpunct(i) != 0);
+	}
+	CHECK(std::iswpunct(U'Я') == 0);
+}
 
 int main(int argc, char** argv) {
 	init_plog(plog::Severity::debug, "test_common.log");

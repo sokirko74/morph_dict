@@ -270,7 +270,7 @@ BYTE	CFormInfo::GetAccentedVowel(uint16_t pos) const
 		return UnknownAccent;
 
 	BYTE BackVowelNo = m_pParent->m_AccentModels[I.m_LemmaInfo.m_AccentModelNo].m_Accents[pos];
-	std::wstring s = utf8_to_utf16(GetWordFormUtf8(pos));
+	std::wstring s = utf8_to_wstring(GetWordFormUtf8(pos));
 	return MapReverseVowelNoToCharNo(s, BackVowelNo);
 };
 

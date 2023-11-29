@@ -49,7 +49,7 @@ static BYTE get_accented_vowels_index(std::string& form, BYTE& aux_accent_offset
     BYTE result_offset = UnknownAccent;
     size_t accents_count = 0;
     size_t vowels_count = 0;
-    auto wform = utf8_to_utf16(form);
+    auto wform = utf8_to_wstring(form);
     for (int k = (int)wform.length() - 1; k >= 0; k--) {
         if (IsUpperVowel(wform[k]))
             vowels_count++;
@@ -82,7 +82,7 @@ static BYTE get_accented_vowels_index(std::string& form, BYTE& aux_accent_offset
         };
     };
     if (wform.length() != form.length()) {
-        form = utf16_to_utf8(wform);
+        form = wstring_to_utf8(wform);
     }
     return result_offset;
 }

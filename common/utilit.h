@@ -25,6 +25,7 @@
 #include <limits>
 #include <plog/Log.h>
 #include <filesystem>
+#include <cwctype>
 
 namespace fs = std::filesystem;
 
@@ -140,8 +141,8 @@ extern std::vector<std::string> split_string(const std::string& s, char delim);
 
 
 // multibyte encoding
-extern std::wstring utf8_to_utf16(const std::string& str);
-extern std::string utf16_to_utf8(const std::wstring& str);
+extern std::wstring utf8_to_wstring(const std::string& str);
+extern std::string wstring_to_utf8(const std::wstring& str);
 extern std::string& MakeUpperUtf8(std::string& s_utf8);
 extern std::string& MakeLowerUtf8(std::string& s_utf8);
 extern std::string& MakeTitleUtf8(std::string& s_utf8);
@@ -157,7 +158,6 @@ extern bool IsUnicodeUpperRussianVowel(uint32_t u);
 extern uint32_t GetFirstUnicodeLetterFromUtf8(const std::string& s);
 extern bool IsUpperVowel(uint32_t u);
 extern bool FirstLetterIsUpper(const std::string& s);
-std::u32string convert_utf8_to_utf32(const std::string& s);
 extern bool IsUnicodeAlpha(uint16_t u);
 uint32_t toupper_utf32(uint32_t c);
 bool CheckLanguage(const std::string& s, MorphLanguageEnum langua);
