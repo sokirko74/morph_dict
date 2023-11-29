@@ -357,7 +357,7 @@ struct tm  RmlGetCurrentTime ()
 
 bool GetLanguageByString (std::string s, MorphLanguageEnum& Result)
 {
-	EngRusMakeUpper(s);
+	MakeUpperUtf8(s);
 	if(s == "RUSSIAN"){
 		Result = morphRussian;
 		return true;

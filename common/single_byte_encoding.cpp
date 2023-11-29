@@ -922,61 +922,11 @@ T& GerEngRusMakeUpperTemplate(T& word, MorphLanguageEnum Langua, size_t Len)
 };
 
 
-char* RmlMakeUpper(char* word, MorphLanguageEnum langua)
-{
-	if (!word) return word;
-	return GerEngRusMakeUpperTemplate(word, langua, strlen(word));
-};
-
 std::string& RmlMakeUpper(std::string& word, MorphLanguageEnum langua)
 {
 	GerEngRusMakeUpperTemplate(word, langua, word.length());
 	return word;
 };
-
-std::string& RmlMakeLower(std::string& word, MorphLanguageEnum langua)
-{
-	if (word.length() == 0) return word;
-
-	if (langua == morphGerman)
-		return RegisterConverter(word, word.length(), is_german_upper, gtolower);
-	else
-		return EngRusMakeLower(word);
-};
-
-
-// конвертирует из строчной кириллицы в прописные 
-std::string& EngRusMakeUpper(std::string& word)
-{
-	size_t len = word.length();
-	for (size_t i = 0; i < len; i++)
-		if (is_russian_lower((BYTE)word[i]))
-			word[i] = rtoupper((BYTE)word[i]);
-		else
-			word[i] = etoupper((BYTE)word[i]);
-
-	return word;
-}
-
-
-
-// конвертирует из строчной кириллицы в прописные 
-char* EngRusMakeUpper(char* word)
-{
-	if (word == 0) return 0;
-	size_t len = strlen(word);
-
-	for (size_t i = 0; i < len; i++)
-
-		if (is_russian_lower((BYTE)word[i]))
-			word[i] = rtoupper((BYTE)word[i]);
-		else
-			if (is_english_lower((BYTE)word[i]))
-				word[i] = etoupper((BYTE)word[i]);
-
-
-	return word;
-}
 
 
 template<class T>
