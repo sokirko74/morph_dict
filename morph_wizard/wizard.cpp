@@ -340,7 +340,12 @@ std::vector<lemma_iterator_t> MorphoWizard::find_lemm(std::string lemm, bool bCh
         m_pMeter->SetMaxPos((uint32_t)m_LemmaToParadigm.size());
         m_pMeter->SetInfo("Finding lemmas...");
     }
-    MakeUpperUtf8(lemm);
+    if (m_bUseUtf8) {
+        MakeUpperUtf8(lemm);
+    }
+    else {
+        RmlMakeUpper(lemm, m_Language);
+    }
     std::vector<lemma_iterator_t> res;
 
     // search a regular expression
@@ -1380,25 +1385,32 @@ bool MorphoWizard::attach_form_prefixes_to_bases() {
 //----------------------------------------------------------------------------
 void MorphoWizard::convert_je_to_jo() {
     if (m_Language != morphRussian) return;
+    assert(!m_bUseUtf8);
 
-    for (int ModelNo = 0; ModelNo < m_FlexiaModels.size(); ModelNo++)
-        for (size_t k = 0; k < m_FlexiaModels[ModelNo].m_Flexia.size(); k++) {
-            ConvertJO2Je(m_FlexiaModels[ModelNo].m_Flexia[k].m_PrefixStr);
-            ConvertJO2Je(m_FlexiaModels[ModelNo].m_Flexia[k].m_FlexiaStr);
-        };
-
-    for (lemma_iterator_t lemm_it = m_LemmaToParadigm.begin(); lemm_it != m_LemmaToParadigm.end();) {
-        std::string Lemma = lemm_it->first;
-        ConvertJO2Je(Lemma);
-        lemma_iterator_t next_lemm_it = lemm_it;
-        next_lemm_it++;
-        if (Lemma != lemm_it->first) {
-            CParadigmInfo P = lemm_it->second;
-            m_LemmaToParadigm.erase(lemm_it);
-            m_LemmaToParadigm.insert(std::make_pair(Lemma, P));
-        };
-        lemm_it = next_lemm_it;
-    };
+    for (auto& m : m_FlexiaModels) {
+        for (auto& f : m.m_Flexia) {
+            ConvertJO2Je(f.m_PrefixStr);
+            ConvertJO2Je(f.m_FlexiaStr);
+        }
+    }
+    std::unordered_map<std::string, std::string> replacements;
+    for (auto& [key, _]: m_LemmaToParadigm) {
+        std::string lemma = key;
+        ConvertJO2Je(lemma);
+        if (lemma != key) {
+            replacements[key] = lemma;
+        }
+    }
+    for (auto& [old_lemma, new_lemma] : replacements) {
+        while (true) {
+            auto range = m_LemmaToParadigm.equal_range(old_lemma);
+            if (range.first == range.second) {
+                break;
+            }
+            m_LemmaToParadigm.insert({ new_lemma, range.first->second });
+            m_LemmaToParadigm.erase(range.first);
+        }
+    }
 }
 
 

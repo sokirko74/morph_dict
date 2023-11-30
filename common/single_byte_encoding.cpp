@@ -821,57 +821,6 @@ bool is_arab_digit(BYTE c)
 }
 
 
-typedef bool (*SymbolCheckerFunc) (BYTE);
-
-template<class T>
-bool CheckLanguage(const T& src, size_t Length, MorphLanguageEnum langua)
-{
-	SymbolCheckerFunc SymbolChecker = 0;
-
-	switch (langua) {
-	case morphFioDisclosures:
-	case morphRussian: SymbolChecker = is_russian_alpha; break;
-	case morphGerman: SymbolChecker = is_german_alpha; break;
-	case morphEnglish: SymbolChecker = is_english_alpha; break;
-	case morphDigits: SymbolChecker = is_arab_digit; break;
-	};
-	if (!SymbolChecker) return false;
-
-	for (size_t i = 0; i < Length; i++)
-		if (!SymbolChecker((BYTE)src[i]))
-			if ((BYTE)src[i] != '-')
-				return false;
-	return true;
-};
-
-bool IsRussian(const char* word)
-{
-	return CheckLanguage(word, strlen(word), morphRussian);
-}
-bool IsRussian(const std::string& word)
-{
-	return CheckLanguage(word, word.length(), morphRussian);
-}
-
-bool IsEnglish(const char* word)
-{
-	return CheckLanguage(word, strlen(word), morphEnglish);
-}
-
-bool IsEnglish(const std::string& word)
-{
-	return CheckLanguage(word, word.length(), morphEnglish);
-}
-
-bool IsGerman(const char* word)
-{
-	return CheckLanguage(word, strlen(word), morphGerman);
-}
-bool IsGerman(const std::string& word)
-{
-	return CheckLanguage(word, word.length(), morphGerman);
-}
-
 
 
 // конвертирует из прописные  кириллицы в строчную
@@ -948,27 +897,11 @@ void ConvertJO2Je(char* src, size_t Length)
 	ConvertJO2JeTemplate(src, Length);
 };
 
-bool HasJO(std::string src)
-{
-	for (size_t i = 0; i < src.length(); i++)
-	{
-		if (((BYTE)src[i]) == LowerJO)
-			return true;
-		else
-			if (((BYTE)src[i]) == UpperJO)
-				return true;
-	}
-	return false;
-}
 
 void ConvertJO2Je(std::string& src)
 {
 
 	ConvertJO2JeTemplate(src, src.length());
-};
-void ConvertJO2Je(char* src)
-{
-	ConvertJO2JeTemplate(src, strlen(src));
 };
 
 std::string convert_from_utf8(const char* utf8str, const MorphLanguageEnum langua) {

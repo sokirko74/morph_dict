@@ -50,17 +50,8 @@ extern std::string& RmlMakeUpper(std::string& word, MorphLanguageEnum langua);
 std::string convert_from_utf8(const char* utf8str, const MorphLanguageEnum langua);
 std::string convert_to_utf8(const std::string& str, const MorphLanguageEnum langua);
 
-extern bool IsRussian(const char* word);
-extern bool IsRussian(const std::string& word);
-extern bool IsEnglish(const char* word);
-extern bool IsEnglish(const std::string& word);
-extern bool IsGerman(const char* word);
-extern bool IsGerman(const std::string& word);
 
-
-extern bool HasJO(std::string src);
 extern void ConvertJO2Je(std::string& src);
-extern void ConvertJO2Je(char* src);
 extern void ConvertJO2Je(char* src, size_t Length);
 extern std::string ConvertASCIIToHtmlSymbols(const std::string& txt);
 

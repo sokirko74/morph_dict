@@ -110,6 +110,15 @@ TEST_CASE("prefixes") {
 	CHECK(in_prefix == out_prefix);
 }
 
+TEST_CASE("convert_jo_to_je") {
+	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
+	MorphoWizard wizard;
+	wizard.load_wizard(path.string(), "guest", false, false, true);
+	wizard.convert_je_to_jo();
+	auto w = wizard.find_lemm(convert_from_utf8("елка", morphRussian), false);
+	CHECK(1 == w.size());
+}
+
 int main(int argc, char** argv) {
 	init_plog(plog::Severity::debug, "morph_wizard_test.log");
 	doctest::Context context;

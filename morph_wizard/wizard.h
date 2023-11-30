@@ -105,7 +105,6 @@ public:
     std::string                 get_prefix_set(CParadigmInfo i) const;
     std::string					get_pos_string_and_grammems(const std::string& code) const;
     const CMorphSession& get_session(int SessionNo) const;
-    bool					IsGerman() const { return m_Language == morphGerman; };
     const StringVector& get_poses() { return m_PosesList; }
     const StringVector& get_grammems() { return m_GrammemsList; }
     const StringVector& get_type_grammems() { return m_TypeGrammemsList; }
