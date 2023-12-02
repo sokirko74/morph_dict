@@ -289,7 +289,7 @@ nlohmann::json CAgramtab::ReadFromFolder(std::string folder) {
         pAgramtabLine->m_PartOfSpeech = pos;
         size_t gram_index = GramcodeToLineIndex(gramcode.c_str());
         if (GetLine(gram_index)) {
-            throw CExpc(Format("line %s in  %s contains a dublicate gramcode",key.c_str(), m_InputJsonPath));
+            throw CExpc(Format("line %s in  %s contains a dublicate gramcode",key.c_str(), m_InputJsonPath.c_str()));
         }
         GetLine(gram_index) = pAgramtabLine;
         line_no++;
