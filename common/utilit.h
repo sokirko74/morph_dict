@@ -87,6 +87,7 @@ public:
 	CExpc(const std::string& cause);
 	CExpc(const char* format, ...);
 	virtual char const* what() const override;
+	void add_to_message(std::string m);
 };
 	
 extern inline uint64_t GetMaxQWORD();
@@ -98,7 +99,7 @@ extern bool         DirExists(const char *path);
 extern file_off_t	FileSize (const char *filename);
 extern std::vector<std::string> list_path_by_file_mask(std::string filemask);
 extern std::string	CreateTempFileName();
-extern std::string LoadFileToString(std::string path);
+extern std::string LoadFileToString(std::string path, bool convert_zero_to_one=false);
 extern std::string	MakeFName(const std::string& InpitFileName, const std::string& Ext);
 extern std::string   MakePath(const std::string path, const std::string fileName);
 extern std::string	GetParentPath(std::string FileName);

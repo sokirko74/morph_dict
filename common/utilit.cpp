@@ -730,7 +730,7 @@ void CMyTimeSpanHolder::ClearTimers()
 };
 
 
-std::string LoadFileToString(std::string path)
+std::string LoadFileToString(std::string path, bool convert_zero_to_one)
 {
 	std::ifstream t(path);
 	if (!t.good()) {
@@ -738,7 +738,11 @@ std::string LoadFileToString(std::string path)
 	}
 	std::stringstream buffer;
 	buffer << t.rdbuf();
-	return buffer.str();
+	std::string s = buffer.str();
+	if (convert_zero_to_one) {
+		std::replace(s.begin(), s.end(), '\x0', '\x1');
+	}
+	return s;
 };
 
 bool is_pseudo_graph(BYTE x)
@@ -761,6 +765,10 @@ CExpc::CExpc(const std::string& Cause)
     m_strCause = Cause;
 };
 
+void CExpc::add_to_message(std::string m) {
+	m_strCause += m;
+
+}
 
 
 CExpc::CExpc(const char* format, ... )

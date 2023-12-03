@@ -376,44 +376,7 @@ int CompareWithoutRegister(const char* s1, const char* s2, size_t l, MorphLangua
 
 
 
-// в первой строке находятся латинские буквы, который могут быть заменены на
-// русские
-const static std::string latin_chars = "AaEe3KkMHOoPpCcyXxuT";
 
-// во второй строке находятся русские
-const static std::string russian_chars = _R("АаЕеЗКкМНОоРрСсуХхиТ");
-
-
-BYTE force_rus_char(BYTE ch)
-{
-
-#ifdef _DEBUG
-	assert(latin_chars.length() == russian_chars.length());
-#endif
-
-	size_t i = latin_chars.find(ch);
-
-	if (i == std::string::npos) return 0;
-
-	return russian_chars[i];
-}
-
-
-
-bool force_to_rus(char* dest, const char* sour, size_t len)
-{
-	BYTE ch = 0;
-
-	for (size_t i = 0; i < len; i++)
-		if (is_russian_alpha((BYTE)sour[i]) || sour[i] == '-')
-			dest[i] = sour[i];
-		else
-			if ((ch = force_rus_char((BYTE)sour[i])) != 0)
-				dest[i] = ch;
-			else
-				return false;
-	return true;
-}
 
 bool is_upper_roman_digit(BYTE ch)
 {
