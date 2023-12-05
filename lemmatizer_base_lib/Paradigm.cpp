@@ -300,7 +300,7 @@ std::string CFormInfo::FormatAsInPlmLine() const
         Result += Format(" %lu %i", GetParadigmId(), GetHomonymWeight());
 	else
 		Result += " -1 0";
-    return Result;
+    return convert_to_utf8(Result, m_pParent->m_Language);
 };
 
 std::string CFormInfo::GetGramInfoStr(const CAgramtab* gramtab) const

@@ -79,6 +79,5 @@ inline std::string _R(const std::string& s) {
 }
 
 extern bool		IsSuperEqualChar(BYTE ch1, BYTE ch2, MorphLanguageEnum langua);
-extern int		CompareWithoutRegister(const char* s1, const char* s2, size_t l, MorphLanguageEnum langua);
 extern BYTE		force_rus_char(BYTE ch);
 extern BYTE convert_html_entity_to_char(const std::string& entity);
