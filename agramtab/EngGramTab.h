@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "agramtab_.h"       // main symbols
+#include "agramtab.h"       // main symbols
 
  enum EnglishPartOfSpeechEnum
  {

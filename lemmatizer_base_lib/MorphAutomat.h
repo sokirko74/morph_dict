@@ -5,6 +5,7 @@
 #pragma once 
 
 #include "../common/util_classes.h"
+#include "fuzzy_result.h"
 
 
 const size_t MaxAlphabetSize = 54;
@@ -113,14 +114,6 @@ public:
 	CABCEncoder(MorphLanguageEnum Language, BYTE AnnotChar);
 
 
-};
-
-struct CFuzzyResult {
-	std::string CorrectedString;
-	int StringDistance;
-	bool operator < (const  CFuzzyResult& x) const {
-		return StringDistance < x.StringDistance;
-	}
 };
 
 class CMorphAutomat : public CABCEncoder

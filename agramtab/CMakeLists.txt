@@ -1,17 +1,16 @@
 declare_cmake_min_version()
 
 add_library(AgramtabLib
+        agramtab.cpp
+        agramtab.h
         EngGramTab.cpp
-        RusGramTab.cpp
-        GerGramTab.cpp
-        agramtab_.cpp
-        AncodePattern.cpp
-        agramtab_.h
-        AncodePattern.h
         EngGramTab.h
-        GerGramTab.h
-        GramInfo.h
+        RusGramTab.cpp
         RusGramTab.h
+        GerGramTab.cpp
+        GerGramTab.h
+
+        GramInfo.h
  )
 
 target_link_libraries(AgramtabLib

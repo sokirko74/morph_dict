@@ -3,7 +3,7 @@
 // ==========  Copyright by Alexey Sokirko
 
 #include "../common/util_classes.h"
-#include "agramtab_.h"
+#include "agramtab.h"
 #include "RusGramTab.h"
 
 #include <fstream>

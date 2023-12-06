@@ -1,4 +1,4 @@
-#include "morph_dict/agramtab/agramtab_.h"
+#include "morph_dict/agramtab/agramtab.h"
 #include "flexia_model.h"
 #include "accent_model.h"
 #include "paradigm_consts.h"

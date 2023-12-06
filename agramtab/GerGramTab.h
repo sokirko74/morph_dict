@@ -4,7 +4,7 @@
 
 #pragma once 
 
-#include "agramtab_.h"       
+#include "agramtab.h"       
 
 
 enum GermanPartOfSpeechEnum

@@ -28,6 +28,9 @@ add_library(lemmatizer_base_lib
         rus_numerals.h
         StaticVectorMap.h
         Statistic.h
+        fuzzy_result.h
+        AncodePattern.cpp
+        AncodePattern.h
 
 )
 

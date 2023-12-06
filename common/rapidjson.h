@@ -26,6 +26,7 @@ public:
 	void add_string(const char* key, const char* value);
 	void add_string_copy(const char* key, const std::string& value); // copies value to json
 	void add_int(const char* key, uint32_t v);
+	void add_int64(const char* key, uint64_t v);
 	void add_double(const char* key, double v);
 	void add_bool(const char* key, bool v);
 	void add_member(const char* key, rapidjson::Value& value);

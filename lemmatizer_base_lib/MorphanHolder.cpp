@@ -1,13 +1,17 @@
 #include "MorphanHolder.h"
 #include "morph_dict/morph_wizard/paradigm_consts.h"
-
+#include "morph_dict/agramtab/RusGramTab.h"
+#include "morph_dict/agramtab/GerGramTab.h"
+#include "morph_dict/agramtab/EngGramTab.h"
+#include "Paradigm.h"
+#include "Lemmatizers.h"
 #include "morph_dict/common/rapidjson.h"
 
 CMorphanHolder::CMorphanHolder()
 {
 	m_pLemmatizer = 0;
 	m_pGramTab = 0;
-    m_bUsePrediction = true;
+    m_bLoaded = true;
 };
 
 CMorphanHolder::~CMorphanHolder()
@@ -32,6 +36,7 @@ void CMorphanHolder::DeleteProcessors()
 
 void CMorphanHolder::LoadOnlyGramtab(MorphLanguageEnum langua, std::string custom_folder)
 {
+    m_bLoaded = true;
     switch (langua) {
     case morphRussian:
     case morphFioDisclosures:
@@ -206,25 +211,20 @@ std::string CMorphanHolder::PrintMorphInfoUtf8(std::string Form, bool printIds, 
 	return result;
 };
 
-bool CMorphanHolder::_GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>&	Paradigms) const {
+void _GetParadigmCollection(const CLemmatizer* lemmatizer, std::string WordForm, std::vector<CFormInfo>& paradigms) {
+    paradigms.clear();
 	if (WordForm.empty())	{
-		return false;
+		return;
 	};
 
-	try
-	{
-		if (m_pLemmatizer == nullptr) return false;
+    if (lemmatizer == nullptr) {
+        throw CExpc("lemmatizer is null in _GetParadigmCollection");
+    }
 
-		m_pLemmatizer->CreateParadigmCollection(false,WordForm,
-                                    is_upper_alpha((unsigned char)WordForm[0], m_CurrentLanguage),
-                                                          m_bUsePrediction,
-                                                          Paradigms);
-	}
-	catch (...)
-	{
-		return false;;
-	};
-	return true;
+	lemmatizer->CreateParadigmCollection(false,WordForm,
+                                is_upper_alpha((unsigned char)WordForm[0], lemmatizer->GetLanguage()),
+                             true,
+        paradigms);
 };
 
 bool CMorphanHolder::IsInDictionaryUtf8(std::string w) const {
@@ -517,13 +517,9 @@ std::string CMorphanHolder::LemmatizeJson(std::string word_utf8, bool withParadi
 {
     auto word = convert_from_utf8(word_utf8.c_str(), m_pLemmatizer->GetLanguage());
     std::vector<CFormInfo> Paradigms;
-    if (!_GetParadigmCollection(word, Paradigms))
-    {
-        return "[]";
-    };
+    _GetParadigmCollection(m_pLemmatizer, word, Paradigms);
     rapidjson::Document d;
     CJsonObject result(d, rapidjson::kArrayType);
-    std::string strResult = "[";
     for (auto& p : Paradigms)
     {
         CJsonObject v(result.get_doc());
@@ -553,4 +549,33 @@ std::vector<CFuzzyResult> CMorphanHolder::CorrectMisspelledWordUtf8(std::string 
     return r;
 }
 
+CMorphanHolder  RusHolder;
+CMorphanHolder  EngHolder;
+CMorphanHolder  GerHolder;
 
+static CMorphanHolder& GetHolder(MorphLanguageEnum l) {
+    switch (l) {
+        case morphRussian: return RusHolder;
+        case morphGerman: return GerHolder;
+        case morphEnglish: return EngHolder;
+        default: throw CExpc("unknown morph holder language");
+    }
+}
+
+const CMorphanHolder& GetMHolder(MorphLanguageEnum l) {
+    auto& h = GetHolder(l);
+    assert(h.m_bLoaded);
+    return h;
+};
+
+
+const CMorphanHolder& GlobalLoadMorphHolder(MorphLanguageEnum l, bool only_gramtab, std::string custom_directory) {
+    auto& h = GetHolder(l);
+    h.m_CurrentLanguage = l;
+    h.LoadOnlyGramtab(l, custom_directory);
+    if (only_gramtab) {
+        return h;
+    }
+    h.LoadOnlyLemmatizer(l, custom_directory);
+    return  h;
+}

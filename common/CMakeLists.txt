@@ -1,7 +1,6 @@
 declare_cmake_min_version()
 
 set(my_SOURCES
-        ../agramtab/AncodePattern.cpp
         ../lemmatizer_base_lib/rus_numerals.cpp
         utilit.cpp
         argparse.h

@@ -1,25 +1,21 @@
 #pragma once
 
 #include "morph_dict/common/utilit.h"
-#include "morph_dict/agramtab/RusGramTab.h"
-#include "morph_dict/agramtab/GerGramTab.h"
-#include "morph_dict/agramtab/EngGramTab.h"
-#include "Paradigm.h"
-#include "Lemmatizers.h"
+#include "morph_dict/lemmatizer_base_lib/fuzzy_result.h"
 
-
-// input and output strings in utf8
+class CAgramtab;
+class CLemmatizer;
+// input and output strings are in utf8
 class CMorphanHolder
 {
 	DwordVector _GetLemmaIds(bool bNorm, std::string& word_str, bool capital, bool bUsePrediction) const;
 protected:
 	std::string GetGrammems(const char* tab_str) const;
-	bool _GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>& Paradigms) const;
 public:
+	bool m_bLoaded;
 	MorphLanguageEnum				m_CurrentLanguage;
 	CAgramtab*						m_pGramTab;
     CLemmatizer* 			        m_pLemmatizer;
-	bool                            m_bUsePrediction;
 
 	CMorphanHolder();
 	~CMorphanHolder();
@@ -41,3 +37,5 @@ public:
 	
 };
 
+extern const CMorphanHolder& GetMHolder(MorphLanguageEnum l);
+const CMorphanHolder& GlobalLoadMorphHolder(MorphLanguageEnum l, bool only_gramtab = false, std::string custom_directory = "");

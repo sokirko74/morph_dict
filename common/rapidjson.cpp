@@ -51,6 +51,10 @@ void CJsonObject::add_int(const char* key, uint32_t v) {
 	m_Value.AddMember(rapidjson::StringRef(key), v, m_Doc.GetAllocator());
 }
 
+void CJsonObject::add_int64(const char* key, uint64_t v) {
+	m_Value.AddMember(rapidjson::StringRef(key), v, m_Doc.GetAllocator());
+}
+
 void CJsonObject::add_double(const char* key, double v) {
 	m_Value.AddMember(rapidjson::StringRef(key), v, m_Doc.GetAllocator());
 }

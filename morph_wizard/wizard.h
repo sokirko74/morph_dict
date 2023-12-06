@@ -3,7 +3,7 @@
 #include "paradigm_info.h"
 #include "accent_model.h"
 
-#include "morph_dict/agramtab/agramtab_.h"
+#include "morph_dict/agramtab/agramtab.h"
 #include "wizard_base.h"
 #include "DumpParadigm.h"
 #include "LemmaPredict.h"
