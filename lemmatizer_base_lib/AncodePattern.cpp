@@ -243,11 +243,11 @@ bool CAncodePattern::InitAncodePattern()
 	return true;
 };
 
-void  CAncodePattern::SetPredictedWord()
+void  CAncodePattern::SetPredictedWord(std::string gram_codes, std::string common_gram_codes)
 {
-	m_CommonGramCode = "??";
 	m_SearchStatus = PredictedWord;
-    m_GramCodes = "??";
+	m_CommonGramCode = common_gram_codes;
+    m_GramCodes = gram_codes;
     InitAncodePattern();
 };
 

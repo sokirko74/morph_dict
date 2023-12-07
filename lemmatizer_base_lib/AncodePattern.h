@@ -35,7 +35,7 @@ public:
 	
 	void	CopyAncodePattern(const CAncodePattern& X);
     
-	void    SetPredictedWord();
+	void    SetPredictedWord(std::string gram_codes, std::string common_gram_codes="??");
 	void    SetNotWord();
 
 	
