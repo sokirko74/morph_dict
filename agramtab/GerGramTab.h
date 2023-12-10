@@ -179,7 +179,6 @@ public:
 		res[2] = 0;
 		return  res;
 	};
-	int GetGroupTypebyName(const char* TypeName) const;
 	const char* GetRegistryString() const 
 	{
 		return "Software\\Dialing\\Lemmatizer\\German\\Ggramtab";

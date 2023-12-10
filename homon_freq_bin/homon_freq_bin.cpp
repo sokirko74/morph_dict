@@ -3,6 +3,7 @@
 #include "morph_dict/lemmatizer_base_lib/MorphanHolder.h"
 #include "morph_dict/common/bserialize.h"
 #include "morph_dict/common/argparse.h"
+#include "morph_dict/agramtab/agramtab.h"
 #include <fstream>
 
 // homon_freq_bin <InDataFile> <-F | -C | -L> [Output Directory]

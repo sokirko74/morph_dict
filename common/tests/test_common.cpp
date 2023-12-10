@@ -54,6 +54,18 @@ TEST_CASE("unicode2") {
 	CHECK(FirstLetterIsUpper(std::string("122")) == false);
 	CHECK(FirstLetterIsUpper(std::string("!@")) == false);
 }
+TEST_CASE("unicode_title") {
+	std::string s = "john";
+	MakeTitleUtf8(s);
+	CHECK("John" == s);
+	
+	s = "МАМА";
+	MakeTitleUtf8(s);
+	CHECK("Мама" == s);
+
+}
+
+
 
 TEST_CASE("check_english") {
 	// possibly unused
