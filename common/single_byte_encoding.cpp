@@ -784,6 +784,17 @@ char* EngRusMakeLower(char* word)
 	return word;
 }
 
+template <class T, class Pred, class Conv>
+T& RegisterConverter(T& word, size_t Len, Pred P, Conv C)
+{
+	for (size_t i = 0; i < Len; i++)
+		if (P((BYTE)word[i]))
+			word[i] = C((BYTE)word[i]);
+
+	return word;
+}
+
+
 template <class T>
 T& GerEngRusMakeUpperTemplate(T& word, MorphLanguageEnum Langua, size_t Len)
 {
@@ -869,6 +880,3 @@ BYTE convert_html_entity_to_char(const std::string& entity) {
 	else return 0;
 }
 
-void MakeUpperVector(std::vector<char>& v, MorphLanguageEnum langua) {
-	GerEngRusMakeUpperTemplate(v, langua, v.size());
-}

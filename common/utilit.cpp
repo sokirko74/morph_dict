@@ -1075,3 +1075,4 @@ uint64_t GetMaxQWORD()
 	return std::numeric_limits<uint64_t>::max();
 #endif
 };
+

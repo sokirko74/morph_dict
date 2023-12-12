@@ -174,3 +174,32 @@ bool _find(_II It, const _Ty& _V)
 {
 	return !(find(It.begin(), It.end(), _V) == It.end());
 }
+
+template<class T>
+size_t get_variants_count(const std::vector<std::vector<T>>& base) {
+	size_t i = 1;
+	for (auto& v : base) {
+		assert(!v.empty());
+		i *= v.size();
+	}
+	return i;
+}
+
+template<class T>
+bool get_next_variant(const std::vector<std::vector<T>>& base, std::vector<size_t>& cur_variant) {
+
+	if (cur_variant.empty()) {
+		cur_variant.resize(base.size(), 0);
+		return true;
+	}
+	assert(base.size() == cur_variant.size());
+
+	for (size_t i = 0; i < cur_variant.size(); ++i) {
+		if (cur_variant[i] + 1 < base[i].size()) {
+			++cur_variant[i];
+			return true;
+		}
+		cur_variant[i] = 0;
+	}
+	return false;
+}

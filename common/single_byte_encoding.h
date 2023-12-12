@@ -56,20 +56,6 @@ extern void ConvertJO2Je(char* src, size_t Length);
 extern std::string ConvertASCIIToHtmlSymbols(const std::string& txt);
 
 
-template <class T, class Pred, class Conv>
-T& RegisterConverter(T& word, size_t Len, Pred P, Conv C)
-{
-	for (size_t i = 0; i < Len; i++)
-		if (P((BYTE)word[i]))
-			word[i] = C((BYTE)word[i]);
-
-	return word;
-}
-
-
-
-void MakeUpperVector(std::vector<char>& v, MorphLanguageEnum Langua);
-
 inline std::string _R(const char* buffer) {
 	return convert_from_utf8(buffer, morphRussian);
 }
