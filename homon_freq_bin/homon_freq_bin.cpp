@@ -1,9 +1,11 @@
+#include "morph_dict/lemmatizer_base_lib/MorphanHolder.h"
+#include "morph_dict/lemmatizer_base_lib/Lemmatizers.h"
+#include "morph_dict/agramtab/agramtab.h"
+
 #include <iostream>
 #include "morph_dict/common/util_classes.h"
-#include "morph_dict/lemmatizer_base_lib/MorphanHolder.h"
 #include "morph_dict/common/bserialize.h"
 #include "morph_dict/common/argparse.h"
-#include "morph_dict/agramtab/agramtab.h"
 #include <fstream>
 
 // homon_freq_bin <InDataFile> <-F | -C | -L> [Output Directory]
@@ -68,6 +70,7 @@ bool check_part_of_speech(part_of_speech_t pos, part_of_speech_mask_t poses) {
     }
     return false;
 }
+
 bool check_word_form(const CFormInfo& paradigm, uint16_t formNo, std::string wordForm, part_of_speech_t pos, grammems_mask_t gra) {
     std::string ancode = paradigm.GetAncode(formNo); 
     assert(ancode.size() == 2);

@@ -316,11 +316,8 @@ bool WriteVectorInner(FILE *fp, const std::vector<T> &V) {
 
     BYTE buffer[VectorMaxStructSize];
     assert (size_of_t < VectorMaxStructSize);
-
-    size_t count = V.size();
-
-    for (size_t i = 0; i < count; i++) {
-        save_to_bytes(V[i], buffer);
+    for (const auto& i: V) {
+        save_to_bytes(i, buffer);
         if (!fwrite((void *) buffer, size_of_t, 1, fp)) return false;
     };
     return true;
@@ -334,7 +331,7 @@ void WriteVectorStream(std::ofstream& outp, const std::vector<T>& vec) {
     BYTE buffer[VectorMaxStructSize];
     assert(size_of_t < VectorMaxStructSize);
 
-    for (auto item : vec) {
+    for (auto& item : vec) {
         save_to_bytes(item, buffer);
         outp.write((char*)buffer, size_of_t);
     };

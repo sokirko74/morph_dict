@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "morph_dict/common/utilit.h"
+#include "morph_dict/common/rapidjson.h"
 
 enum MorphSearchStatus { 
 	DictionaryWord = 1,  // core words
@@ -53,8 +54,8 @@ public:
 	BYTE GetLemSign() const;
 	bool HasNoInfo() const;
 
-	std::string  CAncodePattern::ToString() const;
-	bool FromString(const std::string& line);
+	void ToJsonObject(CJsonObject& o) const;
+	void FromJsonObject(const rapidjson::Value& i);
 	
 	void  InitFromGrammarFormat(MorphLanguageEnum l, std::string& grm);
 	std::string ToGrammarFormat() const;

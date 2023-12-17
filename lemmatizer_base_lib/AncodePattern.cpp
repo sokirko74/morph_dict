@@ -260,10 +260,8 @@ std::string	CAncodePattern::GetPartOfSpeechStr() const
 };
 
 
-std::string  CAncodePattern::ToString() const
+void  CAncodePattern::ToJsonObject(CJsonObject& b) const
 {
-	rapidjson::Document d;
-	CJsonObject b(d);
 	b.add_int("language", m_Language);
 	b.add_int("found_in_morph", m_SearchStatus);
 	b.add_int64("type_grammems", m_TypeGrammems);
@@ -271,25 +269,18 @@ std::string  CAncodePattern::ToString() const
 	b.add_int("poses", m_iPoses);
 	b.add_string("type_gram_code", m_CommonGramCode);
 	b.add_string("gram_codes", m_GramCodes);
-	return b.dump_rapidjson();
 };
 
-bool CAncodePattern::FromString(const std::string& line)
+void CAncodePattern::FromJsonObject(const rapidjson::Value& inj)
 {
-	rapidjson::Document doc;
-	rapidjson::ParseResult ok = doc.Parse(line);
-	assert(ok);
-	assert(doc.IsObject());
-
-	auto& a = doc["language"];
-	m_Language = (MorphLanguageEnum)doc["language"].GetInt();
-	m_SearchStatus = (MorphSearchStatus)doc["found_in_morph"].GetInt();
-	m_TypeGrammems = doc["type_grammems"].GetInt64();
-	m_iGrammems = doc["grammems"].GetInt64();
-	m_iPoses = doc["poses"].GetInt();
-	m_CommonGramCode = doc["type_gram_code"].GetString();
-	m_GramCodes = doc["gram_codes"].GetString();
-	return true;
+	auto& a = inj["language"];
+	m_Language = (MorphLanguageEnum)inj["language"].GetInt();
+	m_SearchStatus = (MorphSearchStatus)inj["found_in_morph"].GetInt();
+	m_TypeGrammems = inj["type_grammems"].GetInt64();
+	m_iGrammems = inj["grammems"].GetInt64();
+	m_iPoses = inj["poses"].GetInt();
+	m_CommonGramCode = inj["type_gram_code"].GetString();
+	m_GramCodes = inj["gram_codes"].GetString();
 };
 
 // init from GLR grammar
