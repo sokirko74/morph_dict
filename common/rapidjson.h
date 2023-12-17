@@ -18,6 +18,7 @@ class CJsonObject {
 	rapidjson::Value m_Value;
 public: 
 	CJsonObject(rapidjson::Document& d, rapidjson::Type t=rapidjson::kObjectType);
+	CJsonObject(rapidjson::Value& v, rapidjson::Document& d);
 	rapidjson::Value& get_value() { return m_Value;}
 	rapidjson::Document& get_doc() { return m_Doc; }
 	rapidjson::Document::AllocatorType& get_allocator() { return m_Doc.GetAllocator(); }
@@ -29,25 +30,13 @@ public:
 	void add_int64(const char* key, uint64_t v);
 	void add_double(const char* key, double v);
 	void add_bool(const char* key, bool v);
-	void add_member(const char* key, rapidjson::Value& value);
+	void move_to_member(const char* key, rapidjson::Value& value);
 	void push_back(rapidjson::Value& value);
 	void push_back(CJsonObject& o);
 
 
 	std::string dump_rapidjson() const;
-	std::string dump_rapidjson_pretty() const;
+	std::string dump_rapidjson_pretty(int ident = 1) const;
 	void dump_rapidjson_pretty(std::string filepath, int ident=1) const;
 
 };
-
-/*
-struct CTestCase {
-	std::string Text;
-	std::string Comment;
-};
-
-struct CTestCaseBase {
-	std::vector<CTestCase> TestCases;
-	void read_test_cases(std::istream& inp);
-};
-*/

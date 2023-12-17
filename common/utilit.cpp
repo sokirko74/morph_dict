@@ -948,33 +948,6 @@ size_t FindFloatingPoint(const std::string& s)
 }
 
 
-void CTestCaseBase::read_test_cases(std::istream& inp) {
-	TestCases.clear();
-	std::string s;
-	while (getline(inp, s)) {
-		size_t commentsIndex = s.find("//");
-		CTestCase e;
-		if (commentsIndex != -1) {
-			e.Comment = s.substr(commentsIndex);
-			s = s.substr(0, commentsIndex);
-		}
-		Trim(s);
-		e.Text = s;
-		TestCases.push_back(e);
-	}
-}
-
-void CTestCaseBase::write_test_cases(std::ostream& outp) const {
-	nlohmann::json cases = nlohmann::json::array();
-	for (auto c : TestCases) {
-		cases.push_back({
-			{"input", c.Text},
-			{"result", c.Result},
-			{"comments", c.Comment},
-			});
-	}
-	outp << cases.dump(4);
-}
 
 
 //#if __cplusplus > 201402L

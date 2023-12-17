@@ -88,7 +88,7 @@ void CFlexiaModel::ToJson(CJsonObject& out) const {
         endings.PushBack(o.get_value().Move(), out.get_allocator());
     };
     
-    out.add_member("endings", endings);
+    out.move_to_member("endings", endings);
 
     if (!m_Comments.empty()) {
         out.add_string("comments",  m_Comments);

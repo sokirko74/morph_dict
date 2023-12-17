@@ -465,11 +465,11 @@ void  GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolde
                 v.add_string_copy("grm", p.second);
                 forms_json.PushBack(v.get_value().Move(), out.get_allocator());
             }
-            subg.add_member("forms", forms_json);
+            subg.move_to_member("forms", forms_json);
 
             formsGroups.PushBack(subg.get_value().Move(), out.get_allocator());
         };
-        prdPart.add_member("formsGroups", formsGroups);
+        prdPart.move_to_member("formsGroups", formsGroups);
         out.push_back(prdPart.get_value());
     };
 };
@@ -507,7 +507,7 @@ static void GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanH
         CJsonObject v(out.get_doc());
         v.get_value().SetArray();
         GetParadigmFromDictionary(piParadigm, Holder, sortForms, v);
-        out.add_member("paradigm", v.get_value());
+        out.move_to_member("paradigm", v.get_value());
     }
     out.add_int("wordWeight", (uint32_t)piParadigm->GetWordWeight());
     out.add_int("homonymWeight", (uint32_t)piParadigm->GetHomonymWeight());

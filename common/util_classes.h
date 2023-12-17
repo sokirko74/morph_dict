@@ -207,14 +207,3 @@ public:
 
 };
 
-struct CTestCase {
-	std::string Text;
-	std::string Comment;
-	nlohmann::json Result;
-};
-
-struct CTestCaseBase {
-	std::vector<CTestCase> TestCases;
-	void read_test_cases(std::istream& inp);
-	void write_test_cases(std::ostream& outp) const;
-};

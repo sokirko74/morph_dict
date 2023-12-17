@@ -6,6 +6,10 @@ CJsonObject::CJsonObject(rapidjson::Document& d, rapidjson::Type t) :
 
 }
 
+CJsonObject::CJsonObject(rapidjson::Value& v, rapidjson::Document& d): m_Doc(d) {
+	m_Value = v;
+}
+
 
 std::string CJsonObject::dump_rapidjson() const {
 	rapidjson::StringBuffer buffer;
@@ -14,10 +18,10 @@ std::string CJsonObject::dump_rapidjson() const {
 	return buffer.GetString();
 }
 
-std::string CJsonObject::dump_rapidjson_pretty() const {
+std::string CJsonObject::dump_rapidjson_pretty(int indent) const {
 	rapidjson::StringBuffer buffer;
 	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
-	writer.SetIndent(' ', 1);
+	writer.SetIndent(' ', indent);
 	m_Value.Accept(writer);
 	return buffer.GetString();
 }
@@ -43,7 +47,7 @@ void CJsonObject::add_string(const char* key, const char* value) {
 	m_Value.AddMember(rapidjson::StringRef(key), rapidjson::StringRef(value), m_Doc.GetAllocator());
 }
 
-void CJsonObject::add_member(const char* key, rapidjson::Value& value) {
+void CJsonObject::move_to_member(const char* key, rapidjson::Value& value) {
 	m_Value.AddMember(rapidjson::StringRef(key), value.Move(), m_Doc.GetAllocator());
 }
 

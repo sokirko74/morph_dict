@@ -20,7 +20,7 @@ void CMorphWizardBase::SaveFlexiaModelsToJson(CJsonObject& out) const {
         model.ToJson(v);
         m.PushBack(v.get_value(), out.get_allocator());
     }
-    out.add_member("flexia_models", m);
+    out.move_to_member("flexia_models", m);
     
 };
 
@@ -40,7 +40,7 @@ void  CMorphWizardBase::SaveAccentModelsToJson(CJsonObject& out) const {
         };
         models.PushBack(m.Move(), out.get_allocator());
     }
-    out.add_member("accent_models", models);
+    out.move_to_member("accent_models", models);
 };
 
 void  CMorphWizardBase::SerializeAccentModelsToAnnotFile(std::ostream& outp) const {

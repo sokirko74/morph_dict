@@ -277,7 +277,7 @@ void MorphoWizard::SaveSessionsToJson(CJsonObject& out) const {
         s.GetJson(v);
         r.PushBack(v.get_value().Move(), out.get_allocator());
     }
-    out.add_member("sessions", r);
+    out.move_to_member("sessions", r);
 }
 
 
@@ -292,7 +292,7 @@ void MorphoWizard::SavePrefixSetsToJson(CJsonObject& out) const {
         }
         r.PushBack(r1.Move(), out.get_allocator());
     }
-    out.add_member("prefix_sets", r);
+    out.move_to_member("prefix_sets", r);
 }
 
 void MorphoWizard::SaveLemmsToJson(CJsonObject& out) const {
@@ -302,7 +302,7 @@ void MorphoWizard::SaveLemmsToJson(CJsonObject& out) const {
         lemm_info.GetJson(lemma, v);
         r.PushBack(v.get_value().Move(), out.get_allocator());
     }
-    out.add_member("lemmas", r);
+    out.move_to_member("lemmas", r);
 }
 
 
