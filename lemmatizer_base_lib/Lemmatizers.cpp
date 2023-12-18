@@ -189,19 +189,18 @@ bool CLemmatizer::GetAllAncodesAndLemmasQuick(std::string& word_str, bool capita
 void CLemmatizer::ReadOptions(std::string file_path)
 {
 	LOGV << "load " << file_path;
-	try {
-		std::ifstream opt_file(file_path);
-		nlohmann::json jf = nlohmann::json::parse(opt_file);
-		opt_file.close();
+	std::ifstream inp(file_path);
+	rapidjson::IStreamWrapper isw(inp);
+	rapidjson::Document d;
+	d.ParseStream(isw);
+	inp.close();
 
-		m_bAllowRussianJo = jf.value("AllowRussianJo", false);
-		if (jf.value("SkipPredictBase", false))
-			m_bEnablePrediction = false;
-	}
-	catch (nlohmann::json::exception e) {
-		LOGE << "error " << e.what() << " while reading " << file_path;
-		throw CExpc(e.what());
-	}
+	auto p = rapidjson::Pointer("/AllowRussianJo").Get(d);
+	m_bAllowRussianJo = (p) ? p->GetBool() : false;
+	p = rapidjson::Pointer("/SkipPredictBase").Get(d);
+	if (p && p->GetBool()) {
+		m_bEnablePrediction = false;
+	};
 };
 
 
