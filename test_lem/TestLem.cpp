@@ -28,7 +28,7 @@ void CheckSpeed(std::istream& inputStream, std::ostream& output) {
             Trim(line);
             if (line.empty()) continue;
             MakeLowerUtf8(line);
-            line = convert_from_utf8(line, Holder.m_CurrentLanguage);
+            line = convert_from_utf8(line.c_str(), Holder.m_CurrentLanguage);
             Forms.push_back(line);
         };
     };

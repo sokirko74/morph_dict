@@ -86,16 +86,15 @@ class CExpc : public std::exception
 public:
 	CExpc(const std::string& cause);
 	CExpc(const char* format, ...);
-	virtual char const* what() const override;
+	char const* what() const noexcept override;
 	void add_to_message(std::string m);
 };
 	
-extern inline uint64_t GetMaxQWORD();
+extern uint64_t GetMaxQWORD();
 
 
 // working with files
 extern bool			FileExists (const char *FName);
-extern bool         DirExists(const char *path);
 extern file_off_t	FileSize (const char *filename);
 extern std::vector<std::string> list_path_by_file_mask(std::string filemask);
 extern std::string	CreateTempFileName();
@@ -147,7 +146,7 @@ extern std::string wstring_to_utf8(const std::wstring& str);
 extern std::string& MakeUpperUtf8(std::string& s_utf8);
 extern std::string& MakeLowerUtf8(std::string& s_utf8);
 extern std::string& MakeTitleUtf8(std::string& s_utf8);
-extern size_t CountLettersInUtf8(std::string& s_utf8);
+extern size_t CountLettersInUtf8(const std::string& s_utf8);
 extern bool CheckRussianUtf8(const std::string& s);
 extern bool CheckRussianLowerUtf8(const std::string& s);
 extern bool ContainsRussianUtf8(const std::string& s);

@@ -1,7 +1,9 @@
 #include "morph_dict/common/utilit.h"
 #include "morph_dict/lemmatizer_base_lib/MorphanHolder.h"
 #include "morph_dict/lemmatizer_base_lib/MorphDictBuilder.h"
+#include "morph_dict/lemmatizer_base_lib/Paradigm.h"
 #include "morph_dict/morph_wizard/flexia_model.h"
+#include "morph_dict/lemmatizer_base_lib/Lemmatizers.h"
 
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "morph_dict/contrib/doctest/doctest.h"
@@ -27,9 +29,12 @@ TEST_CASE("form_info_serialization") {
 	CHECK(m1 == m2);
 
 }
+std::string get_mwz_path(std::string folder) {
+    return (fs::path(__FILE__).parent_path() / folder).string();
+}
 
 TEST_CASE("lemmatize_Russian_word") {
-	std::string folder = "Russian1";
+	std::string folder = get_mwz_path("Russian1");
 	CMorphDictBuilder R;
 	R.BuildLemmatizer(MakePath(folder, "project.mwz"), true, 5, 3, folder);
 
@@ -67,7 +72,7 @@ void Misspell(CMorphanHolder& holder, std::string word_utf8, std::string canon) 
 }
 
 TEST_CASE("misspell_Russian_word") {
-	std::string folder = "Russian2";
+	std::string folder = get_mwz_path("Russian2");
 	CMorphDictBuilder R;
 	R.BuildLemmatizer(MakePath(folder, "project.mwz"), true, -1, -1, folder);
 

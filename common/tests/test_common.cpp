@@ -88,7 +88,7 @@ TEST_CASE("check_utf16") {
 }
 
 TEST_CASE("check_punct") {
-	std::string puncts = "!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}";
+	std::string puncts = "!\"#$%&'()*+,-./:;<=>?@[]^_`{|}";
 	for (auto i : puncts) {
 		CHECK(std::iswpunct(i) != 0);
 	}

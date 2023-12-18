@@ -307,9 +307,9 @@ struct CFormGroup
 };
 
 
-std::string &TrimCommaRight(std::string &str)
+std::string& TrimCommaRight(std::string &str)
 {
-    if (str.size() == 0)
+    if (str.empty())
         return str;
     size_t i = str.find_last_not_of(",");
     str.erase(i + 1);
@@ -450,7 +450,8 @@ void  GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolde
             {
                 auto &f = FormAndGrammems[formNo + saveFormNo];
                 auto form = convert_to_utf8(f.m_Form, Holder->m_CurrentLanguage);
-                std::string grm = TrimCommaRight(pGramtab->GrammemsToStr(f.m_Grammems & ~(fg.m_IntersectGrammems | commonGrammems)));
+                auto grm = pGramtab->GrammemsToStr(f.m_Grammems & ~(fg.m_IntersectGrammems | commonGrammems));
+                grm = TrimCommaRight(grm);
                 forms.push_back({form, grm});
             };
 

@@ -792,7 +792,7 @@ BYTE MapReverseVowelNoToCharNo(const std::wstring& form, BYTE AccentCharNo) {
 void MorphoWizard::SetAccent(uint16_t AccentModelNo, BYTE AuxAccent, int FormNo, std::string& form) const {
     if (AccentModelNo == UnknownAccentModelNo) return;
     assert(FormNo < m_AccentModels[AccentModelNo].m_Accents.size());
-    std::wstring& wform = to_wstring(form);
+    std::wstring wform = to_wstring(form);
     int u = MapReverseVowelNoToCharNo(wform, m_AccentModels[AccentModelNo].m_Accents[FormNo]);
     if (u != UnknownAccent) {
         wform.insert(u + 1, 1, U'\'');

@@ -8232,7 +8232,7 @@ std::string& MakeTitleUtf8(std::string& s_utf8) {
 	return s_utf8;
 }
 
-size_t CountLettersInUtf8(std::string& s_utf8) {
+size_t CountLettersInUtf8(const std::string& s_utf8) {
 	return conv_utf8_utf32.from_bytes(s_utf8).length();
 }
 

@@ -15,7 +15,6 @@ set(my_SOURCES
 	    utf8.cpp
         rapidjson.cpp
         rapidjson.h
-
 )
 
 add_library(morphology_common  ${my_SOURCES})

@@ -27,9 +27,14 @@ void check_uniq(CAgramtab& g)
 }
 
 TEST_CASE("uniq_gram_patterns") {
-	check_uniq(CRusGramTab());
-	check_uniq(CEngGramTab());
-	check_uniq(CGerGramTab());
+    CRusGramTab r;
+	check_uniq(r);
+
+    CEngGramTab e;
+	check_uniq(e);
+
+    CEngGramTab g;
+	check_uniq(g);
 }
 
 TEST_CASE("russian_coordination") {

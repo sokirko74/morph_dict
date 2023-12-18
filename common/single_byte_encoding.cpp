@@ -1,5 +1,7 @@
 #include "single_byte_encoding.h"
 #include <assert.h>
+#include <string.h>
+
 
 // windows-1251 Russian
 const BYTE UpperJO = (BYTE)168;

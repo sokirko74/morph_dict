@@ -15,6 +15,7 @@
 #include <plog/Initializers/ConsoleInitializer.h>
 
 
+/*
 //  for mkdir
 #ifdef WIN32
 	#include <direct.h>
@@ -23,22 +24,11 @@
 #else
 	#include <sys/stat.h>
 #endif
-
+*/
 
 bool FileExists (const char *FName)
 {
 	return (access(FName, 0) == 0);
-}
-
-bool DirExists(const char *path) {
-    struct stat info;
-
-    if(stat( path, &info ) != 0)
-        return false;
-    else if(info.st_mode & S_IFDIR)
-        return true;
-    else
-        return false;
 }
 
 file_off_t FileSize (const char *filename)
@@ -783,7 +773,7 @@ CExpc::CExpc(const char* format, ... )
     m_strCause = SmallBuffer;
 }
 
-char const* CExpc::what() const {
+char const* CExpc::what() const noexcept {
 	return m_strCause.c_str();
 }
 
