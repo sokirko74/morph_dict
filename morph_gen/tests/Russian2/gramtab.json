@@ -2,6 +2,7 @@
   "plug_noun_gram_code": "zz",
   "inanim_indecl_noun": "MM",
   "mas_abbr_noun": "Lv",
+  "test_gramtab": true,
   "gramcodes": {
     "Lu": {
       "p": "",

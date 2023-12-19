@@ -15,16 +15,12 @@
 #include <plog/Initializers/ConsoleInitializer.h>
 
 
-/*
-//  for mkdir
+
+// for MessageBox
 #ifdef WIN32
-	#include <direct.h>
 	#define NOMINMAX 
 	#include "windows.h"
-#else
-	#include <sys/stat.h>
 #endif
-*/
 
 bool FileExists (const char *FName)
 {
@@ -61,7 +57,7 @@ void ErrorMessage (const std::string& Titul, const std::string& Message)
 	#endif
 
 	std::string q = Message;
-	if (q.empty()|| (q[q.length() -1]!='\n'))	q+='\n';
+	if (q.empty() || (q.back() != '\n')) q+='\n';
 	fprintf(stderr, "%s: %s", Titul.c_str(), q.c_str());
 	
 };

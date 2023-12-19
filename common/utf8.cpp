@@ -8353,6 +8353,7 @@ bool IsUnicodeUpperRussianVowel(uint32_t u) {
 	case U'Я': 
 	case U'И': 
 	case U'Ю': 
+	case U'У':
 	case U'Ё': return true;
 	default: return false;
 	}
