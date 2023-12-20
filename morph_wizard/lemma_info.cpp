@@ -3,7 +3,7 @@
 
 CLemmaInfo::CLemmaInfo()
 {
-	m_FlexiaModelNo = UnknownParadigmNo;
+	m_FlexiaModelNo = UnknownFlexiaModelNo;
 	m_AccentModelNo = UnknownAccentModelNo;
 	m_CommonAncode[0] = 0;
 };
@@ -41,7 +41,12 @@ std::string CLemmaInfo::GetBase(const std::string lemma, const CFlexiaModel& m) 
 }
 
 void CLemmaInfo::SetCommonAncode(const char* s) {
-	strncpy(m_CommonAncode, s, CommonAncodeSize + 1);
+    if (*s == 0) {
+        m_CommonAncode[0] = 0;
+    } else {
+        memcpy(m_CommonAncode, s, CommonAncodeSize - 1);
+        m_CommonAncode[CommonAncodeSize - 1] = 0;
+    }
 }
 
 const char* CLemmaInfo::GetCommonAncode() const {

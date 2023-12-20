@@ -95,10 +95,10 @@ const CFlexiaModel& CFormInfo::GetFlexiaModel() const
 uint32_t CFormInfo::GetParadigmId() const 
 {
 	assert (IsValid());
-	if (!IsValid()) return -1;
+	if (!IsValid()) return UnknownParadigmId;
 
 	if (!m_bFound)
-		return ErrorParadigmId;
+		return UnknownParadigmId;
 	else
 		return m_InnerAnnot.GetParadigmId();
 };

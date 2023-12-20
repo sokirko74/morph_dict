@@ -5,7 +5,7 @@
 
 
 const size_t CommonAncodeSize = 3; // ancode length is 2, plus null for null termination
-const uint16_t UnknownParadigmNo = 0xffff - 1;
+const uint16_t UnknownFlexiaModelNo = 0xffff - 1;
 const uint16_t UnknownAccentModelNo = 0xffff - 1;
 
 

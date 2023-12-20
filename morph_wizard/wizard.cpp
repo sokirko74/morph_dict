@@ -1168,7 +1168,7 @@ bool MorphoWizard::change_prd_info(CParadigmInfo& I, const std::string& Lemma,
 
 
     if ((newAccentModelNo == UnknownAccentModelNo && !keepOldAccents)
-        || (I.m_FlexiaModelNo == UnknownParadigmNo)
+        || (I.m_FlexiaModelNo == UnknownFlexiaModelNo)
         )
         I.m_AccentModelNo = UnknownAccentModelNo;
     else {

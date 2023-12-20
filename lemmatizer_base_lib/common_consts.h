@@ -6,4 +6,7 @@
 #define MORPH_MAIN_FILES			"morph.bin"
 #define OPTIONS_FILE				"morph.options"
 
-const uint32_t ErrorParadigmId			= 0xffffffff;
+
+
+
+

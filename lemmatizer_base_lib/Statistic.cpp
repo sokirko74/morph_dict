@@ -24,7 +24,7 @@ static bool less4homonode(const _homonode_t& x, const _homonode_t& y)
 };
 
 
-int		CStatistic::get_HomoWeight(int paradigmid, int form) const
+int		CStatistic::get_HomoWeight(uint32_t paradigmid, int form) const
 {
 	_homonode_t findnode;
 	findnode.first = paradigmid;
@@ -45,7 +45,7 @@ static bool less4statnode(const _statnode_t& x, const _statnode_t& y)
 }
 
 
-int		CStatistic::get_WordWeight(int paradigmid) const
+int		CStatistic::get_WordWeight(uint32_t  paradigmid) const
 {
 	
 	_statnode_t findnode;

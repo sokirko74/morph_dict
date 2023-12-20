@@ -40,7 +40,8 @@ int main(int argc, const char* argv[])
     init_plog(args.GetLogLevel(), "morph_gen.log");
     try {
         CMorphDictBuilder R;
-        R.BuildLemmatizer(args.Retrieve("input"),
+        auto mwz_path = args.Retrieve("input");
+        R.BuildLemmatizer(mwz_path,
             args.Exists("allow-russian-jo"),
             args.Retrieve("postfix-len", -1),
             args.Retrieve("min-freq", -1),
