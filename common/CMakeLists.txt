@@ -12,7 +12,7 @@ set(my_SOURCES
         util_classes.h
         utilit.h
         json.cpp
-	    utf8.cpp
+        utf8.cpp
         rapidjson.cpp
         rapidjson.h
 )
@@ -23,7 +23,7 @@ add_subdirectory(tests)
 
 
 target_link_libraries(morphology_common
-    iconv_subset
+    iconv_subset ZLIB::ZLIB
 )
 
 

@@ -2,7 +2,7 @@
 #include <locale>
 #include <cwctype>
 #include <codecvt>
-
+#include <zlib.h>
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "morph_dict/contrib/doctest/doctest.h"
 
@@ -93,6 +93,26 @@ TEST_CASE("check_punct") {
 		CHECK(std::iswpunct(i) != 0);
 	}
 	CHECK(std::iswpunct(U'Я') == 0);
+}
+
+
+TEST_CASE("check_gzip") {
+    auto path = fs::path(__FILE__).parent_path() / "a.txt.gz";
+    gzFile file = gzopen(path.c_str(), "rb");
+    REQUIRE(file);
+
+    std::stringstream lineStream;
+    char buffer[1024];
+    int cnt = 0;
+    while (gzgets(file, buffer, sizeof(buffer)) != nullptr) {
+        lineStream << buffer;
+        auto line = lineStream.str();
+        ++cnt;
+        lineStream.str("");
+        lineStream.clear();
+    }
+    gzclose(file);
+    CHECK(3 == cnt);
 }
 
 int main(int argc, char** argv) {
