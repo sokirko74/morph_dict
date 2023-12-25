@@ -120,45 +120,6 @@ std::string GetParentPath (std::string FileName)
 };
 
 
-std::string	CreateTempFileName()
-{
-	char tmpfilename[_MAX_PATH];
-    const char * sTempPath = getenv("TMP");
-	#ifdef WIN32
-        if (sTempPath)
-		{
-		    strcpy (tmpfilename, _tempnam(sTempPath, "rml"));
-        }
-        else
-        {
-            strcpy (tmpfilename, _tempnam(".", "rml"));
-            //tmpnam((tmpfilename);
-        }
-	#else
-		if (sTempPath)
-		{
-			strcpy(tmpfilename, sTempPath);
-			if (strlen(tmpfilename) > 0 && tmpfilename[strlen(tmpfilename)-1] != '/')
-				strcat (tmpfilename,"/");
-			strcat (tmpfilename,"rml-temp.XXXXXX");
-		}
-		else
-            strcpy(tmpfilename, "/tmp/rml-temp.XXXXXX");	
-		
-		int fd = mkstemp(tmpfilename);
-		if (fd == -1)
-			throw CExpc ("Cannot create temp file");
-		close (fd);
-	#endif
-
-	return tmpfilename;
-
-};
-
-#ifdef _DEBUG
-    static std::ofstream logger;
-#endif
-
 
 
 char* rtrim (char* s)
@@ -912,15 +873,6 @@ size_t HashValue(const char *pc)
         h ^= (*c & mask[i]); 
 
     return h;
-}
-
-std::string BuildRMLPath (const char* s)
-{
-    std::string path = s;
-    size_t i = path.find("$RML");
-    if (i != std::string::npos)
-        path.replace(i, 4, GetRmlVariable());
-    return path;
 }
 
 

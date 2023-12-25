@@ -1,6 +1,3 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public License
-// ==========  Dialing Syntax Analysis (www.aot.ru)
-// ==========  Copyright by Alexey Sokirko
 #pragma once
 #include  <stdio.h>
 
@@ -99,7 +96,6 @@ extern uint64_t GetMaxQWORD();
 extern bool			FileExists (const char *FName);
 extern file_off_t	FileSize (const char *filename);
 extern std::vector<std::string> list_path_by_file_mask(std::string filemask);
-extern std::string	CreateTempFileName();
 extern std::string LoadFileToString(std::string path, bool convert_zero_to_one=false);
 extern std::string	MakeFName(const std::string& InpitFileName, const std::string& Ext);
 extern std::string   MakePath(const std::string path, const std::string fileName);
@@ -117,7 +113,6 @@ extern bool		IsRmlRegistered(std::string& Error);
 extern struct tm  RmlGetCurrentTime ();
 extern std::string	GetIniFilePath();
 extern std::string	GetRmlVariable();
-extern std::string   BuildRMLPath (const char* s);
 
 // working with std::strings (ASCII)
 extern char*	rtrim (char* s);
@@ -131,7 +126,6 @@ extern int isbracket  (BYTE x);
 extern size_t dual_bracket (BYTE x);
 extern bool is_upper_roman_digit (BYTE ch);
 extern bool is_lower_roman_digit (BYTE ch);
-extern bool is_roman_number ( const char *s, size_t len);
 extern bool is_pseudo_graph(BYTE x);
 extern bool is_spc_fill (BYTE x);
 extern bool isnspace(BYTE x);
@@ -174,16 +168,6 @@ template<class _II, class _Ty> inline
 bool _find(_II It, const _Ty& _V)
 {
 	return !(find(It.begin(), It.end(), _V) == It.end());
-}
-
-template<class T>
-size_t get_variants_count(const std::vector<std::vector<T>>& base) {
-	size_t i = 1;
-	for (auto& v : base) {
-		assert(!v.empty());
-		i *= v.size();
-	}
-	return i;
 }
 
 template<class T>

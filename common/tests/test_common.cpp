@@ -101,15 +101,10 @@ TEST_CASE("check_gzip") {
     gzFile file = gzopen(path.c_str(), "rb");
     REQUIRE(file);
 
-    std::stringstream lineStream;
     char buffer[1024];
     int cnt = 0;
     while (gzgets(file, buffer, sizeof(buffer)) != nullptr) {
-        lineStream << buffer;
-        auto line = lineStream.str();
         ++cnt;
-        lineStream.str("");
-        lineStream.clear();
     }
     gzclose(file);
     CHECK(3 == cnt);

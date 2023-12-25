@@ -360,26 +360,6 @@ bool is_lower_roman_digit(BYTE ch)
 }
 
 
-bool is_roman_number(const char* s, size_t len)
-{
-	if (len == 0) return false;
-	if (!s) return false;
-	bool bLowRoman = true;
-	bool bUpperRoman = true;
-	for (size_t i = 0; i < len; i++)
-	{
-		if ((i > 0) && (s[i] == '-') && (i + 3 >= len)) //  окончания пишутся после дефиса, типа "Павла I-го"
-		{
-			return bLowRoman || bUpperRoman;
-		};
-
-		bLowRoman = bLowRoman && ((ASCII[(BYTE)s[i]] & LwRomDigits) > 0);
-		bUpperRoman = bUpperRoman && ((ASCII[(BYTE)s[i]] & UpRomDigits) > 0);
-
-	};
-	return    bLowRoman || bUpperRoman;
-}
-
 //  =============  Punctuation Letters ======================
 bool is_spc_fill(BYTE x)
 {
