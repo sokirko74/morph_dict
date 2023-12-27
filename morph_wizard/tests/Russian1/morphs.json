@@ -1,0 +1,105 @@
+{
+ "flexia_models": [
+  {
+   "endings": [
+    {
+     "flexia": "",
+     "gramcode": "zz"
+    }
+   ],
+    "wiki": "somelink"
+  },
+  {
+   "endings": [
+    {
+     "flexia": "О",
+     "gramcode": "aa"
+    },
+    {
+     "flexia": "ОМ",
+     "gramcode": "ab"
+    }
+   ]
+  },
+  {
+   "endings": [
+    {
+     "flexia": "Ю",
+     "gramcode": "ab"
+    },
+    {
+     "flexia": "ЮМ",
+     "gramcode": "aa"
+    }
+   ]
+  }
+
+ ],
+ "accent_models": [
+  [
+   255
+  ],
+  [
+   0, 1
+  ]
+ ],
+ "sessions": [
+  {
+   "last_save": "16:30, 09 November 2004",
+   "start": "16:15, 09 November 2004",
+   "user": "alex"
+  },
+  {
+   "last_save": "10:25, 30 October 2023",
+   "start": "10:25, 30 October 2023",
+   "user": "guest"
+   },
+  {
+   "last_save": "11:59, 30 October 2023",
+   "start": "11:59, 30 October 2023",
+   "user": "guest"
+  }
+ ],
+ "prefix_sets": [
+  [
+   "ПСЕВДО"
+  ]
+ ],
+ "lemmas": [
+  {
+   "a": 0,
+   "f": 0,
+   "l": "ДУМА",
+   "s": 0,
+   "t": "Lu"
+  },
+  {
+   "a": 0,
+   "f": 0,
+   "l": "ДУМА",
+   "s": 0,
+   "t": "Lv"
+  },
+  {
+   "a": 1,
+   "f": 1,
+   "l": "СЛОВО",
+   "s": 0,
+   "t": "Lv"
+  },
+  {
+   "a": 1,
+   "f": 1,
+   "l": "ЁЛКА",
+   "s": 0,
+   "t": "Lv"
+  },
+  {
+   "a": 0,
+   "f": 0,
+   "l": "НЕУБИВАЙМЕНЯ",
+   "s": 0,
+   "t": "zz"
+  }
+ ]
+}

@@ -3,17 +3,6 @@
 #include <fstream>
 
 
-bool CMorphWizardBase::read_utf8_line(std::ifstream& inp, std::string& line) const {
-    if (!getline(inp, line)) {
-        return false;
-    }
-    line = convert_from_utf8(line.c_str(), m_Language);
-    return true;
-}
-
-std::string CMorphWizardBase::str_to_utf8(const std::string& line) const {
-    return convert_to_utf8(line, m_Language);
-}
 
 static size_t getCount(std::ifstream& mrdFile, const char* sectionName) {
     std::string line;
@@ -24,21 +13,42 @@ static size_t getCount(std::ifstream& mrdFile, const char* sectionName) {
 }
 
 
-nlohmann::json CMorphWizardBase::GetFlexiaModelsJson() const {
-    auto m = nlohmann::json::array();
-    for (auto f : m_FlexiaModels) {
-        m.push_back(f.ToJson());
+void CMorphWizardBase::SaveFlexiaModelsToJson(CJsonObject& out) const {
+    auto m = rapidjson::Value(rapidjson::kArrayType);
+    for (const auto& model : m_FlexiaModels) {
+        CJsonObject v(out.get_doc());
+        model.ToJson(v);
+        m.PushBack(v.get_value(), out.get_allocator());
     }
-    return m;
+    out.move_to_member("flexia_models", m);
+    
 };
 
-
-
-nlohmann::json  CMorphWizardBase::GetAccentModelsJson() const {
-    auto m = nlohmann::json::array();
-    for (auto a : m_AccentModels) {
-        m.push_back(a.m_Accents);
+void  CMorphWizardBase::SerializeFlexiaModelsToAnnotFile(std::ostream& outp) const {
+    outp << m_FlexiaModels.size() << "\n";
+    for (const auto& f : m_FlexiaModels) {
+        outp << f.ToString();
     }
-    return m;
 };
 
+void  CMorphWizardBase::SaveAccentModelsToJson(CJsonObject& out) const {
+    auto models = rapidjson::Value(rapidjson::kArrayType);
+    for (const auto& a : m_AccentModels) {
+        auto m = rapidjson::Value(rapidjson::kArrayType);
+        for (auto i : a.m_Accents) {
+            m.PushBack(i, out.get_allocator());
+        };
+        models.PushBack(m.Move(), out.get_allocator());
+    }
+    out.move_to_member("accent_models", models);
+};
+
+void  CMorphWizardBase::SerializeAccentModelsToAnnotFile(std::ostream& outp) const {
+    outp << m_AccentModels.size() << "\n";
+    for (const auto& a : m_AccentModels) {
+        for (auto i : a.m_Accents) {
+            outp << (int)i << " ";
+        }
+        outp << "\n";
+    }
+};

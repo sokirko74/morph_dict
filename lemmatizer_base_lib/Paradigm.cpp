@@ -1,4 +1,4 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko, Andrey Putrin
 
@@ -95,10 +95,10 @@ const CFlexiaModel& CFormInfo::GetFlexiaModel() const
 uint32_t CFormInfo::GetParadigmId() const 
 {
 	assert (IsValid());
-	if (!IsValid()) return -1;
+	if (!IsValid()) return UnknownParadigmId;
 
 	if (!m_bFound)
-		return ErrorParadigmId;
+		return UnknownParadigmId;
 	else
 		return m_InnerAnnot.GetParadigmId();
 };
@@ -108,7 +108,7 @@ std::string CFormInfo::GetCommonAncode() const
 {
 	assert (IsValid());
 	if (!IsValid()) return "??";
-    std::string c = GetLemmaInfo().m_LemmaInfo.GetCommonAncodeIfCan();
+    std::string c = GetLemmaInfo().m_LemmaInfo.GetCommonAncodeCopy();
     if (!c.empty()) 
         return c;
     else
@@ -163,6 +163,10 @@ std::string CFormInfo::GetSrcNorm() const
 	std::string result = m_pParent->m_Bases[GetLemmaInfo().m_LemmaStrNo].GetString();
 	result += GetFlexiaModel().get_first_flex();
 	return result;
+}
+
+std::string CFormInfo::GetSrcNormUtf8() const {
+	return convert_to_utf8(GetSrcNorm(), m_pParent->GetLanguage());
 }
 
 int CFormInfo::GetHomonymWeightWithForm(uint16_t pos) const 
@@ -237,6 +241,10 @@ std::string CFormInfo::GetWordForm (uint16_t pos) const
 	return Result;
 }
 
+std::string CFormInfo::GetWordFormUtf8(uint16_t pos) const {
+	return convert_to_utf8(GetWordForm(pos), m_pParent->GetLanguage());
+}
+
 
 int  CFormInfo::GetHomonymWeight() const
 {	
@@ -248,6 +256,7 @@ int  CFormInfo::GetHomonymWeight() const
 	return m_InnerAnnot.m_nWeight;
 }
 
+// method GetAccentedVowel is slow, but it is not used frequently in workflow
 BYTE	CFormInfo::GetAccentedVowel(uint16_t pos) const
 {
 	if (!m_bFound) return UnknownAccent;
@@ -261,9 +270,8 @@ BYTE	CFormInfo::GetAccentedVowel(uint16_t pos) const
 		return UnknownAccent;
 
 	BYTE BackVowelNo = m_pParent->m_AccentModels[I.m_LemmaInfo.m_AccentModelNo].m_Accents[pos];
-	std::string s = GetWordForm(pos);	
-	RmlMakeLower(s, m_pParent->GetLanguage());
-	return TransferReverseVowelNoToCharNo(s, BackVowelNo, m_pParent->GetLanguage());
+	std::wstring s = utf8_to_wstring(GetWordFormUtf8(pos));
+	return MapReverseVowelNoToCharNo(s, BackVowelNo);
 };
 
 BYTE	CFormInfo::GetSrcAccentedVowel() const
@@ -292,7 +300,7 @@ std::string CFormInfo::FormatAsInPlmLine() const
         Result += Format(" %lu %i", GetParadigmId(), GetHomonymWeight());
 	else
 		Result += " -1 0";
-    return Result;
+    return convert_to_utf8(Result, m_pParent->m_Language);
 };
 
 std::string CFormInfo::GetGramInfoStr(const CAgramtab* gramtab) const

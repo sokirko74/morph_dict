@@ -20,10 +20,12 @@ add_library(morph_wizard_lib
         "paradigm_info.cpp" 
         "paradigm_info.h" 
         "accent_model.cpp"
-        "accent_model.h")
+        "accent_model.h"
+        "paradigm_consts.h"
+        "parse_slf.cpp")
 
 target_link_libraries(morph_wizard_lib
     AgramtabLib
 )
 
-#add_subdirectory(scripts/read_mrd)
+add_subdirectory (tests)

@@ -1,5 +1,5 @@
 macro (declare_cmake_min_version)
-    cmake_minimum_required(VERSION 3.16)
+    cmake_minimum_required(VERSION 3.24)
 endmacro(declare_cmake_min_version)
 
 declare_cmake_min_version()
@@ -14,6 +14,10 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 
 add_subdirectory (contrib/iconv_subset)
+
+set(ZLIB_USE_STATIC_LIBS "ON")
+find_package( ZLIB REQUIRED )
+
 add_subdirectory (common)
 add_subdirectory (agramtab)
 add_subdirectory (morph_wizard)

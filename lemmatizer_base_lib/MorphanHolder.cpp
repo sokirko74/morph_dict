@@ -1,15 +1,17 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
-// ==========  Dialing Lemmatizer (www.aot.ru)
-// ==========  Copyright by Alexey Sokirko
-
-#include "morph_dict/common/json.h"
 #include "MorphanHolder.h"
+#include "morph_dict/morph_wizard/paradigm_consts.h"
+#include "morph_dict/agramtab/RusGramTab.h"
+#include "morph_dict/agramtab/GerGramTab.h"
+#include "morph_dict/agramtab/EngGramTab.h"
+#include "Paradigm.h"
+#include "Lemmatizers.h"
+#include "morph_dict/common/rapidjson.h"
 
 CMorphanHolder::CMorphanHolder()
 {
 	m_pLemmatizer = 0;
 	m_pGramTab = 0;
-    m_bUsePrediction = true;
+    m_bLoaded = true;
 };
 
 CMorphanHolder::~CMorphanHolder()
@@ -32,71 +34,99 @@ void CMorphanHolder::DeleteProcessors()
 
 };
 
-void CMorphanHolder::CreateMorphDicts(MorphLanguageEnum langua) 
+void CMorphanHolder::LoadOnlyGramtab(MorphLanguageEnum langua, std::string custom_folder)
 {
-    if (langua == morphRussian)
-    {
-        m_pGramTab = new CRusGramTab;
+    m_bLoaded = true;
+    switch (langua) {
+    case morphRussian:
+    case morphFioDisclosures:
+        m_pGramTab = new CRusGramTab;;
+        break;
+    case morphGerman:
+        m_pGramTab = new CGerGramTab;
+        break;
+    case morphEnglish:
+        m_pGramTab = new CEngGramTab;
+        break;
+    default:
+        throw CExpc("unsupported language");
+    }
+
+    if (custom_folder.empty()) {
+        m_pGramTab->LoadFromRegistry();
+    }
+    else {
+        m_pGramTab->ReadFromFolder(custom_folder);
+    }
+}
+
+void CMorphanHolder::LoadOnlyLemmatizer(MorphLanguageEnum langua, std::string custom_folder)
+{
+    switch (langua) {
+    case morphRussian:
         m_pLemmatizer = new CLemmatizerRussian;
-    }
-    else if (langua == morphFioDisclosures)
-    {
-        m_pGramTab = new CRusGramTab;
+        break;
+    case morphFioDisclosures:
         m_pLemmatizer = new CLemmatizer(morphFioDisclosures);
+        break;
+    case morphGerman:
+        m_pLemmatizer = new CLemmatizerGerman;
+        break;
+    case morphEnglish:
+        m_pLemmatizer = new CLemmatizerEnglish;
+        break;
+    default:
+        throw CExpc("unsupported language");
     }
-    else
-        if (langua == morphGerman)
-        {
-            m_pGramTab = new CGerGramTab;
-            m_pLemmatizer = new CLemmatizerGerman;
-        }
-        else
-            if (langua == morphEnglish)
-            {
-                m_pGramTab = new CEngGramTab;
-                m_pLemmatizer = new CLemmatizerEnglish;
-            }
-            else
-            {
-                throw CExpc("unsupported language");
-            };
+    if (custom_folder.empty()) {
+        m_pLemmatizer->LoadDictionariesRegistry();
+    }
+    else {
+        m_pLemmatizer->LoadDictionariesFromPath(custom_folder);
+    }
 }
 
-void CMorphanHolder::LoadLemmatizer(MorphLanguageEnum langua, std::string custom_folder)
+void CMorphanHolder::LoadMorphology(MorphLanguageEnum langua, std::string custom_folder)
 {
-        DeleteProcessors();
-        CreateMorphDicts(langua);
-        if (custom_folder.empty()) {
-            m_pLemmatizer->LoadDictionariesRegistry();
-            m_pGramTab->LoadFromRegistry();
-        }
-        else {
-            m_pLemmatizer->LoadDictionariesFromPath(custom_folder);
-            m_pGramTab->ReadFromFolder(custom_folder);
-        }
-		m_CurrentLanguage = langua;
+    m_CurrentLanguage = langua;
+    LoadOnlyLemmatizer(langua, custom_folder);
+    LoadOnlyGramtab(langua, custom_folder);
 }
 
+DwordVector CMorphanHolder::_GetLemmaIds(bool bNorm, std::string& word_str, bool capital, bool bUsePrediction) const {
+    DwordVector ids;
+
+    std::vector<CFormInfo > ParadigmCollection;
+    std::string s8 = convert_from_utf8(word_str.c_str(), m_CurrentLanguage);
+    if (!m_pLemmatizer->CreateParadigmCollection(bNorm, s8, capital, bUsePrediction, ParadigmCollection))
+    {
+        throw CExpc("cannot lemmatize %s", word_str.c_str());
+    }
+    for (auto& p : ParadigmCollection)
+    {
+        if (p.m_bFound || bUsePrediction) {
+            ids.push_back(p.GetParadigmId());
+        }
+    }
+    return ids;
+}
+
+
+DwordVector CMorphanHolder::GetLemmaIds(std::string lemma, bool is_capital) const
+{
+    return _GetLemmaIds(true, lemma, is_capital, false);
+}
 
 DwordVector CMorphanHolder::GetLemmaIds(std::string lemma) const
 {
-    DwordVector ids;
-	
-	std::vector<CFormInfo > ParadigmCollection;
-	
-	if (!m_pLemmatizer->CreateParadigmCollection(true, lemma, true, false, ParadigmCollection))
-	{
-		throw CExpc("cannot lemmatize %s\n", lemma.c_str());
-	}
-	
+    bool is_capital = FirstLetterIsUpper(lemma);
+    return _GetLemmaIds(true, lemma, is_capital, false);
+}
 
-	for(auto& p : ParadigmCollection)
-	{
-        if (p.m_bFound) {
-            ids.push_back(p.GetParadigmId());
-        }
-	}
-    return ids;
+
+DwordVector CMorphanHolder::GetWordFormIds(std::string word_form) const
+{
+    return _GetLemmaIds(false, word_form, false, false);
 }
 
 std::string CMorphanHolder::id_to_string(long id) const
@@ -105,17 +135,9 @@ std::string CMorphanHolder::id_to_string(long id) const
 	CFormInfo Res;
 	if (!m_pLemmatizer->CreateParadigmFromID(id, Res))
 		throw CExpc (Format( "cannot get lemma  by id %i", id));
-	return Res.GetWordForm(0);
+	return convert_to_utf8(Res.GetWordForm(0), m_CurrentLanguage);
 }
 
-CFormInfo CMorphanHolder::id_to_paradigm(long id) const
-{
-	
-	CFormInfo Res;
-	if (!m_pLemmatizer->CreateParadigmFromID(id, Res))
-		throw CExpc (Format( "cannot get lemma  by id %i", id));
-	return Res;
-}
 
 
 std::string CMorphanHolder::GetGrammems(const char* tab_str) const {
@@ -129,143 +151,132 @@ std::string CMorphanHolder::GetGrammems(const char* tab_str) const {
 
 std::string CMorphanHolder::PrintMorphInfoUtf8(std::string Form, bool printIds, bool printForms, bool sortParadigms) const
 {
-	bool bCapital = is_upper_alpha((BYTE)Form[0], m_CurrentLanguage);
+    std::string word_s8 = convert_from_utf8(Form.c_str(), m_CurrentLanguage);
+	bool bCapital = is_upper_alpha((BYTE)word_s8[0], m_CurrentLanguage);
 
 	std::vector<CFormInfo> Paradigms;
-	m_pLemmatizer->CreateParadigmCollection(false, Form, bCapital, true, Paradigms);
+	m_pLemmatizer->CreateParadigmCollection(false, word_s8, bCapital, true, Paradigms);
 
 	std::vector<std::string> Results;
-	for (int i = 0; i < Paradigms.size(); i++) {
-		std::string Result;
-		const CFormInfo& F = Paradigms[i];
-		Result += F.m_bFound ? "+ " : "- ";
-
-		Result += F.GetWordForm(0) + " ";
+	for (auto& f : Paradigms) {
+        std::ostringstream ss;
+		ss << (f.m_bFound ? "+" : "-") << " ";
+		ss <<  f.GetWordFormUtf8(0) << " ";
 
 		{
-			std::string GramCodes = F.GetSrcAncode();
+			std::string GramCodes = f.GetSrcAncode();
 			BYTE PartOfSpeech = m_pGramTab->GetPartOfSpeech(GramCodes.c_str());
-			Result += m_pGramTab->GetPartOfSpeechStr(PartOfSpeech) + std::string(" ");
+			ss << m_pGramTab->GetPartOfSpeechStr(PartOfSpeech) << " ";
 
-			std::string CommonAncode = F.GetCommonAncode();
-			Result += Format("%s ", (CommonAncode.empty()) ? "" : GetGrammems(CommonAncode.c_str()).c_str());
+			auto type = f.GetCommonAncode();
+			ss << (type.empty() ? "" : GetGrammems(type.c_str())) << " ";
 
 			for (long i = 0; i < GramCodes.length(); i += 2) {
 				if (i > 0)
-					Result += ";";
-				Result += Format("%s", GetGrammems(GramCodes.c_str() + i).c_str());
+					ss << ";";
+				ss << GetGrammems(GramCodes.c_str() + i);
 			}
 
 		}
 
 		if (printIds)
-			Result += Format(" %i", F.GetParadigmId());
+			ss << " " << f.GetParadigmId();
 
-		BYTE Accent = F.GetSrcAccentedVowel();
-		if (Accent != 0xff)
-			Result += Format(" %s'%s", Form.substr(0, Accent + 1).c_str(), Form.substr(Accent + 1).c_str());
+		BYTE Accent = f.GetSrcAccentedVowel();
+        if (Accent != UnknownAccent) {
+            auto af = word_s8.substr(0, Accent + 1) + "'" + word_s8.substr(Accent + 1);
+            ss << " " << convert_to_utf8(af, m_CurrentLanguage);
+        }
 
 		if (printForms) {
-			Result += " ";
-			for (int k = 0; k < F.GetCount(); k++) {
+			ss << " ";
+			for (int k = 0; k < f.GetCount(); k++) {
 				if (k > 0)
-					Result += ",";
-				Result += Paradigms[i].GetWordForm(k);
+					ss << ",";
+				ss << f.GetWordFormUtf8(k);
 			};
 		};
-		Results.push_back(Result);
+		Results.push_back(ss.str());
 	};
 
 	if (sortParadigms) {
 		std::sort(Results.begin(), Results.end());
 	};
-	std::string Result;
+	std::string result;
 	for (int i = 0; i < Results.size(); i++) {
 		if (i > 0)
-			Result += "\t";
-		Result += Results[i] + "\n";
+			result += "\t";
+		result += Results[i] + "\n";
 	}
-	return convert_to_utf8(Result, m_CurrentLanguage);
+	return result;
 };
 
-inline  bool IsUpper(int x, MorphLanguageEnum Langua)
-{
-	return is_upper_alpha(x, Langua);
-};
-
-bool CMorphanHolder::GetParadigmCollection(std::string WordForm, std::vector<CFormInfo>&	Paradigms) const {
-	if (WordForm.length() == 0)	{
-		return false;
+void _GetParadigmCollection(const CLemmatizer* lemmatizer, std::string WordForm, std::vector<CFormInfo>& paradigms) {
+    paradigms.clear();
+	if (WordForm.empty())	{
+		return;
 	};
 
-	try
-	{
-		if (m_pLemmatizer == nullptr) return false;
-		m_pLemmatizer->CreateParadigmCollection(false,
-                                                  WordForm,
-                                                  IsUpper((unsigned char)WordForm[0],
-                                                          m_CurrentLanguage),
-                                                          m_bUsePrediction,
-                                                          Paradigms);
-	}
-	catch (...)
-	{
-		return false;;
-	};
-	return true;
+    if (lemmatizer == nullptr) {
+        throw CExpc("lemmatizer is null in _GetParadigmCollection");
+    }
+
+	lemmatizer->CreateParadigmCollection(false,WordForm,
+                                is_upper_alpha((unsigned char)WordForm[0], lemmatizer->GetLanguage()),
+                             true,
+        paradigms);
 };
 
-bool CMorphanHolder::IsInDictionary(std::string WordForm) const {
-    return m_pLemmatizer->IsInDictionary(WordForm, true);
+bool CMorphanHolder::IsInDictionaryUtf8(std::string w) const {
+    std::string s = convert_from_utf8(w.c_str(), m_pLemmatizer->GetLanguage());
+    return m_pLemmatizer->IsInDictionary(s, true);
 }
-
-
 
 const int ParagigmGroupsCount = 45;
 const std::string ParagigmGroups[ParagigmGroupsCount] = {
-        _R("П ед,мр"),
-        _R("П ед,жр"),
-        _R("П ед,ср"),
-        _R("П мн"),
-        _R("П сравн"),
-        _R("С ед"),
-        _R("С мн"),
-        _R("Г нст"),
-        _R("Г прш"),
-        _R("Г буд"),
-        _R("Г пвл"),
-        _R("ПРИЧАСТИЕ нст,мр,стр"),
-        _R("ПРИЧАСТИЕ нст,жр,стр"),
-        _R("ПРИЧАСТИЕ нст,ср,стр"),
-        _R("ПРИЧАСТИЕ нст,мн,стр"),
-        _R("ПРИЧАСТИЕ прш,мр,стр"),
-        _R("ПРИЧАСТИЕ прш,жр,стр"),
-        _R("ПРИЧАСТИЕ прш,ср,стр"),
-        _R("ПРИЧАСТИЕ прш,мн,стр"),
-        _R("ПРИЧАСТИЕ нст,мр,дст"),
-        _R("ПРИЧАСТИЕ нст,жр,дст"),
-        _R("ПРИЧАСТИЕ нст,ср,дст"),
-        _R("ПРИЧАСТИЕ нст,мн,дст"),
-        _R("ПРИЧАСТИЕ прш,мр,дст"),
-        _R("ПРИЧАСТИЕ прш,жр,дст"),
-        _R("ПРИЧАСТИЕ прш,ср,дст"),
-        _R("ПРИЧАСТИЕ прш,мн,дст"),
-        _R("ЧИСЛ мр"),
-        _R("ЧИСЛ жр"),
-        _R("ЧИСЛ ср"),
-        _R("ЧИСЛ-П ед,мр"),
-        _R("ЧИСЛ-П ед,жр"),
-        _R("ЧИСЛ-П ед,ср"),
-        _R("ЧИСЛ-П мн"),
-        _R("МС-П ед,мр"),
-        _R("МС-П ед,жр"),
-        _R("МС-П ед,ср"),
-        _R("МС-П мн"),
-        _R("МС ед"),
-        _R("МС мн"),
-        _R("МС ед,мр"),
-        _R("МС ед,жр"),
-        _R("МС ед,ср"),
+        "П ед,мр",
+        "П ед,жр",
+        "П ед,ср",
+        "П мн",
+        "П сравн",
+        "С ед",
+        "С мн",
+        "Г нст",
+        "Г прш",
+        "Г буд",
+        "Г пвл",
+        "ПРИЧАСТИЕ нст,мр,стр",
+        "ПРИЧАСТИЕ нст,жр,стр",
+        "ПРИЧАСТИЕ нст,ср,стр",
+        "ПРИЧАСТИЕ нст,мн,стр",
+        "ПРИЧАСТИЕ прш,мр,стр",
+        "ПРИЧАСТИЕ прш,жр,стр",
+        "ПРИЧАСТИЕ прш,ср,стр",
+        "ПРИЧАСТИЕ прш,мн,стр",
+        "ПРИЧАСТИЕ нст,мр,дст",
+        "ПРИЧАСТИЕ нст,жр,дст",
+        "ПРИЧАСТИЕ нст,ср,дст",
+        "ПРИЧАСТИЕ нст,мн,дст",
+        "ПРИЧАСТИЕ прш,мр,дст",
+        "ПРИЧАСТИЕ прш,жр,дст",
+        "ПРИЧАСТИЕ прш,ср,дст",
+        "ПРИЧАСТИЕ прш,мн,дст",
+        "ЧИСЛ мр",
+        "ЧИСЛ жр",
+        "ЧИСЛ ср",
+        "ЧИСЛ-П ед,мр",
+        "ЧИСЛ-П ед,жр",
+        "ЧИСЛ-П ед,ср",
+        "ЧИСЛ-П мн",
+        "МС-П ед,мр",
+        "МС-П ед,жр",
+        "МС-П ед,ср",
+        "МС-П мн",
+        "МС ед",
+        "МС мн",
+        "МС ед,мр",
+        "МС ед,жр",
+        "МС ед,ср",
         "VBE sg",
         "VBE pl"
 };
@@ -296,9 +307,9 @@ struct CFormGroup
 };
 
 
-std::string &TrimCommaRight(std::string &str)
+std::string& TrimCommaRight(std::string &str)
 {
-    if (str.size() == 0)
+    if (str.empty())
         return str;
     size_t i = str.find_last_not_of(",");
     str.erase(i + 1);
@@ -399,7 +410,7 @@ std::vector<CFormAndGrammems> BuildFormAndGrammems(const CMorphanHolder *Holder,
             F.m_Langua = Holder->m_CurrentLanguage;
             F.m_Form = piParadigm->GetWordForm(j);
             BYTE AccentedCharNo = piParadigm->GetAccentedVowel(j);
-            if (AccentedCharNo != 255)
+            if (AccentedCharNo != UnknownAccent)
                 F.m_Form.insert(AccentedCharNo + 1, "'");
             F.m_Grammems = pGramtab->GetAllGrammems(GramInfo.substr(i, 2).c_str());
             F.m_PartOfSpeech = pGramtab->GetPartOfSpeech(GramInfo.substr(i, 2).c_str());
@@ -411,11 +422,10 @@ std::vector<CFormAndGrammems> BuildFormAndGrammems(const CMorphanHolder *Holder,
 }
 
 
-nlohmann::json GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool sortForms)
+void  GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool sortForms, CJsonObject& out)
 {
     const CAgramtab *pGramtab = Holder->m_pGramTab;
     const std::vector<CFormAndGrammems> FormAndGrammems = BuildFormAndGrammems(Holder, piParadigm);
-    nlohmann::json result = nlohmann::json::array();
     int FormNo = 0;
     while (FormNo < FormAndGrammems.size())
     {
@@ -423,63 +433,64 @@ nlohmann::json GetParadigmFromDictionary(const CFormInfo *piParadigm, const CMor
         grammems_mask_t commonGrammems;
         const std::vector<CFormGroup> FormGroups = BuildInterfaceParadigmPart(Holder, FormAndGrammems, FormNo, commonGrammems);
         assert(FormNo > saveFormNo);
-        auto prdPart = nlohmann::json::object();
+        CJsonObject prdPart(out.get_doc());
         std::string pos = pGramtab->GetPartOfSpeechStrLong(FormAndGrammems[saveFormNo].m_PartOfSpeech);
         if (commonGrammems > 0)
             pos += std::string(" ") + pGramtab->GrammemsToStr(commonGrammems);
-        prdPart["pos"] = TrimCommaRight(pos);
-
-        prdPart["formsGroups"] = nlohmann::json::array();
+        prdPart.add_string_copy("pos", TrimCommaRight(pos));
+        rapidjson::Value formsGroups(rapidjson::kArrayType);
         for (auto fg : FormGroups)
         {
-            auto subg = nlohmann::json::object();
+            CJsonObject subg (out.get_doc());
             std::string grm = pGramtab->GrammemsToStr(fg.m_IntersectGrammems & ~commonGrammems);
-            subg["grm"] = TrimCommaRight(grm);
-            subg["forms"] = nlohmann::json::array();
+            subg.add_string_copy("grm", TrimCommaRight(grm));
+            
+            std::vector<std::pair<std::string, std::string>> forms;
             for (auto formNo : fg.m_FormNos)
             {
                 auto &f = FormAndGrammems[formNo + saveFormNo];
-                std::string grm = pGramtab->GrammemsToStr(f.m_Grammems & ~(fg.m_IntersectGrammems | commonGrammems));
-                subg["forms"].push_back(
-                        {{"f", f.m_Form},
-                         {"grm", TrimCommaRight(grm)}});
+                auto form = convert_to_utf8(f.m_Form, Holder->m_CurrentLanguage);
+                auto grm = pGramtab->GrammemsToStr(f.m_Grammems & ~(fg.m_IntersectGrammems | commonGrammems));
+                grm = TrimCommaRight(grm);
+                forms.push_back({form, grm});
             };
+
             if (sortForms)
             {
-                sort(subg["forms"].begin(), subg["forms"].end());
+                sort(forms.begin(), forms.end());
             }
-            prdPart["formsGroups"].push_back(subg);
+            rapidjson::Value forms_json(rapidjson::kArrayType);
+            for (auto& p : forms) {
+                CJsonObject v(out.get_doc());
+                v.add_string_copy("f", p.first);
+                v.add_string_copy("grm", p.second);
+                forms_json.PushBack(v.get_value().Move(), out.get_allocator());
+            }
+            subg.move_to_member("forms", forms_json);
+
+            formsGroups.PushBack(subg.get_value().Move(), out.get_allocator());
         };
-        result.push_back(prdPart);
+        prdPart.move_to_member("formsGroups", formsGroups);
+        out.push_back(prdPart.get_value());
     };
-    return result;
 };
 
 
-nlohmann::json GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool withParadigm, bool sortForms)
+static void GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorphanHolder *Holder, bool withParadigm, bool sortForms, CJsonObject& out)
 {
-    auto result = nlohmann::json::object();
-    result["found"] = piParadigm->m_bFound;
+    out.add_bool("found", piParadigm->m_bFound);
 
     std::string typeAncode = piParadigm->GetCommonAncode();
     std::string commonGrammems;
     if (!typeAncode.empty())
     {
-        const CAgramtab *pGramtab = Holder->m_pGramTab;
-        try
-        {
-            commonGrammems = pGramtab->GrammemsToStr(pGramtab->GetAllGrammems(typeAncode.c_str()));
-        }
-        catch (...)
-        {
-            throw CExpc(" an exception occurred while getting Common Ancode");
-        };
+        commonGrammems = Holder->m_pGramTab->GrammemsToStr(Holder->m_pGramTab->GetAllGrammems(typeAncode.c_str()));
     };
-    result["commonGrammems"] = TrimCommaRight(commonGrammems);
-    result["wordForm"] = piParadigm->GetWordForm(0);
+    out.add_string_copy("commonGrammems", TrimCommaRight(commonGrammems));
+    out.add_string_copy("wordForm", piParadigm->GetWordFormUtf8(0));
     if (!piParadigm->m_bFound)
     {
-        result["srcNorm"] = piParadigm->GetSrcNorm();
+        out.add_string_copy("srcNorm", piParadigm->GetSrcNormUtf8());
     }
     std::string GramInfo;
     try
@@ -490,45 +501,82 @@ nlohmann::json GetStringByParadigmJson(const CFormInfo *piParadigm, const CMorph
     {
         GramInfo = piParadigm->GetAncode(0);
     }
-    result["morphInfo"] = GetGramInfoStr(GramInfo, Holder);
+    out.add_string_copy("morphInfo", GetGramInfoStr(GramInfo, Holder));
 
     if (withParadigm)
     {
-        result["paradigm"] = GetParadigmFromDictionary(piParadigm, Holder, sortForms);
+        CJsonObject v(out.get_doc());
+        v.get_value().SetArray();
+        GetParadigmFromDictionary(piParadigm, Holder, sortForms, v);
+        out.move_to_member("paradigm", v.get_value());
     }
-    result["wordWeight"] = piParadigm->GetWordWeight();
-    result["homonymWeight"] = piParadigm->GetHomonymWeight();
-    return result;
+    out.add_int("wordWeight", (uint32_t)piParadigm->GetWordWeight());
+    out.add_int("homonymWeight", (uint32_t)piParadigm->GetHomonymWeight());
 }
 
-std::string CMorphanHolder::LemmatizeJson(std::string WordForm, bool withParadigm, bool prettyJson, bool sortForms) const
+std::string CMorphanHolder::LemmatizeJson(std::string word_utf8, bool withParadigm, bool prettyJson, bool sortForms) const
 {
+    auto word = convert_from_utf8(word_utf8.c_str(), m_pLemmatizer->GetLanguage());
     std::vector<CFormInfo> Paradigms;
-    if (!GetParadigmCollection(WordForm, Paradigms))
-    {
-        return "[]";
-    };
-
-    nlohmann::json result = nlohmann::json::array();
-    std::string strResult = "[";
+    _GetParadigmCollection(m_pLemmatizer, word, Paradigms);
+    rapidjson::Document d;
+    CJsonObject result(d, rapidjson::kArrayType);
     for (auto& p : Paradigms)
     {
-        result.push_back(GetStringByParadigmJson(&(p), this, withParadigm, sortForms));
+        CJsonObject v(result.get_doc());
+        GetStringByParadigmJson(&(p), this, withParadigm, sortForms, v);
+        result.push_back(v.get_value());
     };
-    ConvertToUtfRecursive(result, m_CurrentLanguage);
-    return result.dump(prettyJson ? 1 : -1);
-}
-
-std::vector<CFuzzyResult> CMorphanHolder::CorrectMisspelledWord(std::string word) const {
-    std::vector<CFuzzyResult> r;
-    if (IsInDictionary(word)) {
-        r.push_back({word, 0});
+    if (prettyJson) {
+        return result.dump_rapidjson_pretty();
     }
     else {
-        r = m_pLemmatizer->_CorrectMisspelledWord(word);
+        return result.dump_rapidjson();
+    }
+}
+
+std::vector<CFuzzyResult> CMorphanHolder::CorrectMisspelledWordUtf8(std::string word_utf8) const {
+    std::vector<CFuzzyResult> r;
+    if (IsInDictionaryUtf8(word_utf8)) {
+        r.push_back({ word_utf8, 0});
+    }
+    else {
+        auto word_s8 = convert_from_utf8(word_utf8.c_str(), m_CurrentLanguage);
+        r = m_pLemmatizer->CorrectMisspelledWord1(word_s8);
     }
     for (auto& a: r) {
         a.CorrectedString = convert_to_utf8(a.CorrectedString, m_CurrentLanguage);
     }
     return r;
+}
+
+CMorphanHolder  RusHolder;
+CMorphanHolder  EngHolder;
+CMorphanHolder  GerHolder;
+
+static CMorphanHolder& GetHolder(MorphLanguageEnum l) {
+    switch (l) {
+        case morphRussian: return RusHolder;
+        case morphGerman: return GerHolder;
+        case morphEnglish: return EngHolder;
+        default: throw CExpc("unknown morph holder language");
+    }
+}
+
+const CMorphanHolder& GetMHolder(MorphLanguageEnum l) {
+    auto& h = GetHolder(l);
+    assert(h.m_bLoaded);
+    return h;
+};
+
+
+const CMorphanHolder& GlobalLoadMorphHolder(MorphLanguageEnum l, bool only_gramtab, std::string custom_directory) {
+    auto& h = GetHolder(l);
+    h.m_CurrentLanguage = l;
+    h.LoadOnlyGramtab(l, custom_directory);
+    if (only_gramtab) {
+        return h;
+    }
+    h.LoadOnlyLemmatizer(l, custom_directory);
+    return  h;
 }

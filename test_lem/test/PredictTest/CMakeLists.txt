@@ -1,8 +1,8 @@
 declare_cmake_min_version()
 
-project(PredictTest)
+project(test_predict)
 
-add_executable (${PROJECT_NAME} PredictTest.cpp)
+add_executable (${PROJECT_NAME} "test_predict.cpp")
 
 target_link_libraries(${PROJECT_NAME}
         lemmatizer_base_lib

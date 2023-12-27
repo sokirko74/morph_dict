@@ -1,4 +1,4 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko
 
@@ -143,7 +143,7 @@ struct IsLessByModelNoAndBase
 
 const size_t MinimalFlexiaModelFrequence = 10;
 
-bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLength, int MinFreq, std::string path, nlohmann::json& output_opts)
+bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLength, int MinFreq, std::string path, CJsonObject& output_opts)
 {
 	LOGI << "CMorphDictBuilder::GenPredictIdx";
 	DwordVector ModelFreq(wizard.m_FlexiaModels.size(), 0);
@@ -192,7 +192,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 
 	LOGI << "finish prepare";
 
-	std::string plug_noun = wizard.m_pGramTab->GetPlugNouInfo().m_Lemma;
+	std::string plug_noun = convert_from_utf8(wizard.m_pGramTab->GetPlugNouInfo().m_Lemma.c_str(), wizard.m_Language);
 	
 	int PlugLemmaInfoNo = -1;
 
@@ -212,7 +212,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 		if (base + paradigm.get_first_flex() == plug_noun)
 		{
 			PlugLemmaInfoNo = (int)lin;
-			output_opts["PlugNounGramCode"] = convert_to_utf8(paradigm.get_first_code(), m_Language);
+			output_opts.add_string("PlugNounGramCode",  paradigm.get_first_code());
 			continue;
 		};
 
@@ -253,8 +253,8 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 
 	// adding crtitical noun
 	{
-		std::string s = R.GetCriticalNounLetterPack();
-		CPredictWord(0, PlugLemmaInfoNo, 0, 0).AddToAutomat(R, s);
+		std::string s8 = R.GetCriticalNounLetterPack();
+		CPredictWord(0, PlugLemmaInfoNo, 0, 0).AddToAutomat(R, s8);
 		// 0 is noun
 	};
 

@@ -201,6 +201,11 @@ public:
         auto it = ArgumentValues.find(name);
         return (it == ArgumentValues.end()) ? "" : it->second;
     }
+    
+    int Retrieve(const String& name, int default_value) const {
+        auto it = ArgumentValues.find(name);
+        return (it == ArgumentValues.end()) ? default_value : atoi(it->second.c_str());
+    }
 
     bool Exists(const String& name) const {
         return ArgumentValues.find(name) != ArgumentValues.end();

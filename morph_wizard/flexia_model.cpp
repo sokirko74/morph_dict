@@ -12,21 +12,29 @@ CMorphForm::CMorphForm(std::string Gramcode, std::string FlexiaStr, std::string 
     assert(!m_Gramcode.empty());
 };
 
-CMorphForm::CMorphForm(nlohmann::json j) {
-    j.at("flexia").get_to(m_FlexiaStr);
-    j.at("gramcode").get_to(m_Gramcode);
-    m_PrefixStr = j.value("prefix", "");
+CMorphForm::CMorphForm(const rapidjson::Value& j) {
+    m_FlexiaStr = j["flexia"].GetString();
+    m_Gramcode = j["gramcode"].GetString();
+    auto a = rapidjson::Pointer("/prefix").Get(j);
+    if (a) {
+        m_PrefixStr = a->GetString();
+    }
+    
 }
 
-nlohmann::json CMorphForm::ToJson() const {
-    nlohmann::json j;
-    j["flexia"] = m_FlexiaStr;
-    j["gramcode"] = m_Gramcode;
-    if (!m_PrefixStr.empty()) {
-        j["prefix"] = m_PrefixStr;
-    }
-    return j;
+CMorphForm::CMorphForm(const std::string& s) {
+    FromString(s);
 }
+
+
+void CMorphForm::ToJson(CJsonObject& out) const {
+    out.add_string("flexia", m_FlexiaStr);
+    out.add_string("gramcode", m_Gramcode);
+    if (!m_PrefixStr.empty()) {
+        out.add_string("prefix", m_PrefixStr);
+    }
+}
+
 
 bool CMorphForm::operator == (const CMorphForm& X) const
 {
@@ -35,15 +43,28 @@ bool CMorphForm::operator == (const CMorphForm& X) const
         && m_PrefixStr == X.m_PrefixStr;
 };
 
+std::string CMorphForm::ToString() const {
+    return Format("%s\t%s\t%s", m_Gramcode.c_str(), m_FlexiaStr.c_str(), m_PrefixStr.c_str());
+}
+
+CMorphForm& CMorphForm::FromString(const std::string& s) {
+    // speed is important for debugging in RML, lemmatizer is used very frequently 
+    int i1 = s.find('\t');
+    m_Gramcode = s.substr(0, i1);
+    int i2 = s.rfind('\t');
+    m_FlexiaStr = s.substr(i1 + 1, i2 - i1 - 1);
+    m_PrefixStr = s.substr(i2 + 1);
+    return *this;
+}
 
 
-std::string CFlexiaModel::get_first_flex() const {
+const std::string& CFlexiaModel::get_first_flex() const {
     assert(!m_Flexia.empty());
     return m_Flexia[0].m_FlexiaStr;
 };
 
 
-std::string CFlexiaModel::get_first_code() const {
+const std::string& CFlexiaModel::get_first_code() const {
     assert(!m_Flexia.empty());
     return m_Flexia[0].m_Gramcode;
 }
@@ -59,30 +80,58 @@ bool CFlexiaModel::has_ancode(const std::string& search_ancode) const {
 };
 
 
-nlohmann::json CFlexiaModel::ToJson() const {
-    auto endings = nlohmann::json::array();
-    for (auto f : m_Flexia) {
-        auto o = f.ToJson();
-        endings.push_back(o);
+void CFlexiaModel::ToJson(CJsonObject& out) const {
+    rapidjson::Value endings(rapidjson::kArrayType);
+    for (const auto& f : m_Flexia) {
+        CJsonObject o(out.get_doc());
+        f.ToJson(o);
+        endings.PushBack(o.get_value().Move(), out.get_allocator());
     };
-    nlohmann::json r;
-    r["endings"] = endings;
+    
+    out.move_to_member("endings", endings);
+
     if (!m_Comments.empty()) {
-        r["comments"] = m_Comments;
+        out.add_string("comments",  m_Comments);
     }
-    if (!m_Comments.empty()) {
-        r["wiki"] = m_WiktionaryMorphTemplate;
+    
+    if (!m_WiktionaryMorphTemplate.empty()) {
+        out.add_string("wiki", m_WiktionaryMorphTemplate);
     }
-    return r;
 };
 
-CFlexiaModel& CFlexiaModel::FromJson(nlohmann::json inj) {
+
+CFlexiaModel& CFlexiaModel::FromJson(const rapidjson::Value& inj) {
     m_Flexia.clear();
-    for (auto f : inj["endings"]) {
+    for (const auto& f : inj["endings"].GetArray()) {
         CMorphForm form(f);
         m_Flexia.push_back(form);
     }
-    m_Comments = inj.value("comments", "");
-    m_WiktionaryMorphTemplate = inj.value("wiki", "");
+    auto c = rapidjson::Pointer("/comments").Get(inj);
+    if (c) m_Comments = c->GetString();
+    c = rapidjson::Pointer("/wiki").Get(inj);
+    if (c) m_WiktionaryMorphTemplate = c->GetString();
     return *this;
 }
+
+std::string CFlexiaModel::ToString() const {
+    std::ostringstream sp;
+    for (const auto& p : m_Flexia) {
+        sp << p.ToString() << ";";
+    }
+    sp << "\n";
+    return sp.str();
+}
+
+CFlexiaModel& CFlexiaModel::FromString(const std::string& s) {
+    m_Flexia.clear();
+    size_t prev = 0;
+    size_t i = s.find(';');
+    while (i != s.npos) {
+        CMorphForm form(s.substr(prev, i - prev));
+        m_Flexia.emplace_back(form);
+        prev = i + 1;
+        i = s.find(';', prev);
+    }
+    return *this;
+}
+

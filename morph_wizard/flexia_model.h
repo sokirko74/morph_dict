@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../common/utilit.h"
-#include "../common/json.h"
+#include "../common/rapidjson.h"
 
 
 struct CMorphForm
@@ -11,10 +11,14 @@ struct CMorphForm
 	std::string m_PrefixStr;
 
 	CMorphForm(std::string Gramcode, std::string FlexiaStr, std::string PrefixStr);
-	CMorphForm(nlohmann::json j);
+	CMorphForm(const rapidjson::Value& j);
+	CMorphForm(const std::string& s);
 	
 	bool		operator == (const CMorphForm& X) const;
-	nlohmann::json		ToJson() const;
+	void	ToJson(CJsonObject& out) const;
+
+	std::string ToString() const;
+	CMorphForm& FromString(const std::string& s);
 
 };
 
@@ -29,11 +33,14 @@ struct  CFlexiaModel
 	{
 		return	m_Flexia == X.m_Flexia;
 	};
-	nlohmann::json		ToJson() const;
-	CFlexiaModel&	FromJson(nlohmann::json inj) ;
+	void ToJson(CJsonObject& out) const;
+	CFlexiaModel&	FromJson(const rapidjson::Value& inj) ;
 
-	std::string		get_first_flex() const;
-	std::string		get_first_code() const;
+	std::string		ToString() const;
+	CFlexiaModel& FromString(const std::string& s);
+
+	const std::string& get_first_flex() const;
+	const std::string& get_first_code() const;
 	bool		has_ancode(const std::string& search_ancode) const;
 
 };

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../common/json.h"
+#include "../common/utilit.h"
+#include "../common/rapidjson.h"
 
 
 struct CAccentModel
@@ -12,7 +13,7 @@ struct CAccentModel
 		return m_Accents == X.m_Accents;
 
 	};
-	std::string		ToString() const;
-	CAccentModel& FromJson(nlohmann::json inj);
+	CAccentModel& FromJson(const rapidjson::Value& inj);
+	CAccentModel& FromString(const std::string& s);
 };
 

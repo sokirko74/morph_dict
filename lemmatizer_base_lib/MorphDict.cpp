@@ -1,4 +1,4 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru), 
 // ==========  Copyright by Alexey Sokirko (2004)
 
@@ -155,21 +155,20 @@ void CMorphDict::Load(std::string GrammarFileName)
 	};
 	
 	{
-		std::string l;
-		std::getline(annotFile, l);
 		m_FlexiaModels.clear();
-        auto js = nlohmann::json::parse(l);
-		ConvertFromUtfRecursive(js, m_Language);
-		for (auto j : js) {
-			m_FlexiaModels.push_back(CFlexiaModel().FromJson(j));
+		size_t count = getCount(annotFile, "flexia models");
+		std::string l;
+		for (size_t i = 0; i < count; ++i) {
+			if (!getline(annotFile, l)) throw CExpc("cannot read flexia models");
+			m_FlexiaModels.emplace_back(CFlexiaModel().FromString(l));
 		}
 	}
 	{
+		size_t count = getCount(annotFile, "accent models");
 		std::string l;
-		std::getline(annotFile, l);
-		m_AccentModels.clear();
-		for (auto m : nlohmann::json::parse(l)) {
-			m_AccentModels.push_back(CAccentModel().FromJson(m));
+		for (size_t i = 0; i < count; ++i) {
+			std::getline(annotFile, l);
+			m_AccentModels.emplace_back(CAccentModel().FromString(l));
 		}
 	}
 
@@ -215,9 +214,8 @@ void CMorphDict::Save(std::string GrammarFileName) const
 	{
 		throw CExpc(Format("Cannot write to %s", PrecompiledFile.c_str()));
 	};
-    auto js = GetFlexiaModelsJson();
-	outp << ConvertToUtfRecursive(js, m_Language).dump() << "\n";
-	outp << GetAccentModelsJson() << "\n";
+	SerializeFlexiaModelsToAnnotFile(outp);
+	SerializeAccentModelsToAnnotFile(outp);
 
 	assert(!m_Prefixes.empty() && m_Prefixes[0].empty());
 	// do not write the first empty prefix, instead add it manually each time during loading

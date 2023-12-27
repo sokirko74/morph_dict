@@ -1,4 +1,4 @@
-﻿// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+﻿// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko
 
@@ -12,99 +12,99 @@ struct TMorphConstant {
 };
 
 const static TMorphConstant RussianPartOfSpeech[] = {
-	{_R("С"), "N", _R("СУЩЕСТВИТЕЛЬНОЕ")},  // 0
-	{_R("П"), "A", _R("ПРИЛАГАТЕЛЬНОЕ")}, // 1
-	{_R("Г"), "V", _R("ЛИЧНАЯ ФОРМА")}, // 2
-	{_R("МС"),"PRON", _R("МЕСТОИМЕНИЕ")}, // 3
-	{_R("МС-П"),"PA", _R("МЕСТОИМЕНИЕ-ПРИЛАГАТЕЛЬНОЕ")}, // 4
-	{_R("МС-ПРЕДК"),"P_PRED", _R("МЕСТОИМЕНИЕ-ПРЕДИКАТИВ")}, // 5
-	{_R("ЧИСЛ"), "NUM", _R("ЧИСЛИТЕЛЬНОЕ")}, // 6
-	{_R("ЧИСЛ-П"),"ORD_NUM", _R("ПОРЯДКОВОЕ ЧИСЛИТЕЛЬНОЕ")}, // 7
-	{_R("Н"),"ADV", _R("НАРЕЧИЕ")}, // 8
-	{_R("ПРЕДК"), "PRED", _R("ПРЕДИКАТИВ")}, //9 
-	{_R("ПРЕДЛ"), "PREP", _R("ПРЕДЛОГ")}, // 10
-	{_R("ПОСЛ"), "POSL", _R("ПОСЛЕЛОГ")}, // 11
-	{_R("СОЮЗ"), "CONJ", _R("СОЮЗ")}, // 12
-	{_R("МЕЖД"), "INT", _R("МЕЖДОМЕТИЕ")}, // 13
-	{_R("ВВОДН"), "INP", _R("ВВОДНОЕ СЛОВО")},// 14
-	{_R("ФРАЗ"), "COLLOC", _R("ФРАЗЕОЛОГИЗМ")}, // 15
-	{_R("ЧАСТ"), "PARTICLE", _R("ЧАСТИЦА")}, // 16
-	{_R("КР_ПРИЛ"), "ADJ_SHORT", _R("КР_ПРИЛ")},  // 17
-	{_R("ПРИЧАСТИЕ"), "PARTICIPLE", _R("ПРИЧАСТИЕ")}, //18
-	{_R("ДЕЕПРИЧАСТИЕ"),"ADV_PARTICIPLE", _R("ДЕЕПРИЧАСТИЕ")}, //19
-	{_R("КР_ПРИЧАСТИЕ"),"PARTICIPLE_SHORT", _R("КРАТКОЕ ПРИЧАСТИЕ")}, // 20
-	{_R("ИНФИНИТИВ"), "INFINITIVE", _R("ИНФИНИТИВ")}  //21
+	{"С", "N", "СУЩЕСТВИТЕЛЬНОЕ"},  // 0
+	{"П", "A", "ПРИЛАГАТЕЛЬНОЕ"}, // 1
+	{"Г", "V", "ЛИЧНАЯ ФОРМА"}, // 2
+	{"МС","PRON", "МЕСТОИМЕНИЕ"}, // 3
+	{"МС-П","PA", "МЕСТОИМЕНИЕ-ПРИЛАГАТЕЛЬНОЕ"}, // 4
+	{"МС-ПРЕДК","P_PRED", "МЕСТОИМЕНИЕ-ПРЕДИКАТИВ"}, // 5
+	{"ЧИСЛ", "NUM", "ЧИСЛИТЕЛЬНОЕ"}, // 6
+	{"ЧИСЛ-П","ORD_NUM", "ПОРЯДКОВОЕ ЧИСЛИТЕЛЬНОЕ"}, // 7
+	{"Н","ADV", "НАРЕЧИЕ"}, // 8
+	{"ПРЕДК", "PRED", "ПРЕДИКАТИВ"}, //9 
+	{"ПРЕДЛ", "PREP", "ПРЕДЛОГ"}, // 10
+	{"ПОСЛ", "POSL", "ПОСЛЕЛОГ"}, // 11
+	{"СОЮЗ", "CONJ", "СОЮЗ"}, // 12
+	{"МЕЖД", "INT", "МЕЖДОМЕТИЕ"}, // 13
+	{"ВВОДН", "INP", "ВВОДНОЕ СЛОВО"},// 14
+	{"ФРАЗ", "COLLOC", "ФРАЗЕОЛОГИЗМ"}, // 15
+	{"ЧАСТ", "PARTICLE", "ЧАСТИЦА"}, // 16
+	{"КР_ПРИЛ", "ADJ_SHORT", "КР_ПРИЛ"},  // 17
+	{"ПРИЧАСТИЕ", "PARTICIPLE", "ПРИЧАСТИЕ"}, //18
+	{"ДЕЕПРИЧАСТИЕ","ADV_PARTICIPLE", "ДЕЕПРИЧАСТИЕ"}, //19
+	{"КР_ПРИЧАСТИЕ","PARTICIPLE_SHORT", "КРАТКОЕ ПРИЧАСТИЕ"}, // 20
+	{"ИНФИНИТИВ", "INFINITIVE", "ИНФИНИТИВ"}  //21
 };
 
 const static TMorphConstant Grammems[] = {
-	{_R("мн"), "pl"},
-	{_R("ед"), "sg"},
-	{_R("им"), "nom"},
-	{_R("рд"), "gen"},
-	{_R("дт"), "dat"},
-	{_R("вн"), "acc"},
-	{_R("тв"), "ins"},
-	{_R("пр"), "prp"},
-	{_R("зв"), "voc"},
-	{_R("мр"), "mas"},
-	{_R("жр"), "fem"},
-	{_R("ср"), "neu"},
-	{_R("unused"), "unused"},
-	{_R("нст"), "pres"},
-	{_R("буд"), "fut"},
-	{_R("прш"), "past"},
-	{_R("1л"), "1p"},
-	{_R("2л"), "2p"},
-	{_R("3л"), "3p"},
-	{_R("пвл"), "imp"},
-	{_R("од"), "anim"},
-	{_R("но"), "inanim"},
-	{_R("сравн"), "compar"},
-	{_R("св"), "perf"},
-	{_R("нс"), "imperf"},
-	{_R("нп"), "intrans"},
-	{_R("пе"), "trans"},
-	{_R("дст"), "act"},
-	{_R("стр"), "pass"},
-	{_R("0"), "0"},
-	{_R("аббр"), "abbr"},
-	{_R("отч"), "patr"},
-	{_R("лок"), "loc"},
-	{_R("орг"), "org"},
-	{_R("кач"), "qual"},
-	{_R("дфст"), "sing_tant"},
-	{_R("вопр"), "interrog"},
-	{_R("указат"), "demon"},
-	{_R("имя"), "name"},
-	{_R("фам"), "surname"},
-	{_R("безл"), "impers"},
-	{_R("жарг"), "jargon"},
-	{_R("опч"), "misspell"},
-	{_R("разг"), "conv"},
-	{_R("притяж"), "poss"},
-	{_R("арх"), "arch"},
-	{_R("2"), "2"},
-	{_R("поэт"), "poet"},
-	{_R("проф"), "prof"},
-	{_R("прев"), "superl"},
-	{_R("полож"), "positive"}
+	{"мн", "pl"},
+	{"ед", "sg"},
+	{"им", "nom"},
+	{"рд", "gen"},
+	{"дт", "dat"},
+	{"вн", "acc"},
+	{"тв", "ins"},
+	{"пр", "prp"},
+	{"зв", "voc"},
+	{"мр", "mas"},
+	{"жр", "fem"},
+	{"ср", "neu"},
+	{"unused", "unused"},
+	{"нст", "pres"},
+	{"буд", "fut"},
+	{"прш", "past"},
+	{"1л", "1p"},
+	{"2л", "2p"},
+	{"3л", "3p"},
+	{"пвл", "imp"},
+	{"од", "anim"},
+	{"но", "inanim"},
+	{"сравн", "compar"},
+	{"св", "perf"},
+	{"нс", "imperf"},
+	{"нп", "intrans"},
+	{"пе", "trans"},
+	{"дст", "act"},
+	{"стр", "pass"},
+	{"0", "0"},
+	{"аббр", "abbr"},
+	{"отч", "patr"},
+	{"лок", "loc"},
+	{"орг", "org"},
+	{"кач", "qual"},
+	{"дфст", "sing_tant"},
+	{"вопр", "interrog"},
+	{"указат", "demon"},
+	{"имя", "name"},
+	{"фам", "surname"},
+	{"безл", "impers"},
+	{"жарг", "jargon"},
+	{"опч", "misspell"},
+	{"разг", "conv"},
+	{"притяж", "poss"},
+	{"арх", "arch"},
+	{"2", "2"},
+	{"поэт", "poet"},
+	{"проф", "prof"},
+	{"прев", "superl"},
+	{"полож", "positive"}
 };
 
 
 std::string rClauseTypes[] =
 {
-	_R("ГЛ_ЛИЧН"),
-	_R("ДПР"),
-	_R("КР_ПРЧ"),
-	_R("КР_ПРИЛ"),
-	_R("ПРЕДК"),
-	_R("ПРЧ"),
-	_R("ИНФ"),
-	_R("ВВОД"),
-	_R("ТИРЕ"),
-	_R("НСО"),
-	_R("СРАВН"),
-	_R("КОПУЛ")
+	"ГЛ_ЛИЧН",
+	"ДПР",
+	"КР_ПРЧ",
+	"КР_ПРИЛ",
+	"ПРЕДК",
+	"ПРЧ",
+	"ИНФ",
+	"ВВОД",
+	"ТИРЕ",
+	"НСО",
+	"СРАВН",
+	"КОПУЛ"
 };
 
 
@@ -165,17 +165,16 @@ unsigned int count_of_bits(grammems_mask_t n)
 
 void CRusGramTab::LoadFromRegistry()
 {
-    auto gramtab = ReadFromFolder(GetDefaultPath());
+	ReadFromFolder(GetDefaultPath());
+}
 
-    std::string s = gramtab.at("inanim_indecl_noun");
-    m_PopularGramCodes.m_InanimIndeclNoun = convert_from_utf8(s.c_str(), m_Language);
-
-    s = gramtab.at("mas_abbr_noun");
-    m_PopularGramCodes.m_MasAbbrNoun = convert_from_utf8(s.c_str(), m_Language);
-
+void CRusGramTab::InitLanguageSpecific(rapidjson::Document& doc)  {
+    m_PopularGramCodes.m_InanimIndeclNoun = doc["inanim_indecl_noun"].GetString();
+	m_PopularGramCodes.m_MasAbbrNoun = doc["mas_abbr_noun"].GetString();
     m_PopularGramCodes.m_ProductiveNoun = "";
     m_PopularGramCodes.m_ProductiveSingNoun = "";
-    for (uint16_t i = 0; i < GetMaxGrmCount(); i++) {
+
+	for (uint16_t i = 0; i < GetMaxGrmCount(); i++) {
         auto *l = GetLine(i);
         if (l == nullptr) continue;
         l->m_Grammems = DeduceGrammems(l->m_PartOfSpeech, l->m_Grammems);
@@ -195,11 +194,13 @@ void CRusGramTab::LoadFromRegistry()
             }
         }
     }
-    assert (m_PopularGramCodes.m_ProductiveNoun.length() == 72); //72 = 6 cases * 2 numbers * 3 genders * 2 chars
-    assert (m_PopularGramCodes.m_ProductiveSingNoun.length() == 36); // 72 / 2
+	m_PopularGramCodes.m_GenderNumeral = GetAllGramCodes(NUMERAL, 0, AnyGender);
 
-    m_PopularGramCodes.m_GenderNumeral = GetAllGramCodes(NUMERAL, 0, AnyGender);
-    assert (m_PopularGramCodes.m_GenderNumeral.length() == 18 * 2);
+	if (!doc.HasMember("test_gramtab")) {
+		assert(m_PopularGramCodes.m_ProductiveNoun.length() == 72); //72 = 6 cases * 2 numbers * 3 genders * 2 chars
+		assert(m_PopularGramCodes.m_ProductiveSingNoun.length() == 36); // 72 / 2
+		assert(m_PopularGramCodes.m_GenderNumeral.length() == 18 * 2);
+	}
 
 };
 
@@ -558,21 +559,8 @@ bool CRusGramTab::IsStrongClauseRoot(const part_of_speech_mask_t poses) const
 		|| (poses & (1 << PREDK));
 };
 
-const static std::string months[] = { _R("ЯНВАРЬ"),_R("ФЕВРАЛЬ"),_R("МАРТ"),
-			   _R("АПРЕЛЬ"),_R("МАЙ"),_R("ИЮНЬ"),
-			   _R("ИЮЛЬ"),_R("АВГУСТ"),_R("СЕНТЯБРЬ")
-			   ,_R("ОКТЯБРЬ"),_R("НОЯБРЬ"),_R("ДЕКАБРЬ") };
 
-bool CRusGramTab::is_month(const char* lemma) const
-{
-	if (!lemma) return false;
-	for (size_t i = 0; i < 12; i++)
-		if (months[i] == lemma)
-			return true;
-	return false;
-}
-
-const static std::string SmallNumbers[] = { _R("ДВА"),_R("ТРИ"),_R("ЧЕТЫРЕ"),_R("ОБА"),_R("ПОЛТОРА") };
+const static std::string SmallNumbers[] = { "ДВА","ТРИ","ЧЕТЫРЕ","ОБА","ПОЛТОРА" };
 
 
 bool CRusGramTab::IsMorphNoun(part_of_speech_mask_t poses)  const
@@ -654,18 +642,12 @@ bool CRusGramTab::is_morph_personal_pronoun(part_of_speech_mask_t poses, grammem
 
 
 
-const size_t  ParticleCount = 8;
-const static std::string Particles[ParticleCount] = { _R("ЛИ"),_R("ЖЕ"),_R("БЫ"),_R("УЖ"),_R("ТОЛЬКО"), _R("Ж"), _R("Б"), _R("ЛЬ") };
+const static std::unordered_set<std::string> Particles = { "ЛИ","ЖЕ","БЫ","УЖ","ТОЛЬКО", "Ж", "Б", "ЛЬ" };
 
-bool CRusGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t poses) const
+bool CRusGramTab::IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const
 {
-	if (!lemma) return false;
 	if (!(poses & (1 << PARTICLE))) return false;
-	for (int i = 0; i < ParticleCount; i++)
-		if (Particles[i] == lemma)
-			return true;
-
-	return false;
+	return Particles.find(lemma) != Particles.end();
 }
 
 
@@ -678,7 +660,7 @@ bool CRusGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t pose
 
 /*
 	Есть такие  мест. прилагательные, которые могут выступать в роли существительных:
-	_R("КАЖДЫЙ"), _R("ОДИН"), _R("ДРУГОЙ"),_R("ТОТ"),_R("КОТОРЫЙ").
+	"КАЖДЫЙ", "ОДИН", "ДРУГОЙ","ТОТ","КОТОРЫЙ".
 	Для  них не имеет смысла вводит аналогичные местоимения,поскольку  все они могут
 	быть использованы во всех родах. Эти прилагательные могут вести себя так же, как
 	существительные. Например,
@@ -686,30 +668,30 @@ bool CRusGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t pose
 	Я знаю ту, которая тебя видит
 	Один пришел, другой ушел.
 	Я вижу дом, который разрушился.
-	Вышеуказанные мест. прилагательные отличаются, например, от местоимения _R(_R("этот")) и _R("всякий"), поскольку
+	Вышеуказанные мест. прилагательные отличаются, например, от местоимения _R("этот") и "всякий", поскольку
 	трудно себе представить что-то вроде:
 	"эта пришла"
 	"всякая пришла"
 	Но возможно:
 	"всякое бывает"
 	"это бывает"
-	Здесь _R("всякое") и _R("это") - простые местоимения ср рода.
+	Здесь "всякое" и "это" - простые местоимения ср рода.
 
 	!! Таким образом, я не хочу дублировать в морфологии МС-П, если они могут использованы
 	!! во всех родах в качестве существительного.
 
 	1 марта 2001 года, Сокирко
 */
-bool CRusGramTab::IsSynNoun(part_of_speech_mask_t poses, const char* lemma) const
+bool CRusGramTab::IsSynNoun(part_of_speech_mask_t poses, const std::string& lemma) const
 {
 	return   IsMorphNoun(poses)
 		|| (poses & (1 << PRONOUN))
 		|| ((poses & (1 << PRONOUN_P))
-			&& (_R("КАЖДЫЙ") == lemma)
-			|| (_R("ОДИН") == lemma)
-			|| (_R("ДРУГОЙ") == lemma)
-			|| (_R("ТОТ") == lemma)
-			|| (_R("КОТОРЫЙ") == lemma)
+			&& ("КАЖДЫЙ" == lemma)
+			|| ("ОДИН" == lemma)
+			|| ("ДРУГОЙ" == lemma)
+			|| ("ТОТ" == lemma)
+			|| ("КОТОРЫЙ" == lemma)
 			)
 		;
 };
@@ -717,11 +699,11 @@ bool CRusGramTab::IsSynNoun(part_of_speech_mask_t poses, const char* lemma) cons
 
 const int StandardParamAbbrCount = 8;
 const static std::string StandardParamAbbr[StandardParamAbbrCount] =
-{ _R("КГ"), _R("КМ"), _R("СМ"),_R("МЛ"), _R("МБ"),_R("КБ"), _R("МГЦ"), _R("КВ") };
+{ "КГ", "КМ", "СМ","МЛ", "МБ","КБ", "МГЦ", "КВ" };
 
 bool CRusGramTab::IsStandardParamAbbr(const char* WordStrUpper) const
 {
-	if (strlen(WordStrUpper) > 4) return false;
+	if (strlen(WordStrUpper) > 6) return false;
 	for (long i = 0; i < StandardParamAbbrCount; i++)
 		if (StandardParamAbbr[i] == WordStrUpper)
 			return true;

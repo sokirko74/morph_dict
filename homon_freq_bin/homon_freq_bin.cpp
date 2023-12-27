@@ -1,6 +1,9 @@
+#include "morph_dict/lemmatizer_base_lib/MorphanHolder.h"
+#include "morph_dict/lemmatizer_base_lib/Lemmatizers.h"
+#include "morph_dict/agramtab/agramtab.h"
+
 #include <iostream>
 #include "morph_dict/common/util_classes.h"
-#include "morph_dict/lemmatizer_base_lib/MorphanHolder.h"
 #include "morph_dict/common/bserialize.h"
 #include "morph_dict/common/argparse.h"
 #include <fstream>
@@ -67,6 +70,7 @@ bool check_part_of_speech(part_of_speech_t pos, part_of_speech_mask_t poses) {
     }
     return false;
 }
+
 bool check_word_form(const CFormInfo& paradigm, uint16_t formNo, std::string wordForm, part_of_speech_t pos, grammems_mask_t gra) {
     std::string ancode = paradigm.GetAncode(formNo); 
     assert(ancode.size() == 2);
@@ -94,18 +98,17 @@ static void loadDat(std::istream& ifs, MorphLanguageEnum langua) {
     std::string line;
     int lin = 0;
     while (getline(ifs, line)) {
-        std::string buf_s = convert_from_utf8(line.c_str(), langua);
-        Trim(buf_s);
+        Trim(line);
         lin++;
-        if (buf_s.empty()) {
+        if (line.empty()) {
             continue;
         }
-        auto elems = split_string(buf_s, ' ');
+        auto elems = split_string(line, ' ');
         if (elems.size() != 4 && elems.size() != 5) {
             throw std::runtime_error(Format("Error in line: %i skipped", lin));
         }
-        std::string wordForm = elems[0];
-        std::string lemma = elems[1];
+        std::string wordForm = convert_from_utf8(elems[0].c_str(), langua);
+        std::string lemma = convert_from_utf8(elems[1].c_str(), langua);
         std::string partOfSpeechStr = elems[2];
         int freq = atoi(elems.back().c_str());
         if (freq < 0)
@@ -203,17 +206,14 @@ int main(int argc, const char** argv) {
     initArgParser(argc, argv, args);
     init_plog(args.GetLogLevel(), "stat_dat_bin.log");
     try {
-        MorphHolder.LoadLemmatizer(args.GetLanguage(), args.Retrieve("morph-folder"));
+        MorphHolder.LoadMorphology(args.GetLanguage(), args.Retrieve("morph-folder"));
 
         loadDat(args.GetInputStream(), args.GetLanguage());
 
         if (saveBin(args.CloseOutputStreamAndGetName()))
             return 0;
     }
-    catch (CExpc e) {
-        LOGE << "exception occurred:" << e.m_strCause;
-    }
-    catch (std::exception e) {
+    catch (std::exception& e) {
         LOGE << "exception occurred:" << e.what();
     }
     catch (...) {

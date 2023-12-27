@@ -1,18 +1,20 @@
-// =====	=====  This file is under  LGPL, the GNU Lesser General Public Licence
+// =====	=====  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru), 
 // ==========  Copyright by Alexey Sokirko (2004)
 
 #include "MorphDictBuilder.h"
+#include "Lemmatizers.h"
+#include "fstream"
 
 const size_t MaxLemmaPrefixCount = 0x200;
 const size_t MaxLemmaCount = 0x800000;
 const size_t MaxFlexiaModelsCount = 0x8000;
 const size_t MaxNumberFormsInOneParadigm = 0x200;
 
-CMorphDictBuilder::CMorphDictBuilder(MorphLanguageEnum Language) 
-:	CMorphDict(Language)
+CMorphDictBuilder::CMorphDictBuilder() 
+:	CMorphDict(morphUnknown)
 {
-	InitAutomat( new CMorphAutomatBuilder(Language, MorphAnnotChar) );
+	
 };
 
 CMorphDictBuilder::~CMorphDictBuilder() 
@@ -100,7 +102,7 @@ void  CMorphDictBuilder::GenerateUnitedFlexModels(const MorphoWizard& Wizard)
 
 		if ( p.m_Flexia.size() >=  MaxNumberFormsInOneParadigm)
 		{
-			throw CExpc ("Error: flexia %s contains more than %i forms. !\n", p.ToJson().dump().c_str(), MaxNumberFormsInOneParadigm);
+			throw CExpc ("Error: flexia %s contains more than %i forms. !", p.ToString().c_str(), MaxNumberFormsInOneParadigm);
 		};
 
 		for (size_t i=0; i <p.m_Flexia.size(); i++)
@@ -238,3 +240,69 @@ void  CMorphDictBuilder::CreateAutomat(const MorphoWizard& Wizard)
 	GetFormBuilder()->ConvertBuildRelationsToRelations();
 };
 
+void create_options(CJsonObject& opts, bool allow_russian_jo, int postfix_len, int min_freq) {
+	opts.add_bool("AllowRussianJo", allow_russian_jo);
+
+	bool skip_predict = false;
+	if (postfix_len == -1 || min_freq == -1) {
+		LOGI << "skip prediction base generation ";
+		skip_predict = true;
+	}
+	else {
+		if (!(0 < postfix_len && postfix_len <= 5))
+		{
+			throw CExpc("postfix_len should be between 1 and 5");
+		};
+		if (min_freq <= 0) {
+			throw CExpc("MinFreq should be more than 0");
+		};
+	}
+	opts.add_bool("SkipPredictBase", skip_predict);
+}
+
+void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russian_jo, int postfix_len, int min_freq, std::string output_folder) {
+	rapidjson::Document d_opts(rapidjson::kObjectType);
+	CJsonObject opts(d_opts);
+
+	create_options(opts, allow_russian_jo, postfix_len, min_freq);
+
+	MorphoWizard wizard;
+	wizard.load_wizard(mwz_path.c_str(), "guest", false, true, true);
+	m_Language = wizard.m_Language;
+	InitAutomat(new CMorphAutomatBuilder(m_Language, MorphAnnotChar));
+	if (!allow_russian_jo)
+	{
+		wizard.convert_je_to_jo();
+	};
+	{
+		GenerateLemmas(wizard);
+		GenerateUnitedFlexModels(wizard);
+		CreateAutomat(wizard);
+		LOGI << "Saving...";
+		auto outFileName = std::filesystem::path(output_folder) / MORPH_MAIN_FILES;
+		Save(outFileName.string());
+		LOGI << "Successful written indices of the main automat to " << outFileName << std::endl;
+		if (!opts.get_value()["SkipPredictBase"].GetBool()) {
+			if (!GenPredictIdx(wizard, postfix_len, min_freq, output_folder, opts))
+			{
+				throw CExpc("Cannot create prediction base");
+			};
+		}
+	}
+
+	{
+		auto opt_path = std::filesystem::path(output_folder) / OPTIONS_FILE;
+		LOGI << "writing options file " << opt_path;
+		opts.dump_rapidjson_pretty(opt_path.string());
+	}
+
+	{
+		std::filesystem::path src = wizard.m_GramtabPath;
+		std::filesystem::path trg = output_folder / wizard.m_GramtabPath.filename();
+		if (!std::filesystem::exists(trg) || !std::filesystem::equivalent(src, trg)) {
+			std::filesystem::copy_file(src, trg, std::filesystem::copy_options::overwrite_existing);
+		}
+	}
+
+
+}

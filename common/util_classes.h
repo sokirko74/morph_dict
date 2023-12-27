@@ -1,10 +1,9 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Syntax Analysis (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko
 
 #pragma once
 #include "utilit.h"
-#include "json.h"
 
 template <class	Type, int Size>
 struct CSmallVector	{
@@ -207,14 +206,3 @@ public:
 
 };
 
-struct CTestCase {
-	std::string Text;
-	std::string Comment;
-	nlohmann::json Result;
-};
-
-struct CTestCaseBase {
-	std::vector<CTestCase> TestCases;
-	void read_test_cases(std::istream& inp);
-	void write_test_cases(std::ostream& outp) const;
-};

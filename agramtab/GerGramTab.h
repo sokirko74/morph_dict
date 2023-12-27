@@ -1,10 +1,10 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko
 
 #pragma once 
 
-#include "agramtab_.h"       
+#include "agramtab.h"       
 
 
 enum GermanPartOfSpeechEnum
@@ -179,7 +179,6 @@ public:
 		res[2] = 0;
 		return  res;
 	};
-	int GetGroupTypebyName(const char* TypeName) const;
 	const char* GetRegistryString() const 
 	{
 		return "Software\\Dialing\\Lemmatizer\\German\\Ggramtab";
@@ -190,8 +189,6 @@ public:
 	bool GleicheSubjectPredicate(const char* gram_code1, const char* gram_code2) const;
 	const size_t GetClauseTypesCount() const;
 	bool IsStrongClauseRoot(const part_of_speech_mask_t poses) const;
-	bool is_month (const char* lemma) const;
-
     bool IsMorphNoun (part_of_speech_mask_t poses)  const;
 	bool is_morph_adj (part_of_speech_mask_t poses) const;
 	bool is_morph_participle (part_of_speech_mask_t poses) const;
@@ -205,8 +202,8 @@ public:
 	bool is_morph_adv(part_of_speech_mask_t poses) const;
 	bool is_morph_personal_pronoun (part_of_speech_mask_t poses, grammems_mask_t grammems) const;
 
-    bool IsSimpleParticle(const char* lemma, part_of_speech_mask_t poses) const;
-	bool IsSynNoun(part_of_speech_mask_t poses, const char* Lemma) const;
+    bool IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const;
+	bool IsSynNoun(part_of_speech_mask_t poses, const std::string& lemma) const;
 	bool IsStandardParamAbbr (const char* WordStrUpper) const;
 	bool GleicheCase(const char* gram_code_noun, const char* gram_code_adj) const;
 	bool GleicheCaseNumber(const char* gram_code1, const char* gram_code2) const;

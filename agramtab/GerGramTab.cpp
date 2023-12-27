@@ -1,4 +1,4 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko
 #include "GerGramTab.h"
@@ -223,11 +223,6 @@ bool CGerGramTab::IsStrongClauseRoot(const part_of_speech_mask_t poses) const
 };
 
 
-bool CGerGramTab::is_month (const char* lemma) const
-{
-	return false;
-};
-
 bool CGerGramTab::IsMorphNoun (part_of_speech_mask_t poses)  const
 {
 	return  ( ( poses & ( 1 << gSUB)   ) >0)
@@ -302,7 +297,7 @@ bool CGerGramTab::is_morph_personal_pronoun (part_of_speech_mask_t poses, gramme
 	return		false;
 };
 
-bool CGerGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t poses) const
+bool CGerGramTab::IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const
 {
 	return false;
 }
@@ -310,7 +305,7 @@ bool CGerGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t pose
 
 
 
-bool CGerGramTab::IsSynNoun(part_of_speech_mask_t poses, const char* Lemma) const
+bool CGerGramTab::IsSynNoun(part_of_speech_mask_t poses, const std::string& lemma) const
 {
 	return			is_morph_pronoun(poses)
 			||		IsMorphNoun(poses);

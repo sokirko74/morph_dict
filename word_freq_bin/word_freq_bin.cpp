@@ -1,4 +1,8 @@
-#include "../common/util_classes.h"
+#include "morph_dict/agramtab/agramtab.h"
+#include "morph_dict/lemmatizer_base_lib/MorphanHolder.h"
+
+
+#include "morph_dict/common/util_classes.h"
 #include "morph_dict/common/bserialize.h"
 #include "morph_dict/common/argparse.h"
 
@@ -10,7 +14,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "morph_dict/lemmatizer_base_lib/MorphanHolder.h"
 
 
 CMorphanHolder MorphHolderRus;
@@ -196,7 +199,7 @@ int main(int argc, const char **argv) {
     init_plog(args.GetLogLevel(), "word_dat_bin.log");
 
     try {
-        MorphHolderRus.LoadLemmatizer(args.GetLanguage(), args.Retrieve("morph-folder"));
+        MorphHolderRus.LoadMorphology(args.GetLanguage(), args.Retrieve("morph-folder"));
         MorphHolderRus.m_pGramTab->SetUseNationalConstants(false);
         PLOGI << "morphology for " << GetStringByLanguage(MorphHolderRus.m_pGramTab->m_Language) << " loaded";
         if (loadDat(args.GetInputStream()))
@@ -205,7 +208,7 @@ int main(int argc, const char **argv) {
 
     }
     catch (CExpc e) {
-        std::cerr << "exception occurred:"  << e.m_strCause << "\n";
+        std::cerr << "exception occurred:"  << e.what() << "\n";
     }
     catch (...) {
         std::cout << std::endl << "An error in try{} has occurred!" << std::endl;

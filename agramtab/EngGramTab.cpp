@@ -1,4 +1,4 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko
 #include "EngGramTab.h"
@@ -100,11 +100,6 @@ bool CEngGramTab::IsStrongClauseRoot(const part_of_speech_mask_t poses)  const
 };
 
 
-bool CEngGramTab::is_month (const char* lemma) const
-{
-	return false;
-};
-
 bool CEngGramTab::IsMorphNoun (part_of_speech_mask_t poses)  const
 {
 	return  false;
@@ -168,7 +163,7 @@ bool CEngGramTab::is_morph_personal_pronoun (part_of_speech_mask_t poses, gramme
 	return		false;
 };
 
-bool CEngGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t poses) const
+bool CEngGramTab::IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const
 {
 	return false;
 }
@@ -179,7 +174,7 @@ bool CEngGramTab::IsSimpleParticle(const char* lemma, part_of_speech_mask_t pose
 
 
 
-bool CEngGramTab::IsSynNoun(part_of_speech_mask_t poses, const char* Lemma) const
+bool CEngGramTab::IsSynNoun(part_of_speech_mask_t poses, const std::string& lemma) const
 {
 	return false;
 };

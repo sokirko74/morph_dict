@@ -16,9 +16,9 @@ public:
 	// all accent models
 	std::vector<CAccentModel>	m_AccentModels;
 
-	bool read_utf8_line(std::ifstream& inp, std::string& line) const;
-	std::string str_to_utf8(const std::string& line) const;
+	void SaveFlexiaModelsToJson(CJsonObject& d) const;
+	void SaveAccentModelsToJson(CJsonObject& d) const;
 
-	nlohmann::json GetFlexiaModelsJson() const;
-	nlohmann::json GetAccentModelsJson() const;
+	void  SerializeFlexiaModelsToAnnotFile(std::ostream& outp) const;
+	void  SerializeAccentModelsToAnnotFile(std::ostream& outp) const;
 };

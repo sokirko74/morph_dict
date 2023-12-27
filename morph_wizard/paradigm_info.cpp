@@ -15,7 +15,7 @@ CParadigmInfo::CParadigmInfo(uint16_t ParadigmNo, uint16_t AccentModelNo, uint16
     m_AccentModelNo = AccentModelNo;
     m_SessionNo = SessionNo;
     m_AuxAccent = AuxAccent;
-    strncpy(m_CommonAncode, CommonAncode, CommonAncodeSize);
+    SetCommonAncode(CommonAncode);
     m_PrefixSetNo = PrefixSetNo;
 };
 
@@ -23,7 +23,7 @@ bool CParadigmInfo::operator==(const CParadigmInfo& X) const {
     return m_FlexiaModelNo == X.m_FlexiaModelNo
         && m_AccentModelNo == X.m_AccentModelNo
         && m_AuxAccent == X.m_AuxAccent
-        && !strncmp(m_CommonAncode, X.m_CommonAncode, CommonAncodeSize)
+        && !CompareCommonAncode(X.GetCommonAncode())
         && m_PrefixSetNo == X.m_PrefixSetNo;
 };
 
@@ -44,9 +44,9 @@ bool CParadigmInfo::IsAnyEqual(const CParadigmInfo& X) const {
         && (m_AuxAccent == AnyAccent ||
             X.m_AuxAccent == AnyAccent ||
             m_AuxAccent == X.m_AuxAccent)
-        && (!strncmp(m_CommonAncode, X.m_CommonAncode, CommonAncodeSize)
-            || !strncmp(m_CommonAncode, AnyCommonAncode, CommonAncodeSize)
-            || !strncmp(X.m_CommonAncode, AnyCommonAncode, CommonAncodeSize))
+        && (   !CompareCommonAncode(X.GetCommonAncode())
+            || !CompareCommonAncode(AnyCommonAncode)
+            || !X.CompareCommonAncode(AnyCommonAncode))
         && (m_PrefixSetNo == AnyPrefixSetNo ||
             X.m_PrefixSetNo == AnyPrefixSetNo ||
             m_PrefixSetNo == X.m_PrefixSetNo)
@@ -54,31 +54,38 @@ bool CParadigmInfo::IsAnyEqual(const CParadigmInfo& X) const {
 }
 
 
-nlohmann::json CParadigmInfo::GetJson(const std::string& lemma) const {
-    nlohmann::json out;
-    out["l"] = lemma;
-    out["f"] = m_FlexiaModelNo;
-    out["a"] = m_AccentModelNo;
-    out["s"] = m_SessionNo;
-    if (m_CommonAncode[0] != 0) {
-        out["t"] = GetCommonAncodeIfCan();
+void  CParadigmInfo::GetJson(const std::string& lemma, CJsonObject& out) const {
+    out.add_string("l", lemma);
+    out.add_int("f", m_FlexiaModelNo);
+    out.add_int("a", m_AccentModelNo);
+    out.add_int("s", m_SessionNo);
+    if (GetCommonAncode()[0] != 0) {
+        out.add_string("t", GetCommonAncode());
     }
     if (m_PrefixSetNo != UnknownPrefixSetNo) {
-        out["p"] = m_PrefixSetNo;
+        out.add_int("p", m_PrefixSetNo);
     }
-    return out;
-
+    
 }
 
-CParadigmInfo& CParadigmInfo::FromJson(nlohmann::json inj) {
-    m_Lemma = inj["l"];
-    m_FlexiaModelNo = inj["f"];
-    m_AccentModelNo = inj["a"];
-    m_SessionNo = inj["s"];
-    auto t = inj.value("t", "");
-    if (!t.empty()) {
-        strncpy(m_CommonAncode, t.c_str(), CommonAncodeSize);
+CParadigmInfo& CParadigmInfo::FromJson(const rapidjson::Value& inj) {
+    m_Lemma = inj["l"].GetString();
+    m_FlexiaModelNo = inj["f"].GetInt();
+    m_AccentModelNo = inj["a"].GetInt();
+    m_SessionNo = inj["s"].GetInt();
+    auto t = rapidjson::Pointer("/t").Get(inj);
+    if (t) {
+        SetCommonAncode(t->GetString());
     }
-    m_PrefixSetNo = inj.value("p", UnknownPrefixSetNo);
+    else {
+        SetCommonAncode("");
+    }
+    t = rapidjson::Pointer("/p").Get(inj);
+    if (t) {
+        m_PrefixSetNo = t->GetInt();
+    }
+    else {
+        m_PrefixSetNo = UnknownPrefixSetNo;
+    }
     return *this;
 }

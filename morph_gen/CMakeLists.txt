@@ -10,5 +10,6 @@ target_link_libraries(${PROJECT_NAME}
     lemmatizer_base_lib
 )
 
-add_subdirectory (tests/Lemmatize)
-add_subdirectory (tests/Misspell)
+add_subdirectory (tests)
+
+

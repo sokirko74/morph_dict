@@ -1,4 +1,4 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru), 
 // ==========  Copyright by Alexey Sokirko (2004)
 
@@ -27,9 +27,6 @@ static int  InitAlphabet(MorphLanguageEnum Language, int* pCode2Alphabet, int* p
 				)
 			|| ((Language == morphFioDisclosures)
 				&& (additionalFioDisclosuresChars.find((BYTE)i) != std::string::npos)
-				)
-			|| ((Language == morphURL)
-				&& is_alpha((BYTE)i, morphURL)
 				)
 			)
 		{

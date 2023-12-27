@@ -1,10 +1,10 @@
-// ==========  This file is under  LGPL, the GNU Lesser General Public Licence
+// ==========  This file is under  LGPL, the GNU Lesser General Public License
 // ==========  Dialing Lemmatizer (www.aot.ru)
 // ==========  Copyright by Alexey Sokirko
 
 #pragma once
 
-#include "agramtab_.h"
+#include "agramtab.h"
 
 enum RussianPartOfSpeechEnum
 {
@@ -149,6 +149,8 @@ class CRusGramTab : public CAgramtab {
     const static size_t rMaxGrmCount = rEndUp - rStartUp; // (14 kb)
 
     CRusPopularGramCodes m_PopularGramCodes;
+protected:
+    void InitLanguageSpecific(rapidjson::Document& doc) override;
 
 public:
     CAgramtabLine *Lines[rMaxGrmCount];
@@ -200,8 +202,6 @@ public:
 
     bool IsStrongClauseRoot(part_of_speech_mask_t poses) const override;
 
-    bool is_month(const char *lemma) const override;
-
     bool IsMorphNoun(part_of_speech_mask_t poses) const override;
 
     bool is_morph_adj(part_of_speech_mask_t poses) const override;
@@ -226,9 +226,9 @@ public:
 
     bool is_morph_personal_pronoun(part_of_speech_mask_t poses, grammems_mask_t grammems) const override;
 
-    bool IsSimpleParticle(const char *lemma, part_of_speech_mask_t poses) const override;
+    bool IsSimpleParticle(const std::string& lemma, part_of_speech_mask_t poses) const override;
 
-    bool IsSynNoun(part_of_speech_mask_t poses, const char *Lemma) const override;
+    bool IsSynNoun(part_of_speech_mask_t poses, const std::string& lemma) const override;
 
     bool IsStandardParamAbbr(const char *WordStrUpper) const override;
 

@@ -27,7 +27,8 @@ void CheckSpeed(std::istream& inputStream, std::ostream& output) {
         while(getline(inputStream, line)) {
             Trim(line);
             if (line.empty()) continue;
-            RmlMakeUpper(line, Holder.m_pLemmatizer->GetLanguage());
+            MakeLowerUtf8(line);
+            line = convert_from_utf8(line.c_str(), Holder.m_CurrentLanguage);
             Forms.push_back(line);
         };
     };
@@ -88,9 +89,9 @@ int main(int argc, const char **argv) {
    
     try {
         if (args.Exists("morph-folder")) {
-            Holder.LoadLemmatizer(language, args.Retrieve("morph-folder"));
+            Holder.LoadMorphology(language, args.Retrieve("morph-folder"));
         } else {
-            Holder.LoadLemmatizer(language);
+            Holder.LoadMorphology(language);
         }
 
         if (args.Exists("speed-test")) {
@@ -99,39 +100,38 @@ int main(int argc, const char **argv) {
         };
 
         std::cerr << "Input a word..\n";
-        std::string s;
-        while (getline(args.GetInputStream(), s)) {
-            Trim(s);
-            if (s.empty()) break;
+        std::string word;
+        while (getline(args.GetInputStream(), word)) {
+            Trim(word);
+            if (word.empty()) break;
 		    if (bEchoInput) {
-			    args.GetOutputStream() << s << "\t";
+			    args.GetOutputStream() << word  << "\t";
 		    }
-		    s = convert_from_utf8(s.c_str(), language);
-            Trim(s);
+            auto word_s8 = convert_from_utf8(word.c_str(), language);
 		    std::string result;
             if (args.Exists("misspell")) {
-                if (Holder.IsInDictionary(s)) {
+                if (Holder.IsInDictionaryUtf8(word)) {
                     result = "in dictionary\n";
                 }
                 else {
-                    for (auto a: Holder.CorrectMisspelledWord(s)) {
+                    for (auto a: Holder.CorrectMisspelledWordUtf8(word)) {
                         result += Format(" corrected = %s distance= %i;", a.CorrectedString.c_str(), a.StringDistance);
                     }
                 }
             }
             else if (args.Exists("morphan")) {
-                result = Holder.LemmatizeJson(s.c_str(), printForms, true, true);
+                result = Holder.LemmatizeJson(word.c_str(), printForms, true, true);
             }
             else {
-                result = Holder.PrintMorphInfoUtf8(s, printIds, printForms, sortParadigms);
+                result = Holder.PrintMorphInfoUtf8(word, printIds, printForms, sortParadigms);
                 
             }
             args.GetOutputStream() << result << "\n";
     	};
     }
     catch (CExpc c) {
-        std::cerr << c.m_strCause << "\n";
-        exit(1);
+        std::cerr << c.what() << "\n";
+        return 1;
     }
 
     return 0;
