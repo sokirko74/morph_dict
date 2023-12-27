@@ -927,8 +927,6 @@ std::vector<std::string> split_string(const std::string& s, char delim) {
 	return elems;
 }
 
-static MorphLanguageEnum log_language = morphUnknown;
-
 class MyFormatter
 {
 public:
@@ -942,12 +940,7 @@ public:
 		plog::util::nostringstream ss;
 		ss << std::setfill(PLOG_NSTR(' ')) << std::setw(5) << std::left << severityToString(record.getSeverity()) << PLOG_NSTR(" ");
 		ss << PLOG_NSTR("[") << record.getFunc() << PLOG_NSTR("@") << record.getLine() << PLOG_NSTR("] ");
-        if (log_language != morphUnknown) {
-            ss << convert_to_utf8(record.getMessage(), log_language) << PLOG_NSTR("\n");
-        }
-        else {
-            ss << record.getMessage() << PLOG_NSTR("\n");
-        }
+        ss << record.getMessage() << PLOG_NSTR("\n");
 		return ss.str();
 	}
 };
@@ -955,13 +948,12 @@ public:
 
 static plog::ConsoleAppender<MyFormatter> consoleAppender; 
 
-void init_plog(plog::Severity severity, std::string filename, bool overwrite, MorphLanguageEnum langua) {
+void init_plog(plog::Severity severity, std::string filename, bool overwrite) {
 	if (overwrite) {
-		if (std::filesystem::exists(filename)) {
-			std::filesystem::remove(filename);
+		if (fs::exists(filename)) {
+			fs::remove(filename);
 		}
 	}
-    log_language = langua;
 	plog::init<MyFormatter>(severity, filename.c_str()).addAppender(&consoleAppender);
 }
 

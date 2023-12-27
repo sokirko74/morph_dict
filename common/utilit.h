@@ -161,7 +161,7 @@ bool CheckLanguage(const std::string& s, MorphLanguageEnum langua);
 
 
 // logging
-extern void init_plog(plog::Severity severity, std::string filename, bool overwrite = true, MorphLanguageEnum langua = morphUnknown);
+extern void init_plog(plog::Severity severity, std::string filename, bool overwrite = true);
 
 // helpers
 template<class _II, class _Ty> inline

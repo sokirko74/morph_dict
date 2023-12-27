@@ -5,7 +5,6 @@
 #include "morph_dict/agramtab/EngGramTab.h"
 #include "morph_dict/agramtab/RusGramTab.h"
 #include "morph_dict/agramtab/GerGramTab.h"
-#include "morph_dict/common/json.h"
 #include "morph_dict/common/rapidjson.h"
 
 #include <fstream>

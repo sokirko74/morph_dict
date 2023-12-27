@@ -4,7 +4,6 @@
 
 #pragma once
 #include "utilit.h"
-#include "json.h"
 
 template <class	Type, int Size>
 struct CSmallVector	{

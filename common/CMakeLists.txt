@@ -6,12 +6,10 @@ set(my_SOURCES
         argparse.h
         base_types.h
         bserialize.h
-        json.h
         single_byte_encoding.h
         single_byte_encoding.cpp
         util_classes.h
         utilit.h
-        json.cpp
         utf8.cpp
         rapidjson.cpp
         rapidjson.h
