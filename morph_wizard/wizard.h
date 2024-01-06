@@ -62,8 +62,8 @@ public:
     LemmaMap				m_LemmaToParadigm;
 
 
-    std::filesystem::path m_MwzFolder;
-    std::filesystem::path m_GramtabPath;
+    fs::path m_MwzFolder;
+    fs::path m_GramtabPath;
 
 
     //! a table of character properties for regular expressions which depend on CConcIndexator::m_Language

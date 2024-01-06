@@ -1,5 +1,7 @@
 #pragma once 
 
+#include <cstdint>
+
 typedef unsigned char BYTE;
 
 enum RegisterEnum { AnyRegister = 0, LowLow = 1, UpLow = 2, UpUp = 3 };

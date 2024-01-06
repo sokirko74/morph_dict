@@ -17,12 +17,13 @@
 #include <iostream>
 #include <set>
 #include <map>
-#include <string.h>
+#include <cstring>
 #include <unordered_set>
 #include <limits>
 #include <plog/Log.h>
 #include <filesystem>
 #include <cwctype>
+#include <cstdint>
 
 namespace fs = std::filesystem;
 

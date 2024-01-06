@@ -270,7 +270,7 @@ bool CMorphDictBuilder::GenPredictIdx(const MorphoWizard& wizard, int PostfixLen
 	};
 
 	R.ConvertBuildRelationsToRelations();
-	auto out_path = std::filesystem::path(path) / PREDICT_BIN_PATH;
+	auto out_path = fs::path(path) / PREDICT_BIN_PATH;
 	R.Save(out_path.string());
 
 

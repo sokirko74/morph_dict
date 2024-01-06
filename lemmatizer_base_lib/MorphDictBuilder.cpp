@@ -279,7 +279,7 @@ void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russia
 		GenerateUnitedFlexModels(wizard);
 		CreateAutomat(wizard);
 		LOGI << "Saving...";
-		auto outFileName = std::filesystem::path(output_folder) / MORPH_MAIN_FILES;
+		auto outFileName = fs::path(output_folder) / MORPH_MAIN_FILES;
 		Save(outFileName.string());
 		LOGI << "Successful written indices of the main automat to " << outFileName << std::endl;
 		if (!opts.get_value()["SkipPredictBase"].GetBool()) {
@@ -291,16 +291,16 @@ void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russia
 	}
 
 	{
-		auto opt_path = std::filesystem::path(output_folder) / OPTIONS_FILE;
+		auto opt_path = fs::path(output_folder) / OPTIONS_FILE;
 		LOGI << "writing options file " << opt_path;
 		opts.dump_rapidjson_pretty(opt_path.string());
 	}
 
 	{
-		std::filesystem::path src = wizard.m_GramtabPath;
-		std::filesystem::path trg = output_folder / wizard.m_GramtabPath.filename();
-		if (!std::filesystem::exists(trg) || !std::filesystem::equivalent(src, trg)) {
-			std::filesystem::copy_file(src, trg, std::filesystem::copy_options::overwrite_existing);
+		fs::path src = wizard.m_GramtabPath;
+		fs::path trg = output_folder / wizard.m_GramtabPath.filename();
+		if (!fs::exists(trg) || !fs::equivalent(src, trg)) {
+			fs::copy_file(src, trg, fs::copy_options::overwrite_existing);
 		}
 	}
 

@@ -71,7 +71,7 @@ namespace plog
                 enum { value = sizeof(test<T>(0)) == sizeof(Yes) };
             };
 
-            // Detects `std::filesystem::path` and `boost::filesystem::path`. They look like containers
+            // Detects `fs::path` and `boost::filesystem::path`. They look like containers
             // but we don't want to treat them as containers, so we use this detector to filter them out.
             template <class T>
             struct isFilesystemPath

@@ -140,7 +140,7 @@ void MorphoWizard::StartLastSessionOfUser(std::string user_name) {
 
 void MorphoWizard::load_wizard(std::string mwz_path, std::string user_name, bool bCreatePrediction, bool useNationalConstants, bool convert_to_s8_encoding) {
     m_bUseUtf8 = !convert_to_s8_encoding;
-    m_MwzFolder = std::filesystem::absolute(mwz_path).parent_path();
+    m_MwzFolder = fs::absolute(mwz_path).parent_path();
 
     std::ifstream mwzFile(mwz_path);
     if (!mwzFile.is_open())

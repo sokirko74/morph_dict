@@ -893,9 +893,9 @@ size_t FindFloatingPoint(const std::string& s)
 // "c:/*.txt" -> c:/a.txt, c:/b.txt
 std::vector<std::string> list_path_by_file_mask(std::string filemask)
 {
-	auto path = std::filesystem::path(filemask);
+	auto path = fs::path(filemask);
 	std::vector<std::string> filenames;
-	for (const auto& p : std::filesystem::directory_iterator(path.parent_path())) 	{
+	for (const auto& p : fs::directory_iterator(path.parent_path())) 	{
 		if (p.path().extension() == path.extension()) {
 			filenames.push_back(p.path().string());
 		}
