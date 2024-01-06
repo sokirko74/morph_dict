@@ -6,6 +6,7 @@
 #include <locale>
 #include <algorithm>
 #include <assert.h>
+#include <stdint.h>
 
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 

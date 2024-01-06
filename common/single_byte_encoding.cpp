@@ -1,5 +1,6 @@
 #include "single_byte_encoding.h"
 #include <assert.h>
+#include <stdint.h>
 #include <string.h>
 
 
