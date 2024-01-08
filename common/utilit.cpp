@@ -376,7 +376,7 @@ std::string Format( const char* format, ... )
 	vsnprintf( pBuffer, OutputLength+1, format, arglst);
 	va_end( arglst );
 	std::string Res = pBuffer;
-	delete pBuffer;
+	delete[] pBuffer;
 	return Res;
 
 };
