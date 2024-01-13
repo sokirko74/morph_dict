@@ -127,12 +127,12 @@ CMorphAutomat::~CMorphAutomat()
 void CMorphAutomat::Clear()
 {
 	if (m_pNodes)
-		delete m_pNodes;
+		delete[] m_pNodes;
 	m_pNodes = 0;
 	m_NodesCount = 0;
 
 	if (m_pRelations)
-		delete m_pRelations;
+		delete[] m_pRelations;
 	m_pRelations = 0;
 	m_RelationsCount = 0;
 };
