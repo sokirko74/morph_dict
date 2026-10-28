@@ -110,6 +110,51 @@ TEST_CASE("prefixes") {
 	CHECK(in_prefix == out_prefix);
 }
 
+TEST_CASE("slf_export_import") {
+	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
+	MorphoWizard wizard;
+	wizard.load_wizard(path.string(), "guest", false, false, false);
+	auto w = wizard.find_lemm("слово", false);
+	REQUIRE(w.size() == 1);
+
+	// export as in morphwizard: Tools/Paradigm Export
+	CDumpParadigm out(&wizard);
+	out.m_SlfStr = wizard.get_slf_string(w[0], out.m_TypeGrammemsStr, out.m_PrefixesStr, 50);
+	out.m_Session.m_UserName = "алексей";
+	out.m_Session.m_SessionStart = "10:00, 28 October 2026";
+	out.m_Session.m_LastSessionSave = "11:00, 28 October 2026";
+	std::string dump = out.ToStringUtf8();
+	CHECK(dump.find("слово'") != std::string::npos);
+
+	auto tmp_path = fs::path(TEST_FOLDER) / "export.slf";
+	{
+		std::ofstream f(tmp_path, std::ios::binary);
+		f << dump;
+	}
+	wizard.remove_lemm(w[0]);
+	CHECK(wizard.find_lemm("слово", false).empty());
+
+	// import
+	FILE* fp = fopen(tmp_path.string().c_str(), "rb");
+	REQUIRE(fp != nullptr);
+	CDumpParadigm in(&wizard);
+	int line_no = 0;
+	bool bError = false;
+	std::string errors;
+	REQUIRE(in.ReadNextParadigmFromFile(fp, line_no, bError, errors));
+	fclose(fp);
+	fs::remove(tmp_path);
+	CHECK(!bError);
+	CHECK(errors.empty());
+	CHECK(in.m_Session.m_UserName == "алексей");
+	int error_line;
+	wizard.add_lemma_to_dict(in.m_SlfStr, in.m_TypeGrammemsStr, in.m_PrefixesStr, error_line);
+	w = wizard.find_lemm("слово", false);
+	REQUIRE(w.size() == 1);
+	std::string type_grm, prefixes;
+	CHECK(wizard.get_slf_string(w[0], type_grm, prefixes, 50) == out.m_SlfStr);
+}
+
 TEST_CASE("convert_jo_to_je") {
 	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
 	MorphoWizard wizard;

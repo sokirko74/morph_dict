@@ -64,7 +64,8 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
     bError = false;
     while (fgets(buf, 1000, fp)) {
         line_no++;
-        std::string s = convert_from_utf8(buf, m_pWizard->m_Language);
+        // the file is always in utf-8
+        std::string s = m_pWizard->is_utf8() ? std::string(buf) : convert_from_utf8(buf, m_pWizard->m_Language);
         {
             const char* auth_patt = "//edited by ";
             size_t qq = s.find(auth_patt);
@@ -124,10 +125,10 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
                 bError = true;
             }
             else {
-                std::string s = s.substr(ind + 1);
-                Trim(s);
+                std::string json_str = s.substr(ind + 1);
+                Trim(json_str);
                 rapidjson::Document d;
-                auto& js = d.Parse(s.c_str());
+                auto& js = d.Parse(json_str.c_str());
                 m_Session.FromJson(js);
             };
             continue;
@@ -152,7 +153,7 @@ std::string CDumpParadigm::ToStringUtf8() const {
     if (!m_Session.IsEmpty())
         outp << SessionField << " = " << m_Session.GetJsonStr() << "\n";
     outp << m_SlfStr;
-    return convert_to_utf8(outp.str(), m_pWizard->m_Language);
+    return m_pWizard->is_utf8() ? outp.str() : convert_to_utf8(outp.str(), m_pWizard->m_Language);
 };
 
 bool CDumpParadigm::ReadNextParadigmFromFile(FILE* fp, int& line_no, bool& bError, std::string& Errors) {

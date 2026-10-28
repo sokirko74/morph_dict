@@ -84,6 +84,8 @@ public:
     void	load_wizard(std::string path, std::string user_name, bool bCreatePrediction = true, bool useNationalConstants=true, bool convert_to_s8_encoding=false);
     void	log_lemma(const std::string& lemm, const CFlexiaModel& p, bool is_added) const;
     bool	is_changed() { return m_bWasChanged; }
+    // true if strings are stored in utf-8, false if they are converted to a single byte encoding
+    bool	is_utf8() const { return m_bUseUtf8; }
     void	save_mrd();
     
     
