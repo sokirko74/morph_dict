@@ -7,6 +7,7 @@
 #include "../common/utilit.h"
 #include "../common/rapidjson.h"
 #include <unordered_map>
+#include <map>
 
 enum NamingAlphabet {
     naDefault = 0,
@@ -35,6 +36,8 @@ class CAgramtab {
     std::unordered_map<std::string, grammem_t> m_GrammemHashMap;
     CPlugNounInfo m_PlugNoun;
     std::string m_InputJsonPath;
+    // (part of speech, grammems) -> the first line index with them, built in ReadFromFolder
+    std::map<std::pair<part_of_speech_t, grammems_mask_t>, uint16_t> m_PosAndGrammemsToLine;
 
     void BuildPartOfSpeechMap();
     char* grammems_to_str(grammems_mask_t grammems, char* out_buf, NamingAlphabet na = naDefault) const;

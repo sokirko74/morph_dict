@@ -175,6 +175,14 @@ bool CAgramtab::FindGrammems(const char* gram_codes, grammems_mask_t grammems) c
 
 bool CAgramtab::GetGramCodeByGrammemsAndPartofSpeechIfCan(part_of_speech_t Pos, grammems_mask_t grammems, std::string& gramcodes) const
 {
+    if (!m_PosAndGrammemsToLine.empty()) {
+        auto it = m_PosAndGrammemsToLine.find({ Pos, grammems });
+        if (it == m_PosAndGrammemsToLine.end()) {
+            return false;
+        }
+        gramcodes = LineIndexToGramcode(it->second);
+        return true;
+    }
     for (uint16_t i = 0; i < GetMaxGrmCount(); i++) {
         if (GetLine(i) != NULL)
         {
@@ -317,6 +325,15 @@ void CAgramtab::ReadFromFolder(std::string folder) {
     m_PlugNoun.m_Lemma  = doc["gramcodes"][gramcode]["l"].GetString();
     assert(!m_PlugNoun.m_Lemma.empty());
     InitLanguageSpecific(doc);
+
+    // after InitLanguageSpecific, since it can change grammems of lines
+    m_PosAndGrammemsToLine.clear();
+    for (uint16_t i = 0; i < GetMaxGrmCount(); i++) {
+        if (GetLine(i) != NULL) {
+            // emplace keeps the first (minimal) index, as the linear search does
+            m_PosAndGrammemsToLine.emplace(std::make_pair(GetLine(i)->m_PartOfSpeech, GetLine(i)->m_Grammems), i);
+        }
+    }
 }
 
 std::string CAgramtab::GetGramtabPath() const {
