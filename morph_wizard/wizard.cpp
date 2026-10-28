@@ -204,14 +204,14 @@ static size_t getCount(std::ifstream& mrdFile, const char* sectionName) {
 void MorphoWizard::ReadOnePrefixSet(std::string in, std::set<std::string>& out) const {
     MakeUpperUtf8(in);
     out.clear();
-    for (auto p : split_string(in, ' ')) {
-        Trim(p);
-        if (!p.empty()) {
-            if (!CheckLanguage(p, m_Language)) {
-                throw CExpc ("bad language in prefix %s", p.c_str());
-            }
-            out.insert(p);
+    // prefixes are separated by commas (get_prefix_set_str), spaces are also allowed
+    StringTokenizer tok(in.c_str(), ", \t\r\n");
+    while (tok()) {
+        std::string p = tok.val();
+        if (!CheckLanguage(p, m_Language)) {
+            throw CExpc ("bad language in prefix %s", p.c_str());
         }
+        out.insert(p);
     }
 };
 

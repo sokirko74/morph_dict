@@ -110,6 +110,20 @@ TEST_CASE("prefixes") {
 	CHECK(in_prefix == out_prefix);
 }
 
+TEST_CASE("prefix_set_with_commas") {
+	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
+	MorphoWizard wizard;
+	wizard.load_wizard(path.string(), "guest", false, false, false);
+	// get_prefix_set_str (slf export) joins prefixes with commas
+	std::string in_prefix = "ГИГА,ТЕРА";
+	REQUIRE(wizard.check_prefixes(in_prefix));
+	int error_line;
+	wizard.add_lemma_to_dict("БАЙТ N sg", "", in_prefix, error_line);
+	auto lemmas = wizard.find_lemm("БАЙТ", false);
+	REQUIRE(1 == lemmas.size());
+	CHECK(in_prefix == wizard.get_prefix_set(lemmas[0]->second));
+}
+
 TEST_CASE("slf_export_import") {
 	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
 	MorphoWizard wizard;
