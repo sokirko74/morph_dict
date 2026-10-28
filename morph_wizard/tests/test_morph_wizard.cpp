@@ -36,6 +36,21 @@ TEST_CASE("slf_create") {
 	CHECK(canon == slf);
 }
 
+TEST_CASE("slf_common_left_part_utf8") {
+	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
+	MorphoWizard wizard;
+	wizard.load_wizard(path.string(), "guest", false, false, false);
+	// "И" and "Ь" have the same first byte in utf-8
+	int error_line;
+	wizard.add_lemma_to_dict("ЛИСИЙ N sg\nЛИСЬЯ N pl", "", "", error_line);
+	auto w = wizard.find_lemm("ЛИСИЙ", false);
+	REQUIRE(1 == w.size());
+	const auto& flexia = wizard.m_FlexiaModels[w[0]->second.m_FlexiaModelNo].m_Flexia;
+	REQUIRE(2 == flexia.size());
+	CHECK("ИЙ" == flexia[0].m_FlexiaStr);
+	CHECK("ЬЯ" == flexia[1].m_FlexiaStr);
+}
+
 TEST_CASE("slf_accented") {
 	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
 	MorphoWizard wizard;

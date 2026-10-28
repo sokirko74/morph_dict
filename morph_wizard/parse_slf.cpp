@@ -197,6 +197,12 @@ void parse_slf(const CAgramtab* gramtab, const std::string& s, std::string& lemm
     if (lemm.empty())
         throw CExpc("Error! Empty paradigm");
 
+    // the common left part is calculated in bytes, it must not end in the middle of a utf-8 char
+    while (CommonLeftPartSize > 0 && CommonLeftPartSize < lemm.size()
+        && ((BYTE)lemm[CommonLeftPartSize] & 0xC0) == 0x80) {
+        CommonLeftPartSize--;
+    }
+
     FlexiaModel.m_Flexia.clear();
     AccentModel.m_Accents.clear();
 
