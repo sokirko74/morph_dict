@@ -21,6 +21,8 @@ macro (TestLemLang lang filename optional_morphan_arg)
         COMMAND ${CMAKE_COMMAND} -E compare_files  ${filename}.morph ${filename}.morph.canon
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
+    # the comparison must not run before the test that writes the file (ctest -j)
+    set_tests_properties(Morphan_${lang}_${base_name}_cmp PROPERTIES DEPENDS Morphan_${lang}_${base_name})
 endmacro(TestLemLang)
 
 TestLemLang(Russian test/Russian/test.txt "")
