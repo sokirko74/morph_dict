@@ -18,7 +18,12 @@ struct CLemmaInfoAndLemma
 		if (m_LemmaInfo.m_FlexiaModelNo != X.m_LemmaInfo.m_FlexiaModelNo)
 			return m_LemmaInfo.m_FlexiaModelNo < X.m_LemmaInfo.m_FlexiaModelNo;
 
-		return m_LemmaStrNo < X.m_LemmaStrNo;
+		if (m_LemmaStrNo != X.m_LemmaStrNo)
+			return m_LemmaStrNo < X.m_LemmaStrNo;
+
+		// homonyms with the same flexia model and base (for example, two lemmas "СВЕДЕНИЕ"
+		// with different common grammems) must have the same order in every build, since the order gives paradigm ids
+		return m_LemmaInfo < X.m_LemmaInfo;
 	};
 
 };
