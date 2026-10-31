@@ -67,8 +67,9 @@ public:
     void LoadDictionariesFromPath(std::string load_path);
     void LoadDictionariesRegistry();
     bool LoadStatisticRegistry(SubjectEnum subj);
+    // bSort sorts the homonyms (see CFormInfo::operator<), otherwise their order depends on the numbers of flexia models
     bool CreateParadigmCollection(bool bNorm, std::string &WordStr, bool capital, bool bUsePrediction,
-                                  std::vector<CFormInfo> &Result) const;
+                                  std::vector<CFormInfo> &Result, bool bSort=true) const;
     bool GetAllAncodesAndLemmasQuick(std::string &InputWordStr, bool capital, char *OutBuffer, size_t MaxBufferSize,
                                      bool bUsePrediction) const;
     bool CreateParadigmFromID(uint32_t id, CFormInfo &Result) const;

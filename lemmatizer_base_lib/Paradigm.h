@@ -58,5 +58,10 @@ public:
     void    SetUserUnknown();
 	std::string  GetGramInfoStr(const CAgramtab* gramtab) const;
 	std::string  FormatAsInPlmLine() const;
+	// The automaton returns homonyms in the order of the numbers of flexia models, which change after the dictionary
+	// packing (MorphoWizard::pack). The order of homonyms influences the results of the next stages (mapost, synan, seman),
+	// so we sort them by the corpus weights (GetWordWeight, GetHomonymWeight, the greater go first),
+	// then by the content: lemma, common gramcode, gramcode of the word form.
+	bool operator<(const CFormInfo& other) const;
 };
 

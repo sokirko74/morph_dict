@@ -6,6 +6,8 @@
 #include "Paradigm.h"
 #include "morph_dict/morph_wizard/wizard.h"
 
+#include <tuple>
+
 
 CFormInfo::CFormInfo()
 {
@@ -311,4 +313,11 @@ std::string CFormInfo::GetGramInfoStr(const CAgramtab* gramtab) const
 	for (int i = 0; i < ancode.length(); i += 2)
 		s += " " + gramtab->GetTabStringByGramCode(ancode.c_str() + i);
 	return s;
+}
+
+bool CFormInfo::operator<(const CFormInfo& other) const
+{
+	// the greater weights go first
+	return std::make_tuple(-GetWordWeight(), -GetHomonymWeight(), GetSrcNorm(), GetCommonAncode(), GetSrcAncode()) <
+		std::make_tuple(-other.GetWordWeight(), -other.GetHomonymWeight(), other.GetSrcNorm(), other.GetCommonAncode(), other.GetSrcAncode());
 }

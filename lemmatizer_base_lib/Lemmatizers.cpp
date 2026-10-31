@@ -6,6 +6,7 @@
 #include "Paradigm.h"
 #include "rus_numerals.h"
 #include <fstream>
+#include <algorithm>
 
 
 CLemmatizer::CLemmatizer(MorphLanguageEnum Language) : 
@@ -306,7 +307,7 @@ void CLemmatizer::predict_hyphen_word(std::string& wordform, bool capital, std::
     }
 }
 
-bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& word_str, bool capital, bool bUsePrediction, std::vector<CFormInfo>& Result) const
+bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& word_str, bool capital, bool bUsePrediction, std::vector<CFormInfo>& Result, bool bSort) const
 {
     Result.clear();
 	FilterSrc(word_str);
@@ -335,6 +336,9 @@ bool CLemmatizer::CreateParadigmCollection(bool bNorm, std::string& word_str, bo
 		// then we should try to predict each parts of the hyphened word separately
         predict_hyphen_word(word_str, capital, Result);
 	};
+	if (bSort) {
+		std::stable_sort(Result.begin(), Result.end());
+	}
 	return true;
 }
 
