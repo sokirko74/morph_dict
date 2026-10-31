@@ -51,6 +51,47 @@ TEST_CASE("slf_common_left_part_utf8") {
 	CHECK("ЬЯ" == flexia[1].m_FlexiaStr);
 }
 
+TEST_CASE("paradigm_parts") {
+	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
+	MorphoWizard wizard;
+	wizard.load_wizard(path.string(), "guest", false, false, false);
+	int error_line;
+	wizard.add_lemma_to_dict("ЗДАНИЕ N sg\nЗДАНИЯ N pl", "", "", error_line);
+	auto w = wizard.find_lemm("ЗДАНИЕ", false);
+	REQUIRE(1 == w.size());
+	auto& info = w[0]->second;
+	const auto first = wizard.m_FlexiaModels[info.m_FlexiaModelNo].m_Flexia;
+	REQUIRE(2 == first.size());
+
+	CFlexiaModel variant;
+	variant.m_Flexia.push_back(CMorphForm(first[0].m_Gramcode, "ЬЕ", ""));
+	variant.m_Flexia.push_back(CMorphForm(first[1].m_Gramcode, "ЬЯ", ""));
+	wizard.m_FlexiaModels.push_back(variant);
+	uint16_t variant_no = (uint16_t)wizard.m_FlexiaModels.size() - 1;
+	info.m_NextParts.push_back({ variant_no, UnknownAccentModelNo });
+
+	StringVector forms;
+	wizard.get_wordforms(w[0], forms);
+	CHECK(StringVector({ "ЗДАНИЕ", "ЗДАНИЯ", "ЗДАНЬЕ", "ЗДАНЬЯ" }) == forms);
+
+	std::vector<lemma_iterator_t> found;
+	wizard.find_lemm_by_prdno(variant_no, found);
+	CHECK(1 == found.size());
+
+	rapidjson::Document d;
+	CJsonObject out(d);
+	info.GetJson("ЗДАНИЕ", out);
+	CParadigmInfo restored;
+	restored.FromJson(out.get_value());
+	CHECK(restored.m_NextParts == info.m_NextParts);
+
+	wizard.pack();
+	w = wizard.find_lemm("ЗДАНИЕ", false);
+	REQUIRE(1 == w.size());
+	wizard.get_wordforms(w[0], forms);
+	CHECK("ЗДАНЬЯ" == forms.back());
+}
+
 TEST_CASE("slf_accented") {
 	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
 	MorphoWizard wizard;

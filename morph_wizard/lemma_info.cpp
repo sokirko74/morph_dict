@@ -5,7 +5,7 @@ CLemmaInfo::CLemmaInfo()
 {
 	m_FlexiaModelNo = UnknownFlexiaModelNo;
 	m_AccentModelNo = UnknownAccentModelNo;
-	m_CommonAncode[0] = 0;
+	memset(m_CommonAncode, 0, CommonAncodeSize);
 };
 
 
@@ -42,7 +42,8 @@ std::string CLemmaInfo::GetBase(const std::string lemma, const CFlexiaModel& m) 
 
 void CLemmaInfo::SetCommonAncode(const char* s) {
     if (*s == 0) {
-        m_CommonAncode[0] = 0;
+        // all bytes, since they are written to the binary dictionary
+        memset(m_CommonAncode, 0, CommonAncodeSize);
     } else {
         memcpy(m_CommonAncode, s, CommonAncodeSize - 1);
         m_CommonAncode[CommonAncodeSize - 1] = 0;

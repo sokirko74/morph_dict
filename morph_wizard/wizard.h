@@ -129,6 +129,8 @@ public:
     void	remove_lemm(lemma_iterator_t it);
     std::string	get_slf_string(lemma_iterator_t it, std::string& dict, std::string& Prefixes, int line_size = 79);
     void	get_wordforms(const_lemma_iterator_t it, StringVector& forms) const;
+    // all parts of a word as one flexia model
+    CFlexiaModel	get_word_flexia(const CParadigmInfo& I) const;
     CParadigmInfo	add_lemma_to_dict(const std::string& slf, std::string common_grammems, const std::string& prefixes, int& line_no_err, uint16_t SessionNo = UnknownSessionNo);
     void   check_slf(const std::string& slf, int& line_no_err) const;
     void	set_to_delete_false();

@@ -1,6 +1,10 @@
 #include "paradigm_info.h"
 
 
+bool CParadigmPart::operator==(const CParadigmPart& X) const {
+    return m_FlexiaModelNo == X.m_FlexiaModelNo && m_AccentModelNo == X.m_AccentModelNo;
+}
+
 CParadigmInfo::CParadigmInfo() : CLemmaInfo() {
     m_SessionNo = UnknownSessionNo;
     m_AuxAccent = UnknownAccent;
@@ -24,8 +28,25 @@ bool CParadigmInfo::operator==(const CParadigmInfo& X) const {
         && m_AccentModelNo == X.m_AccentModelNo
         && m_AuxAccent == X.m_AuxAccent
         && !CompareCommonAncode(X.GetCommonAncode())
-        && m_PrefixSetNo == X.m_PrefixSetNo;
+        && m_PrefixSetNo == X.m_PrefixSetNo
+        && m_NextParts == X.m_NextParts;
 };
+
+bool CParadigmInfo::HasFlexiaModel(uint16_t FlexiaModelNo) const {
+    if (m_FlexiaModelNo == FlexiaModelNo) return true;
+    for (const auto& p : m_NextParts) {
+        if (p.m_FlexiaModelNo == FlexiaModelNo) return true;
+    }
+    return false;
+}
+
+bool CParadigmInfo::HasAccentModel(uint16_t AccentModelNo) const {
+    if (m_AccentModelNo == AccentModelNo) return true;
+    for (const auto& p : m_NextParts) {
+        if (p.m_AccentModelNo == AccentModelNo) return true;
+    }
+    return false;
+}
 
 CParadigmInfo CParadigmInfo::AnyParadigmInfo() {
     return CParadigmInfo(AnyParadigmNo, AnyAccentModelNo, AnySessionNo,
@@ -65,7 +86,16 @@ void  CParadigmInfo::GetJson(const std::string& lemma, CJsonObject& out) const {
     if (m_PrefixSetNo != UnknownPrefixSetNo) {
         out.add_int("p", m_PrefixSetNo);
     }
-    
+    if (!m_NextParts.empty()) {
+        rapidjson::Value parts(rapidjson::kArrayType);
+        for (const auto& p : m_NextParts) {
+            rapidjson::Value part(rapidjson::kArrayType);
+            part.PushBack(p.m_FlexiaModelNo, out.get_allocator());
+            part.PushBack(p.m_AccentModelNo, out.get_allocator());
+            parts.PushBack(part.Move(), out.get_allocator());
+        }
+        out.move_to_member("n", parts);
+    }
 }
 
 CParadigmInfo& CParadigmInfo::FromJson(const rapidjson::Value& inj) {
@@ -86,6 +116,13 @@ CParadigmInfo& CParadigmInfo::FromJson(const rapidjson::Value& inj) {
     }
     else {
         m_PrefixSetNo = UnknownPrefixSetNo;
+    }
+    m_NextParts.clear();
+    t = rapidjson::Pointer("/n").Get(inj);
+    if (t) {
+        for (const auto& p : t->GetArray()) {
+            m_NextParts.push_back({ (uint16_t)p[0].GetInt(), (uint16_t)p[1].GetInt() });
+        }
     }
     return *this;
 }
