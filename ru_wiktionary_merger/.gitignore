@@ -1,0 +1,8 @@
+/data/
+/tmp/
+/tmp.sav/
+/result/
+/venv/
+/.idea/
+__pycache__/
+/a.json
