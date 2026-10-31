@@ -8,11 +8,13 @@ target_link_libraries(TestLem
         lemmatizer_base_lib
 )
 
+# the order of homonyms depends on the numbers of flexia models, which change after packing the dictionary,
+# so the homonyms are sorted
 macro (TestLemLang lang filename optional_morphan_arg)
     get_filename_component(base_name ${filename} NAME)
     add_test(
         NAME Morphan_${lang}_${base_name} 
-        COMMAND TestLem --echo  ${optional_morphan_arg} --no-ids --forms --language ${lang} --input ${filename} --output ${filename}.morph
+        COMMAND TestLem --echo  ${optional_morphan_arg} --no-ids --sort --forms --language ${lang} --input ${filename} --output ${filename}.morph
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
 
