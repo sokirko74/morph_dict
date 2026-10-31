@@ -12,7 +12,8 @@ def is_article_title_ru(title: str) -> bool:
     :param title: article title as a string
     :return: a boolean value
     """
-    pattern = re.compile(r"^[А-Яа-яЁё\-]+[^\-]$")
+    # one-letter words are Russian too: `я`, `в`, `и`
+    pattern = re.compile(r"^(?:[А-Яа-яЁё\-]+[^\-]|[А-Яа-яЁё])$")
     return bool(re.match(pattern, title))
 
 

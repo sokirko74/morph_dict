@@ -13,7 +13,8 @@ with open("tmp/processed/articles.jsonl", "w") as file:
         stems: dict = article["morpho"]["stems"]
         processed_stems = {}
         for name, stem in stems.items():
-            if stem:
+            # without morpheme segmentation the stems cannot be segmented either
+            if stem and segmented:
                 processed_stems[name] = segment_stem(stem, segmented)
         article["processed_stems"] = processed_stems
         file.write(json.dumps(article, ensure_ascii=False) + "\n")

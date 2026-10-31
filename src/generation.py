@@ -42,8 +42,8 @@ def segment_stem(stem: str, segmented_lemma: str, *, sep: str = SEGMENT_SEPARATO
     # not considering hyphens by convention
     stem = clean_string(stem).replace("-", "")
     whole_lemma, sep_positions = process_seps(segmented_lemma, sep)
-    # in this case we already have segmented stem
-    if len(stem) == len(whole_lemma):
+    # in this case we already have segmented stem; a stem of the same length may differ: `аватарок`, `аватарка`
+    if stem == whole_lemma:
         return segmented_lemma
     # this means that there are no stem alternations
     if whole_lemma.startswith(stem):

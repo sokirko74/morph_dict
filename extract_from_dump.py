@@ -1,235 +1,144 @@
-from multiprocessing import Queue, Process, cpu_count
-from bz2 import BZ2File
-from lxml.etree import iterparse, Element
-from typing import Union, NoReturn
+"""
+Extracts morphological data from the Russian pages cached by `cache_dump.py`
+(the cache is built first if it is missing).
+Articles and templates can be re-extracted separately:
+    python extract_from_dump.py --templates
+"""
+from multiprocessing import Pool, cpu_count
 from timeit import default_timer as timer
+from typing import List
+import argparse
 import json
+import pathlib
+import re
 
 import wikitextparser as wtp
 
-from config import DUMP_PATH, PROCESS_TEMPLATES, PROCESS_ARTICLES
-from constants import WRITE_PATHS, BROKEN_ARTICLES
-from src.data import Article, Template, TemplateRedirect
-from src.utils.etc import empty_file
-from src.utils.xml import is_article_title_ru, is_template, is_template_title_ru, is_redirect, is_article, \
-    is_article_title_proper, is_element_page, get_page_id, get_raw_wiki, get_page_title, get_redirect_title
+from config import DUMP_PATH
+from constants import WRITE_PATHS, BROKEN_ARTICLES, CACHE_PATH
+from cache_dump import cache_dump
 from src.utils.wiki import find_ru_section, parse_ru_section, clean_template_name, parse_template_page, \
-    remove_no_include, is_obscene, has_ru_homonyms
-
-assert cpu_count() > 4
-NUM_PROCESSES = 4
+    remove_no_include
 
 
-def process_element(element: Element) -> Union[Article, Template, None]:
+HEADER = re.compile(r"^(=+)[^=].*?(=+)\s*$")
+MORPHO_SECTION = "Морфологические и синтаксические свойства"
+
+
+def keep_morpho_sections(text: str) -> str:
     """
-    Parses an individual XML element. Returns an instance of a corresponding
-    class if successful, None otherwise.
-    Additionally, clears all parent elements of a given element to conserve memory.
-    :param element: XML element
-    :return: an instance of Article or Template class or None
+    Parsing the whole section is slow, while only the morphological sections are needed.
+    Keeps them and the headers of levels 1 and 2 (homonyms are level 2 sections).
     """
-    # we're only interested in `page` elements in this dump
-    if is_element_page(element):
-
-        cur_id: int = get_page_id(element)
-        cur_title: str = get_page_title(element)
-        cur_wiki: str = get_raw_wiki(element)
-
-        # filter out incorrectly formatted articles
-        if cur_title in BROKEN_ARTICLES:
-            wiki_page = None
-
-        elif (is_article(element)
-                and is_article_title_ru(cur_title)
-                and not is_redirect(element)
-                and PROCESS_ARTICLES):
-
-            is_proper: bool = is_article_title_proper(cur_title)
-
-            wiki_page = Article(id_=cur_id,
-                                title=cur_title,
-                                raw_wiki=cur_wiki,
-                                is_proper=is_proper)
-
-        elif (is_template(element)
-              and is_template_title_ru(cur_title)
-              and not is_redirect(element)
-              and PROCESS_TEMPLATES):
-
-            cur_title: str = clean_template_name(cur_title)
-
-            wiki_page = Template(id_=cur_id,
-                                 title=cur_title,
-                                 raw_wiki=cur_wiki)
-
-        elif (is_template(element)
-              and is_template_title_ru(cur_title)
-              and is_redirect(element)
-              and PROCESS_TEMPLATES):
-
-            cur_title: str = clean_template_name(cur_title)
-
-            redirect_title: str = get_redirect_title(element)
-            redirect_title: str = clean_template_name(redirect_title)
-
-            wiki_page = TemplateRedirect(id_=cur_id,
-                                         title=cur_title,
-                                         raw_wiki=cur_wiki,
-                                         redirect_title=redirect_title)
-        # not interested in other cases
-        else:
-            wiki_page = None
-
-        # remove data from current element
-        element.clear()
-
-        # clear all preceding elements
-        for ancestor in element.xpath('ancestor-or-self::*'):
-            while ancestor.getprevious() is not None:
-                del ancestor.getparent()[0]
-
-        return wiki_page
+    result = []
+    morpho_level = None
+    for line in text.splitlines():
+        header = HEADER.match(line)
+        if header:
+            level = min(len(header.group(1)), len(header.group(2)))
+            if morpho_level and level <= morpho_level:
+                morpho_level = None
+            if MORPHO_SECTION in line:
+                morpho_level = level
+            if level <= 2 or morpho_level:
+                result.append(line)
+        elif morpho_level:
+            result.append(line)
+    return "\n".join(result)
 
 
-def parse_dump(dump_path: str, conn: Queue) -> NoReturn:
+def process_article(page: dict) -> List[dict]:
     """
-    Iteratively goes through a compressed XML dump. Extracts information
-    from page elements. If extraction is successful (i.e. not None), then
-    the processed information is passed on to an output queue.
-    :param dump_path: path leading to the compressed XML dump
-    :param conn: output queue
+    Parses the Russian section of an article; homonyms give several results.
     """
-    with BZ2File(dump_path) as bz_file:
-        for index, (_, elem) in enumerate(iterparse(bz_file)):
-            if index % 100000 == 0:
-                print("\r" + f"Processed {index} XML elements...", end="")
-
-            processed_page = process_element(elem)
-
-            if processed_page:
-                conn.put(processed_page)
-
-        # we need to stop each individual process down the line
-        # after we're done parsing the dump
-        for _ in range(NUM_PROCESSES):
-            conn.put('STOP')
-
-        # total number of elements processed for reference
-        print("\n" + f"Total elements processed: {index}")
+    if page["title"] in BROKEN_ARTICLES:
+        return []
+    wiki_data = find_ru_section(wtp.parse(keep_morpho_sections(page["text"])))
+    if not wiki_data:
+        return []
+    result = []
+    for parsed_wiki_data in parse_ru_section(wiki_data):
+        parsed_wiki_data["id"] = page["id"]
+        parsed_wiki_data["title"] = page["title"]
+        parsed_wiki_data["type"] = "article"
+        parsed_wiki_data["is_proper"] = page["is_proper"]
+        parsed_wiki_data["is_obscene"] = page["is_obscene"]
+        parsed_wiki_data["has_homonyms"] = page["has_homonyms"]
+        result.append(parsed_wiki_data)
+    return result
 
 
-def parse_wiki(in_conn: Queue, out_conn: Queue) -> NoReturn:
+def process_template(page: dict) -> List[dict]:
     """
-    Processes actual wiki text of a given page. Receives data from an input queue
-    and puts results into an output queue.
-    Meant to run in multiple parallel processes.
-    :param in_conn: input queue
-    :param out_conn: output queue
+    Template pages contain the inflection tables, template redirects are aliases for their names.
     """
-    # runs in an infinite cycle until it receives a stop signal
-    while True:
-        data: Union[Article, Template, str] = in_conn.get()
-        # upon receiving the stop signal
-        # pass it further down the line and break the infinite cycle
-        if data == "STOP":
-            out_conn.put(data)
-            break
-        # parse the article type
-        if isinstance(data, Article):
-            wiki_data = wtp.parse(data.raw_wiki)
-            wiki_data = find_ru_section(wiki_data)
-            # proceed if Russian language section is found
-            if wiki_data:
-                # parse found section
-                parsed_wiki_data = parse_ru_section(wiki_data)
-                # proceed if morphological information and segmentation data were found
-                if parsed_wiki_data:
-                    parsed_wiki_data["id"] = data.id_
-                    parsed_wiki_data["title"] = data.title
-                    parsed_wiki_data["type"] = "article"
-                    parsed_wiki_data["is_proper"] = data.is_proper
-                    parsed_wiki_data["is_obscene"] = is_obscene(data.raw_wiki)
-                    parsed_wiki_data["has_homonyms"] = has_ru_homonyms(data.raw_wiki)
-
-                    out_conn.put(parsed_wiki_data)
-        # Template class contains data from a page dedicated to a particular template
-        elif isinstance(data, Template):
-            wiki_data = wtp.parse(remove_no_include(data.raw_wiki))
-
-            if wiki_data:
-                parsed_wiki_data = parse_template_page(wiki_data)
-                if parsed_wiki_data:
-                    parsed_wiki_data["id"] = data.id_
-                    parsed_wiki_data["title"] = data.title
-                    parsed_wiki_data["type"] = "template"
-
-                    out_conn.put(parsed_wiki_data)
-        # we're interested only in template redirects
-        # those are essentially aliases for template names
-        # although only one page contains data
-        elif isinstance(data, TemplateRedirect):
-            # here we don't actually need any wiki data from the page body
-            parsed_wiki_data = {
-                "id": data.id_,
-                "title": data.title,
-                "redirect_title": data.redirect_title,
-                "type": "template_redirect"
-            }
-
-            out_conn.put(parsed_wiki_data)
-        # not interested in any other cases
-        else:
-            pass
+    title = clean_template_name(page["title"])
+    if page["type"] == "template_redirect":
+        # here we don't actually need any wiki data from the page body
+        return [{"id": page["id"],
+                 "title": title,
+                 "redirect_title": clean_template_name(page["redirect_title"]),
+                 "type": "template_redirect"}]
+    text = remove_no_include(page["text"])
+    wiki_data = wtp.parse(text)
+    parsed_wiki_data = parse_template_page(wiki_data) if wiki_data else None
+    # some tables are written in the wiki table markup (`{| ... |}`) instead of calling a table template
+    if "{|" in text:
+        parsed_wiki_data = parsed_wiki_data or {"template": {}}
+        parsed_wiki_data["wikitable"] = text
+    if not parsed_wiki_data:
+        return []
+    parsed_wiki_data["id"] = page["id"]
+    parsed_wiki_data["title"] = title
+    parsed_wiki_data["type"] = "template"
+    return [parsed_wiki_data]
 
 
-def write_result(paths: dict, conn: Queue) -> NoReturn:
-    """
-    Receives data from input queue and writes it to a single line
-    in a file. The file path depends on specified data type.
-    :param paths: dictionary containing data types as keys and corresponding
-    paths as values.
-    :param conn: input queue
-    """
-    for _, path in paths.items():
-        empty_file(path)
-    while True:
-        data: Union[dict, str] = conn.get()
-        if data == "STOP":
-            break
-        data_type = data["type"]
-        path = paths.get(data_type, None)
-        if path:
-            with open(path, "a") as file:
-                file.write(json.dumps(data, ensure_ascii=False) + "\n")
+def process_page(page: dict) -> List[dict]:
+    if page["type"] == "article":
+        return process_article(page)
+    return process_template(page)
+
+
+def read_cache(path: str, types: set):
+    with open(path) as file:
+        for line in file:
+            page = json.loads(line)
+            if page["type"] in types:
+                yield page
+
+
+def parse_args():
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("--articles", action="store_true", help="extract articles only")
+    arg_parser.add_argument("--templates", action="store_true", help="extract templates and their redirects only")
+    arg_parser.add_argument("--rebuild-cache", action="store_true", help="read the dump again")
+    arg_parser.add_argument("--processes", type=int, default=cpu_count())
+    return arg_parser.parse_args()
 
 
 if __name__ == "__main__":
-    # to check total time elapsed
     start = timer()
-    # create necessary queues
-    task_queue = Queue()
-    write_queue = Queue()
+    args = parse_args()
+    if args.rebuild_cache or not pathlib.Path(CACHE_PATH).exists():
+        cache_dump(DUMP_PATH, pathlib.Path(CACHE_PATH))
 
-    # wiki pages are completely independent of each other (except morphological templates, but we'll deal
-    # with them separately), so it makes sense to parallelize their parsing
-    wiki_process = [Process(target=parse_wiki, args=(task_queue, write_queue)) for _ in range(NUM_PROCESSES)]
-    # this can be also done independently of XML and wiki parsing
-    write_process = Process(target=write_result, args=(WRITE_PATHS, write_queue))
-    # start all the processes
-    for process in wiki_process:
-        process.start()
+    stages = []
+    if args.articles or not args.templates:
+        stages.append("article")
+    if args.templates or not args.articles:
+        stages += ["template", "template_redirect"]
 
-    write_process.start()
-    # run the main function
-    parse_dump(DUMP_PATH, task_queue)
-    # close the processes
-    for process in wiki_process:
-        process.join()
-    write_process.join()
+    # only the files of the selected stages are rewritten
+    outputs = {stage: open(WRITE_PATHS[stage], "w") for stage in stages}
+    with Pool(args.processes) as pool:
+        results = pool.imap_unordered(process_page, read_cache(CACHE_PATH, set(stages)), chunksize=200)
+        for index, records in enumerate(results):
+            if index % 10000 == 0:
+                print("\r" + f"Processed {index} pages...", end="")
+            for record in records:
+                outputs[record["type"]].write(json.dumps(record, ensure_ascii=False) + "\n")
+    for file in outputs.values():
+        file.close()
 
-    end = timer()
-
-    print("\n" + f"Time elapsed: {end - start:.4f}")
-
-
-
+    print("\n" + f"Time elapsed: {timer() - start:.1f}")

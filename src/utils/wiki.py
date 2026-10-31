@@ -25,21 +25,6 @@ def find_ru_section(wiki_text: WikiText) -> Union[Section, None]:
         return None
 
 
-def find_ru_morpho_section(wiki_text: WikiText) -> Union[Section, None]:
-    """
-    Attempts to find a section pertaining to Russian morphology within
-    parsed wiki text.
-    :param wiki_text: parsed wiki text
-    :return: None or found section
-    """
-    sections = wiki_text.get_sections()
-    sections = [sec for sec in sections if 'Морфологические и синтаксические свойства' in str(sec.title)]
-    if len(sections) == 1:
-        return sections[0]
-    else:
-        return None
-
-
 def clean_template_name(template: str) -> str:
     """
     Removes unnecessary symbols from template name
@@ -54,6 +39,8 @@ def clean_template_name(template: str) -> str:
 
     whitespace = re.compile(r"\s+")
     template = whitespace.sub(" ", template)
+    # invisible marks of the text direction: `мест ru 1a-в\u200e`
+    template = template.replace("\u200e", "").replace("\u200f", "")
     return template.strip()
 
 
@@ -150,42 +137,81 @@ def parse_segments(temp: Template) -> Union[Dict[str, str], None]:
     return segments
 
 
-def parse_ru_section(wiki_section: Section) -> Union[dict, None]:
+def homonym_label(section: Section, index: int) -> str:
     """
-    Processes the entire Russian language section of an article.
-    Return a dictionary with morphological information and morpheme segmentation.
-    :param wiki_section: a wiki text section in Russian language
+    Homonyms are level 2 sections titled like `{{заголовок|I}}`; returns `I` or the ordinal number.
+    """
+    title = str(section.title or "")
+    match = re.search(r"\{\{заголовок\|([^|}]*)", title)
+    return match.group(1).strip() if match else str(index)
+
+
+def parse_morpho_section(morpho_section: Section) -> Union[dict, None]:
+    """
+    Extracts the morphological template and morpheme segmentation from
+    a `Морфологические и синтаксические свойства` section.
+    :param morpho_section: a wiki text section
     :return: a dictionary with relevant information or None
     """
-    # try to find morphological section
-    # generally, it should be present in all articles
-    wiki_section = find_ru_morpho_section(wiki_section)
-    # return None if no such section was found or if
-    # it contains no templates
-    if not wiki_section or not wiki_section.templates:
+    if not morpho_section.templates:
         return None
-    # deal with templates found
-    wiki_section = wiki_section.templates
+    templates = morpho_section.templates
     # the morphological template should be the first one
     # in the relevant section; it cannot be identified by name
-    morpho = parse_morpho(wiki_section[0])
-    # the template with morphemes can be found by name
-    segments = find_segments(wiki_section)
-    # return None if no such template is found
-    # because that's what we're trying to extract from the dump
-    if not segments:
-        return None
-    # convert template to Python dictionary
-    segments = parse_segments(segments)
-    # sometimes this template is completely empty
-    # or filled with empty elements
-    # naturally, that's not very useful
-    if not segments or len(segments) == 1 and segments["1"] == "":
-        return None
+    main = templates[0]
+    # a header without a table may be followed by the table: `{{мест ru}} {{падежи ru 1|nom=никто́|...}}`
+    if clean_template_name(main.name) in BARE_HEADERS:
+        tables = [t for t in templates[1:]
+                  if t.nesting_level == 1 and is_table_template(clean_template_name(t.name))]
+        main = tables[0] if tables else main
+    morpho = parse_morpho(main)
+    # the template with morphemes can be found by name;
+    # articles without segmentation are kept with empty segments
+    segments = find_segments(templates)
+    segments = parse_segments(segments) if segments else None
+    if not segments or len(segments) == 1 and segments.get("1") == "":
+        segments = {}
+    # the part of speech of a table given in the article (`{{падежи ru 1|nom=он|...}}`) is in the next template
+    morpho["section_templates"] = [clean_template_name(t.name) for t in templates if t.nesting_level == 1]
     return {
         "morpho": morpho,
         "segments": segments
     }
+
+
+def parse_ru_section(wiki_section: Section) -> List[dict]:
+    """
+    Processes the entire Russian language section of an article.
+    Homonyms have their own morphological sections, each of them gives a separate result
+    with a `homonym` label (`I`, `II`, ...).
+    :param wiki_section: a wiki text section in Russian language
+    :return: a list of dictionaries with morphological information and morpheme segmentation
+    """
+    homonyms = [sec for sec in wiki_section.get_sections(level=2)]
+    morpho_sections = [sec for sec in wiki_section.get_sections()
+                       if 'Морфологические и синтаксические свойства' in str(sec.title)]
+    result = []
+    for index, morpho_section in enumerate(morpho_sections, start=1):
+        parsed = parse_morpho_section(morpho_section)
+        if not parsed:
+            continue
+        if len(morpho_sections) > 1:
+            # find the level 2 section containing this morphological section
+            owners = [sec for sec in homonyms if sec.span[0] <= morpho_section.span[0] < sec.span[1]]
+            parsed["homonym"] = homonym_label(owners[0], index) if owners else str(index)
+        result.append(parsed)
+    return result
+
+
+# the table templates the inflection templates of adjectives, verbs, pronouns, numerals and surnames call
+TABLE_TEMPLATES = ("прил", "Гл-блок", "падежи", "Фам-блок")
+# headers of articles that have no inflection template
+BARE_HEADERS = ("мест ru", "числ ru", "Фам ru", "Фам")
+
+
+def is_table_template(name: str) -> bool:
+    # `падежи ru 1`, `Гл-блок2наст`, but not the header `прил ru`
+    return name == "прил" or name.startswith(TABLE_TEMPLATES[1:])
 
 
 def parse_template_page(wiki_text: WikiText) -> Union[dict, None]:
@@ -202,27 +228,46 @@ def parse_template_page(wiki_text: WikiText) -> Union[dict, None]:
     # containing just one template
     # template pages not satisfying this condition
     # are likely irrelevant
+    # inflection tables of adjectives and verbs are an exception: their arguments contain nested templates
+    # (`{{incorrect|...}}`, `{{-}}`), and base ones (e.g. `прил ru 1a`) call the table
+    # template `прил` and then the header template `прил ru`
+    header = None
     if len(templates) > 1:
-        return None
+        top_level = [t for t in templates if t.nesting_level == 1]
+        if len(top_level) > 1:
+            # the header gets the parameters not shown in the table, e.g. the comparative `степень`
+            headers = [t for t in top_level if clean_template_name(t.name) == "прил ru"]
+            header = headers[0] if len(headers) == 1 else None
+            top_level = [t for t in top_level if is_table_template(clean_template_name(t.name))]
+        if len(top_level) != 1 or not clean_template_name(top_level[0].name).startswith(TABLE_TEMPLATES):
+            return None
+        templates = top_level
     # templates attribute always return a list
     # so we need to take out the only element
     template = templates[0]
-    return {"template": template_to_dict(template)}
+    result = {"template": template_to_dict(template),
+              "call": clean_template_name(template.name)}
+    if header:
+        result["header"] = template_to_dict(header)
+    return result
 
 
 def remove_no_include(raw_template_page: str) -> str:
     """
     wikitextparser can't parse templates with `<noinclude>`
     tags in them. This function removes these tags and their
-    contents.
+    contents, and the tags `<includeonly>` without their contents.
     :param raw_template_page: unprocessed text body of a template page
     :return: the same text body with tags removed
     """
-    pattern = re.compile(r"<noinclude>.*?</noinclude>")
-    lines = raw_template_page.split("\n")
+    # the documentation is often a `<noinclude>` block of several lines
+    pattern = re.compile(r"<noinclude>.*?</noinclude>", re.DOTALL)
+    lines = re.sub(pattern, "", raw_template_page).split("\n")
     output = []
     for line in lines:
-        line = re.sub(pattern, "", line)
+        # the contents of `<includeonly>` are used when the template is called, only the tags go away:
+        # `{{{основа1<includeonly>|{{{основа}}}</includeonly>}}}`
+        line = re.sub(r"</?includeonly>", "", line)
         if line:
             output.append(line)
     return "\n".join(output)

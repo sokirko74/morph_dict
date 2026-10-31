@@ -5,6 +5,8 @@ from unicodedata import normalize
 
 from constants import POS_MAP
 
+LATIN_HOMOGLYPHS = str.maketrans("aeopcxyAEOPCXY", "аеорсхуАЕОРСХУ")
+
 
 def clean_string(seg: str) -> str:
     """
@@ -18,6 +20,8 @@ def clean_string(seg: str) -> str:
     seg = re.sub(r"\(.*?\)", "", seg)
     # decompose string to filter out stress marks
     seg = normalize("NFD", seg)
+    # stressed vowels are sometimes typed with Latin letters, e.g. `ó` instead of `о́`
+    seg = seg.translate(LATIN_HOMOGLYPHS)
     ru_letters = ({chr(ind) for ind in range(ord("а"), ord("я") + 1)}
                   | {chr(ind) for ind in range(ord("А"), ord("Я") + 1)}
                   | {"-"}
