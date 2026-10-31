@@ -74,15 +74,21 @@ bool CDumpParadigm::ReadFromFile(FILE* fp, int& line_no, bool& bError, std::stri
                 Trim(m_AuthorStr);
             };
         };
+        bool bComment = false;
         {
             size_t qq = s.find("//");
-            if (qq != std::string::npos)
-
+            if (qq != std::string::npos) {
                 s.erase(qq);
+                bComment = true;
+            }
 
         };
         Trim(s);
-        if (s.empty()) continue;
+        if (s.empty()) {
+            // an empty line separates the parts of a word, a line with a comment does not
+            if (!bComment && !m_SlfStr.empty()) m_SlfStr += "\r\n";
+            continue;
+        }
         if (s.substr(0, 5) == "=====") {
             if (m_SlfStr.empty() && m_TypeGrammemsStr.empty() && m_PrefixesStr.empty() && !bError)
                 continue;

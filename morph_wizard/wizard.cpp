@@ -773,7 +773,14 @@ std::string MorphoWizard::get_slf_string(lemma_iterator_t it, std::string& commo
     const CFlexiaModel& P = m_FlexiaModels[I.m_FlexiaModelNo];
     prefixes = get_prefix_set(it);
     common_grammems = get_grammem_string(I.GetCommonAncodeCopy());
-    return mrd_to_slf(it->first, P, I.m_AccentModelNo, I.m_AuxAccent, line_size);
+    std::string res = mrd_to_slf(it->first, P, I.m_AccentModelNo, I.m_AuxAccent, line_size);
+    std::string base = it->first.substr(0, it->first.size() - P.get_first_flex().size());
+    for (const auto& part : I.m_NextParts) {
+        const CFlexiaModel& next = m_FlexiaModels[part.m_FlexiaModelNo];
+        res += "\r\n";
+        res += mrd_to_slf(base + next.get_first_flex(), next, part.m_AccentModelNo, I.m_AuxAccent, line_size);
+    }
+    return res;
 }
 
 
@@ -954,16 +961,15 @@ uint16_t MorphoWizard::AddPrefixSet(std::string PrefixSetStr) {
     return Result;
 }
 
-extern void parse_slf(const CAgramtab* gramtab, const std::string& s, std::string& lemm, CFlexiaModel& FlexiaModel, CAccentModel& AccentModel, BYTE& AuxAccent, int& line_no_err);
+extern void parse_slf_parts(const CAgramtab* gramtab, const std::string& s, std::string& lemm, std::vector<CSlfPart>& parts, BYTE& AuxAccent, int& line_no_err);
 
 CParadigmInfo
 MorphoWizard::add_lemma_to_dict(const std::string& slf, std::string common_grammems, const std::string& prefixes, int& line_no_err,
     uint16_t SessionNo) {
     std::string lemm;
-    CFlexiaModel FlexiaModel;
-    CAccentModel AccentModel;
+    std::vector<CSlfPart> parts;
     BYTE AuxAccent;
-    parse_slf(m_pGramTab, slf, lemm, FlexiaModel, AccentModel, AuxAccent, line_no_err);
+    parse_slf_parts(m_pGramTab, slf, lemm, parts, AuxAccent, line_no_err);
 
     std::string common_gramcode;
     if (!common_grammems.empty()) {
@@ -973,26 +979,69 @@ MorphoWizard::add_lemma_to_dict(const std::string& slf, std::string common_gramm
     }
 
 
-    uint16_t ParadigmNo = AddFlexiaModel(*this, FlexiaModel);
-    uint16_t AccentModelNo = AddAccentModel(*this, AccentModel);
+    uint16_t ParadigmNo = AddFlexiaModel(*this, parts[0].m_FlexiaModel);
+    uint16_t AccentModelNo = AddAccentModel(*this, parts[0].m_AccentModel);
     uint16_t PrefixSetNo = AddPrefixSet(prefixes);
 
     if (SessionNo == UnknownSessionNo)
         SessionNo = GetCurrentSessionNo();
 
     CParadigmInfo NewInfo(ParadigmNo, AccentModelNo, SessionNo, AuxAccent, common_gramcode.c_str(), PrefixSetNo);
+    for (size_t i = 1; i < parts.size(); i++) {
+        uint16_t PartFlexiaModelNo = AddFlexiaModel(*this, parts[i].m_FlexiaModel);
+        NewInfo.m_NextParts.push_back({ PartFlexiaModelNo, AddAccentModel(*this, parts[i].m_AccentModel) });
+    }
     m_LemmaToParadigm.insert(std::make_pair(lemm, NewInfo));
-    log_lemma(lemm, FlexiaModel, true);
+    log_lemma(lemm, get_word_flexia(NewInfo), true);
     m_bWasChanged = true;
     return NewInfo;
 }
 
+size_t MorphoWizard::flatten_parts() {
+    size_t count = 0;
+    for (auto& [lemma, info] : m_LemmaToParadigm) {
+        if (info.m_NextParts.empty()) continue;
+        CFlexiaModel flexia = m_FlexiaModels[info.m_FlexiaModelNo];
+        flexia.m_Flexia.clear();
+        CAccentModel accents;
+        bool has_accents = false;
+        auto add_part = [&](uint16_t FlexiaModelNo, uint16_t AccentModelNo) {
+            const auto& forms = m_FlexiaModels[FlexiaModelNo].m_Flexia;
+            has_accents = has_accents || AccentModelNo != UnknownAccentModelNo;
+            for (size_t i = 0; i < forms.size(); i++) {
+                BYTE accent = AccentModelNo == UnknownAccentModelNo ? UnknownAccent : m_AccentModels[AccentModelNo].m_Accents[i];
+                // the same form can be in two parts
+                bool duplicate = false;
+                for (size_t k = 0; k < flexia.m_Flexia.size() && !duplicate; k++) {
+                    duplicate = flexia.m_Flexia[k] == forms[i] && accents.m_Accents[k] == accent;
+                }
+                if (!duplicate) {
+                    flexia.m_Flexia.push_back(forms[i]);
+                    accents.m_Accents.push_back(accent);
+                }
+            }
+        };
+        add_part(info.m_FlexiaModelNo, info.m_AccentModelNo);
+        for (const auto& part : info.m_NextParts) {
+            add_part(part.m_FlexiaModelNo, part.m_AccentModelNo);
+        }
+        info.m_FlexiaModelNo = AddFlexiaModel(*this, flexia);
+        info.m_AccentModelNo = has_accents ? AddAccentModel(*this, accents) : UnknownAccentModelNo;
+        info.m_NextParts.clear();
+        count++;
+    }
+    if (count > 0) {
+        // the models of the parts are not used any more
+        pack();
+    }
+    return count;
+}
+
 void MorphoWizard::check_slf(const std::string& slf, int& line_no_err) const {
     std::string d1;
-    CFlexiaModel d2;
-    CAccentModel d3;
-    BYTE d4;
-    parse_slf(m_pGramTab, slf, d1, d2, d3, d4, line_no_err);
+    std::vector<CSlfPart> d2;
+    BYTE d3;
+    parse_slf_parts(m_pGramTab, slf, d1, d2, d3, line_no_err);
 }
 //----------------------------------------------------------------------------
 void MorphoWizard::set_to_delete_false() {
@@ -1177,6 +1226,9 @@ void MorphoWizard::pack() {
 //----------------------------------------------------------------------------
 bool MorphoWizard::change_prd_info(CParadigmInfo& I, const std::string& Lemma,
     uint16_t NewFlexiaModelNo, uint16_t newAccentModelNo, bool keepOldAccents) {
+    // a word with several parts can be changed only as a whole, by its slf text
+    if (!I.m_NextParts.empty()) return false;
+
     if (NewFlexiaModelNo >= m_FlexiaModels.size()
         || (newAccentModelNo >= m_AccentModels.size()
             && newAccentModelNo != UnknownAccentModelNo
@@ -1345,7 +1397,11 @@ bool MorphoWizard::attach_form_prefixes_to_bases() {
         if (!(Count % 10000))
             std::cout <<  Count << "/" << Size << "    \r";
 
-        if (binary_search(ModelsWithPrefixes.begin(), ModelsWithPrefixes.end(), it->second.m_FlexiaModelNo)) {
+        bool bHasPrefixes = binary_search(ModelsWithPrefixes.begin(), ModelsWithPrefixes.end(), it->second.m_FlexiaModelNo);
+        for (const auto& part : it->second.m_NextParts) {
+            bHasPrefixes = bHasPrefixes || binary_search(ModelsWithPrefixes.begin(), ModelsWithPrefixes.end(), part.m_FlexiaModelNo);
+        }
+        if (bHasPrefixes) {
             bFound = true;
 
             std::string type_grm, Prefixes;
@@ -1526,14 +1582,21 @@ uint16_t MorphoWizard::RegisterSession(const CMorphSession& S) {
         return it - m_Sessions.begin();
 };
 
-std::string MorphoWizard::create_slf_for_lemm(std::string lemm, size_t flexiaModelNo, int line_size) const {
+std::string MorphoWizard::create_slf_for_lemm(std::string lemm, size_t flexiaModelNo, int line_size, const std::vector<uint16_t>& nextFlexiaModels) const {
 
     const CFlexiaModel& P = m_FlexiaModels[flexiaModelNo];
     std::string flex = P.get_first_flex();
     std::string NewLemma = lemm.substr(0, lemm.length() - flex.size()) + flex;
     if (NewLemma.find("|"))
         NewLemma.erase(0, NewLemma.find("|") + 1);
-    return mrd_to_slf(NewLemma, P, UnknownAccentModelNo, UnknownAccent, line_size);
+    std::string res = mrd_to_slf(NewLemma, P, UnknownAccentModelNo, UnknownAccent, line_size);
+    std::string base = NewLemma.substr(0, NewLemma.size() - flex.size());
+    for (uint16_t modelNo : nextFlexiaModels) {
+        const CFlexiaModel& next = m_FlexiaModels[modelNo];
+        res += "\r\n";
+        res += mrd_to_slf(base + next.get_first_flex(), next, UnknownAccentModelNo, UnknownAccent, line_size);
+    }
+    return res;
 }
 
 std::wstring MorphoWizard::to_wstring(const std::string& s) const {

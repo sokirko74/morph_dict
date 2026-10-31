@@ -1,4 +1,5 @@
 #include "lemma_info.h"
+#include "accent_model.h"
 
 #include "../common/utilit.h"
 #include "paradigm_consts.h"
@@ -16,6 +17,13 @@ struct CParadigmPart
 };
 
 typedef std::vector<CParadigmPart> CFlexiaModelVector;
+
+// a part of a word in a slf text, parts are separated by empty lines
+struct CSlfPart
+{
+    CFlexiaModel	m_FlexiaModel;
+    CAccentModel	m_AccentModel;
+};
 
 
 struct CParadigmInfo : public CLemmaInfo

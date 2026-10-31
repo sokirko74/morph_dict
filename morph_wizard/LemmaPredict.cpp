@@ -11,6 +11,9 @@ bool CPredictSuffix::operator  < (const  CPredictSuffix& X) const
     if (m_FlexiaModelNo != X.m_FlexiaModelNo)
         return m_FlexiaModelNo < X.m_FlexiaModelNo;
 
+    if (m_NextFlexiaModels != X.m_NextFlexiaModels)
+        return m_NextFlexiaModels < X.m_NextFlexiaModels;
+
     if (m_SourceLemmaAncode != X.m_SourceLemmaAncode)
         return m_SourceLemmaAncode < X.m_SourceLemmaAncode;
 
@@ -20,6 +23,7 @@ bool CPredictSuffix::operator  < (const  CPredictSuffix& X) const
 bool CPredictSuffix::operator  == (const  CPredictSuffix& X) const
 {
     return			(m_FlexiaModelNo == X.m_FlexiaModelNo)
+        && (m_NextFlexiaModels == X.m_NextFlexiaModels)
         && (m_Suffix == X.m_Suffix)
         && (m_SourceLemmaAncode == X.m_SourceLemmaAncode);
 };
@@ -28,8 +32,16 @@ std::string CPredictSuffix::getSLF_Utf8(std::string lemm) {
     CDumpParadigm P(m_pWizard);
     lemm = convert_from_utf8(lemm.c_str(), m_pWizard->m_Language);
     P.m_TypeGrammemsStr = m_pWizard->get_grammem_string(m_SourceCommonAncode);
-    P.m_SlfStr = m_pWizard->create_slf_for_lemm(lemm, m_FlexiaModelNo, 80);
+    P.m_SlfStr = m_pWizard->create_slf_for_lemm(lemm, m_FlexiaModelNo, 80, m_NextFlexiaModels);
     return P.ToStringUtf8();
+}
+
+size_t CPredictSuffix::getFormsCount() const {
+    size_t result = m_pWizard->m_FlexiaModels[m_FlexiaModelNo].m_Flexia.size();
+    for (uint16_t modelNo : m_NextFlexiaModels) {
+        result += m_pWizard->m_FlexiaModels[modelNo].m_Flexia.size();
+    }
+    return result;
 }
 
 std::string CPredictSuffix::getWiktionaryTemplateRef() {
@@ -70,6 +82,9 @@ void TLemmaPredictor::CreateIndex() {
         CPredictSuffix S;
         S.m_pWizard = m_pWizard;
         S.m_FlexiaModelNo = value.m_FlexiaModelNo;
+        for (const auto& part : value.m_NextParts) {
+            S.m_NextFlexiaModels.push_back(part.m_FlexiaModelNo);
+        }
         S.m_SourceLemmaAncode = p.get_first_code();
         S.m_SourceCommonAncode = value.GetCommonAncodeCopy();
         S.m_SourceLemma = lemma;
@@ -181,7 +196,7 @@ bool  IsLessForPredict::operator()(const CPredictSuffix& s1, const CPredictSuffi
             return s1.m_PrefixSetStr < s2.m_PrefixSetStr;
     };
     case TLemmPredictSortEnum::FormsCount:
-            return m_pWizard->m_FlexiaModels[s1.m_FlexiaModelNo].m_Flexia.size() < m_pWizard->m_FlexiaModels[s2.m_FlexiaModelNo].m_Flexia.size();
+            return s1.getFormsCount() < s2.getFormsCount();
     default: return s1 < s2;
     };
 };

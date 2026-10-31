@@ -61,6 +61,27 @@ TEST_CASE("lemmatize_Russian_word") {
 
 }
 
+TEST_CASE("flatten_parts_of_a_word") {
+	std::string folder = get_mwz_path("Russian3");
+	CMorphDictBuilder R;
+	R.BuildLemmatizer(MakePath(folder, "project.mwz"), true, -1, -1, folder);
+
+	CMorphanHolder Holder;
+	Holder.LoadMorphology(morphRussian, folder);
+
+	for (std::string word : {"здание", "здания", "зданье", "зданья"}) {
+		std::vector<CFormInfo> result;
+		word = _R(word.c_str());
+		Holder.m_pLemmatizer->CreateParadigmCollection(false, word, false, false, result);
+		REQUIRE(result.size() == 1);
+		CHECK(convert_to_utf8(result[0].GetSrcNorm(), morphRussian) == "ЗДАНИЕ");
+		CHECK(result[0].GetCount() == 4);
+		for (uint16_t i = 0; i < 4; i++) {
+			CHECK(result[0].GetAccentedVowel(i) == 2);
+		}
+	}
+}
+
 void Misspell(CMorphanHolder& holder, std::string word_utf8, std::string canon) {
 
 	auto res = holder.CorrectMisspelledWordUtf8(word_utf8);
@@ -104,4 +125,3 @@ int main(int argc, char** argv) {
 		return res;
 	}
 }
-

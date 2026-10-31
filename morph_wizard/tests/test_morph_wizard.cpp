@@ -64,15 +64,15 @@ TEST_CASE("paradigm_parts") {
 	REQUIRE(2 == first.size());
 
 	CFlexiaModel variant;
-	variant.m_Flexia.push_back(CMorphForm(first[0].m_Gramcode, "ЬЕ", ""));
-	variant.m_Flexia.push_back(CMorphForm(first[1].m_Gramcode, "ЬЯ", ""));
+	variant.m_Flexia.push_back(CMorphForm(first[0].m_Gramcode, "ЕВ", ""));
+	variant.m_Flexia.push_back(CMorphForm(first[1].m_Gramcode, "ЯВ", ""));
 	wizard.m_FlexiaModels.push_back(variant);
 	uint16_t variant_no = (uint16_t)wizard.m_FlexiaModels.size() - 1;
 	info.m_NextParts.push_back({ variant_no, UnknownAccentModelNo });
 
 	StringVector forms;
 	wizard.get_wordforms(w[0], forms);
-	CHECK(StringVector({ "ЗДАНИЕ", "ЗДАНИЯ", "ЗДАНЬЕ", "ЗДАНЬЯ" }) == forms);
+	CHECK(StringVector({ "ЗДАНИЕ", "ЗДАНИЯ", "ЗДАНИЕВ", "ЗДАНИЯВ" }) == forms);
 
 	std::vector<lemma_iterator_t> found;
 	wizard.find_lemm_by_prdno(variant_no, found);
@@ -89,7 +89,78 @@ TEST_CASE("paradigm_parts") {
 	w = wizard.find_lemm("ЗДАНИЕ", false);
 	REQUIRE(1 == w.size());
 	wizard.get_wordforms(w[0], forms);
-	CHECK("ЗДАНЬЯ" == forms.back());
+	CHECK("ЗДАНИЯВ" == forms.back());
+}
+
+TEST_CASE("slf_parts") {
+	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
+	MorphoWizard wizard;
+	wizard.load_wizard(path.string(), "guest", false, false, false);
+	int error_line;
+	wizard.add_lemma_to_dict("здание N sg\r\nздания N pl\r\n\r\nзданье N sg\r\nзданья N pl\r\n", "", "", error_line);
+	auto w = wizard.find_lemm("ЗДАНИЕ", false);
+	REQUIRE(1 == w.size());
+	REQUIRE(1 == w[0]->second.m_NextParts.size());
+	CHECK("ЗДАН" == wizard.get_base_string(w[0]));
+	CHECK("ЬЕ" == wizard.m_FlexiaModels[w[0]->second.m_NextParts[0].m_FlexiaModelNo].get_first_flex());
+
+	// slf -> dictionary -> slf
+	std::string type_grm, prefixes;
+	auto slf = wizard.get_slf_string(w[0], type_grm, prefixes, 0);
+	CHECK(slf == "здание N sg,\r\nздания N pl,\r\n\r\nзданье N sg,\r\nзданья N pl,\r\n");
+	auto info = w[0]->second;
+	wizard.remove_lemm(w[0]);
+	wizard.add_lemma_to_dict(slf, "", "", error_line);
+	w = wizard.find_lemm("ЗДАНИЕ", false);
+	REQUIRE(1 == w.size());
+	CHECK(w[0]->second.m_NextParts == info.m_NextParts);
+
+	// a change of one part is not allowed
+	CHECK(!wizard.change_prd_info(w[0]->second, "ЗДАНИЕ", 0, UnknownAccentModelNo, true));
+
+	// the parts are predicted together
+	wizard.m_Predictor.CreateIndex();
+	auto predicted = wizard.m_Predictor.predict_lemm("СОЗДАНИЕ", 4, 0, false, TLemmPredictSortEnum::Freq);
+	REQUIRE(1 == predicted.size());
+	CHECK(4 == predicted[0].getFormsCount());
+	auto new_slf = wizard.create_slf_for_lemm("СОЗДАНИЕ", predicted[0].m_FlexiaModelNo, 0, predicted[0].m_NextFlexiaModels);
+	CHECK(new_slf.find("созданья") != std::string::npos);
+	CHECK(new_slf.find("\r\n\r\n") != std::string::npos);
+
+	// parts with different bases, "И" and "Ь" have the same first byte in utf-8
+	wizard.add_lemma_to_dict("ЛИСА N sg\n\nЛЬСА N sg", "", "", error_line);
+	w = wizard.find_lemm("ЛИСА", false);
+	REQUIRE(1 == w.size());
+	CHECK("Л" == wizard.get_base_string(w[0]));
+	CHECK("ЬСА" == wizard.m_FlexiaModels[w[0]->second.m_NextParts[0].m_FlexiaModelNo].get_first_flex());
+
+	// the line number of an error is counted in the whole text
+	CHECK_THROWS(wizard.add_lemma_to_dict("ЛОСЬ N sg\n\nЛОСИ BAD", "", "", error_line));
+	CHECK(3 == error_line);
+}
+
+TEST_CASE("slf_parts_in_file") {
+	auto path = fs::path(TEST_FOLDER) / "Russian1" / "project.mwz";
+	MorphoWizard wizard;
+	wizard.load_wizard(path.string(), "guest", false, false, false);
+	FILE* fp = std::tmpfile();
+	REQUIRE(fp != nullptr);
+	std::string text = "=====\n// a comment before\nЛОСЬ N sg\n// a comment inside is not a separator\nЛОСЯ N sg\n\nЛОСЬЕ N sg\n\n=====\nЗВЕРЬ N sg\n";
+	fwrite(text.data(), 1, text.size(), fp);
+	rewind(fp);
+	CDumpParadigm paradigm(&wizard);
+	int line_no = 0;
+	bool error = false;
+	std::string errors;
+	REQUIRE(paradigm.ReadNextParadigmFromFile(fp, line_no, error, errors));
+	CHECK("ЛОСЬ N sg\r\nЛОСЯ N sg\r\n\r\nЛОСЬЕ N sg\r\n\r\n" == paradigm.m_SlfStr);
+	int error_line;
+	auto info = wizard.add_lemma_to_dict(paradigm.m_SlfStr, "", "", error_line);
+	CHECK(1 == info.m_NextParts.size());
+	REQUIRE(paradigm.ReadNextParadigmFromFile(fp, line_no, error, errors));
+	info = wizard.add_lemma_to_dict(paradigm.m_SlfStr, "", "", error_line);
+	CHECK(info.m_NextParts.empty());
+	fclose(fp);
 }
 
 TEST_CASE("slf_accented") {
@@ -258,4 +329,3 @@ int main(int argc, char** argv) {
 		return res;
 	}
 }
-

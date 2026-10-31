@@ -1,0 +1,10 @@
+{
+ "flexia_models": [
+  {"endings": [{"flexia": "ИЕ", "gramcode": "zz"}, {"flexia": "ИЯ", "gramcode": "zz"}]},
+  {"endings": [{"flexia": "ЬЕ", "gramcode": "zz"}, {"flexia": "ЬЯ", "gramcode": "zz"}]}
+ ],
+ "accent_models": [[2, 2], [1, 1]],
+ "sessions": [{"last_save": "16:30, 09 November 2004", "start": "16:15, 09 November 2004", "user": "alex"}],
+ "prefix_sets": [],
+ "lemmas": [{"a": 0, "f": 0, "l": "ЗДАНИЕ", "s": 0, "n": [[1, 1]]}]
+}

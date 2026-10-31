@@ -4,6 +4,8 @@ struct CPredictSuffix
 {
     const MorphoWizard* m_pWizard;
     uint16_t	m_FlexiaModelNo;
+    // the flexia models of the other parts of the word, all parts are predicted together
+    std::vector<uint16_t>	m_NextFlexiaModels;
     std::string	m_Suffix;
 
     //  grammatical code of the lemma
@@ -21,6 +23,7 @@ struct CPredictSuffix
     std::string getCommonGrammemsUtf8();
     size_t getFreq() { return m_Frequence;}
     size_t getFlexiaModelNo() { return m_FlexiaModelNo; }
+    size_t getFormsCount() const;
     std::string getSLF_Utf8(std::string lemm);
     std::string getWiktionaryTemplateRef();
 };

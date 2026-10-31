@@ -270,6 +270,8 @@ void  CMorphDictBuilder::BuildLemmatizer(std::string mwz_path, bool allow_russia
 	wizard.load_wizard(mwz_path.c_str(), "guest", false, true, true);
 	m_Language = wizard.m_Language;
 	InitAutomat(new CMorphAutomatBuilder(m_Language, MorphAnnotChar));
+	// the binary dictionary knows nothing about parts of a word
+	wizard.flatten_parts();
 	if (!allow_russian_jo)
 	{
 		wizard.convert_je_to_jo();

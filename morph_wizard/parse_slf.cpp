@@ -2,6 +2,7 @@
 #include "flexia_model.h"
 #include "accent_model.h"
 #include "paradigm_consts.h"
+#include "paradigm_info.h"
 #include "morph_dict/common/util_classes.h"
 
 struct AncodeLess
@@ -219,4 +220,78 @@ void parse_slf(const CAgramtab* gramtab, const std::string& s, std::string& lemm
         }
     };
 
+}
+
+// Parses a word that can consist of several parts separated by empty lines, the flexias of all parts are relative
+// to one base: the common left part of the bases of the parts. A word with one part is parsed as by parse_slf.
+void parse_slf_parts(const CAgramtab* gramtab, const std::string& s, std::string& lemm, std::vector<CSlfPart>& parts, BYTE& aux_accent_offset, int& line_no_err) {
+    std::vector<std::pair<std::string, int>> texts; // the text of a part and the number of the line before it
+    {
+        std::string text;
+        int line_no = 0;
+        int first_line_no = 0;
+        size_t start = 0;
+        while (start < s.length()) {
+            size_t end = s.find("\n", start);
+            if (end == std::string::npos) end = s.length();
+            std::string line = s.substr(start, end - start);
+            start = end + 1;
+            line_no++;
+            Trim(line);
+            if (!line.empty()) {
+                if (text.empty()) first_line_no = line_no - 1;
+                text += line + "\n";
+            }
+            else if (!text.empty()) {
+                texts.push_back({ text, first_line_no });
+                text.clear();
+            }
+        }
+        if (!text.empty()) texts.push_back({ text, first_line_no });
+    }
+    if (texts.empty()) texts.push_back({ s, 0 });
+
+    parts.clear();
+    aux_accent_offset = UnknownAccent;
+    std::vector<std::string> bases;
+    for (auto& [text, first_line_no] : texts) {
+        CSlfPart part;
+        std::string part_lemma;
+        BYTE part_aux_accent;
+        int part_line_no = 0;
+        try {
+            parse_slf(gramtab, text, part_lemma, part.m_FlexiaModel, part.m_AccentModel, part_aux_accent, part_line_no);
+        }
+        catch (...) {
+            line_no_err = first_line_no + part_line_no;
+            throw;
+        }
+        line_no_err = first_line_no + part_line_no;
+        if (part_aux_accent != UnknownAccent) {
+            if (aux_accent_offset != UnknownAccent && aux_accent_offset != part_aux_accent) {
+                throw CExpc("Auxiliary stress should be on the same position in all parts: %s ", part_lemma.c_str());
+            }
+            aux_accent_offset = part_aux_accent;
+        }
+        if (parts.empty()) lemm = part_lemma;
+        bases.push_back(part_lemma.substr(0, part_lemma.size() - part.m_FlexiaModel.get_first_flex().size()));
+        parts.push_back(part);
+    }
+
+    size_t base_size = bases[0].size();
+    for (const auto& base : bases) {
+        size_t i = 0;
+        while (i < std::min(base_size, base.size()) && base[i] == bases[0][i]) i++;
+        base_size = i;
+    }
+    // the size is calculated in bytes, it must not end in the middle of a utf-8 char
+    while (base_size > 0 && base_size < bases[0].size() && ((BYTE)bases[0][base_size] & 0xC0) == 0x80) {
+        base_size--;
+    }
+    for (size_t i = 0; i < parts.size(); i++) {
+        std::string tail = bases[i].substr(base_size);
+        for (auto& form : parts[i].m_FlexiaModel.m_Flexia) {
+            form.m_FlexiaStr = tail + form.m_FlexiaStr;
+        }
+    }
 }

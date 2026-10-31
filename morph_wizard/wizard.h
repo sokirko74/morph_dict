@@ -131,6 +131,9 @@ public:
     void	get_wordforms(const_lemma_iterator_t it, StringVector& forms) const;
     // all parts of a word as one flexia model
     CFlexiaModel	get_word_flexia(const CParadigmInfo& I) const;
+    // replaces the parts of each word with one flexia model and one accent model (for the binary dictionary),
+    // returns the number of changed words
+    size_t	flatten_parts();
     CParadigmInfo	add_lemma_to_dict(const std::string& slf, std::string common_grammems, const std::string& prefixes, int& line_no_err, uint16_t SessionNo = UnknownSessionNo);
     void   check_slf(const std::string& slf, int& line_no_err) const;
     void	set_to_delete_false();
@@ -155,7 +158,7 @@ public:
     uint16_t	RegisterSession(const CMorphSession& S);
     bool    Filter(std::string flt_str, std::vector<lemma_iterator_t>& found_paradigms) const;
 
-    std::string create_slf_for_lemm(std::string lemm, size_t flexiaModelNo, int line_size) const;
+    std::string create_slf_for_lemm(std::string lemm, size_t flexiaModelNo, int line_size, const std::vector<uint16_t>& nextFlexiaModels = {}) const;
 
 };
 
