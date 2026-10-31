@@ -124,4 +124,5 @@ int main(int argc, char** argv) {
 	if (context.shouldExit()) {
 		return res;
 	}
+	return res;
 }

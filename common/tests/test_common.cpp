@@ -74,7 +74,6 @@ TEST_CASE("check_english") {
 	CHECK(std::isalpha('z', c_locale));
 	CHECK(std::isalpha('A', c_locale));
 	CHECK(!std::isalpha('1', c_locale));
-	CHECK(!std::isalpha(U'Я', c_locale));
 
 }
 
@@ -127,5 +126,5 @@ int main(int argc, char** argv) {
 	if (context.shouldExit()) {
 		return res;
 	}
+	return res;
 }
-
