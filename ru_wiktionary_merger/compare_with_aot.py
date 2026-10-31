@@ -8,6 +8,8 @@ of Wiktionary is matched with an ordinal numeral or a pronoun-adjective of aot);
 similar paradigm is taken. The differences of a pair are written as endings relative to the common stem of
 both paradigms, pairs with the same differences make a group: e.g. aot has the second genitive `-у`.
 Lemmas with no pair are linked with the paradigms of the other dictionary by their forms: `лемма -> лемма2`.
+Each part of a word (key `n` of a lemma) is compared as a separate paradigm, since a part corresponds to an article
+of Wiktionary: воскресенье is the second part of воскресение in aot.
 """
 import argparse
 import json
@@ -34,7 +36,13 @@ class TDictionary:
         with open(os.path.join(folder, "morphs.json")) as inp:
             data = json.load(inp)
         self.flexia_models = data["flexia_models"]
-        self.lemmas = data["lemmas"]
+        self.lemmas = []
+        for lemma in data["lemmas"]:
+            self.lemmas.append(lemma)
+            base = lemma["l"][:len(lemma["l"]) - len(self.flexia_models[lemma["f"]]["endings"][0]["flexia"])]
+            for flexia_no, _ in lemma.get("n", []):
+                part_lemma = base + self.flexia_models[flexia_no]["endings"][0]["flexia"]
+                self.lemmas.append({"l": part_lemma, "f": flexia_no, "t": lemma.get("t")})
         self.gramtab = gramtab
         self.by_key: Dict[Tuple[str, str], List[int]] = defaultdict(list)
         for index, lemma in enumerate(self.lemmas):
